@@ -30,3 +30,4 @@ export function scoreToPercent(score: number): string {
 export function truncate(s: string, maxLen = 60): string {
   return s.length > maxLen ? `${s.slice(0, maxLen)}…` : s
 }
+export { getApiError } from './apiError'
