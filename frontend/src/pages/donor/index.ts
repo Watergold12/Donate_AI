@@ -1,0 +1,6 @@
+export { DonorDashboardPage } from './DonorDashboardPage'
+export { CameraPage } from './CameraPage'
+export { DonationHistoryPage } from './DonationHistoryPage'
+export { DonorPickupsPage } from './DonorPickupsPage'
+export { DonorAnalyticsPage } from './DonorAnalyticsPage'
+export { DonationPage } from './DonationPage'

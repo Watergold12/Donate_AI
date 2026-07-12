@@ -1,0 +1,172 @@
+# ============================================================
+# DonateAI — Monorepo .gitignore
+# Covers: Python/FastAPI backend + React/Vite/TypeScript frontend
+# ============================================================
+
+# ── Python / FastAPI (backend) ──────────────────────────────
+
+# Byte-compiled / optimised / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Virtual environments
+backend/venv/
+backend/.venv/
+venv/
+.venv/
+env/
+.env/
+
+# Distribution / packaging
+.Python
+build/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# PyInstaller
+*.manifest
+*.spec
+
+# Unit test / coverage reports
+htmlcov/
+.tox/
+.nox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.py,cover
+.hypothesis/
+.pytest_cache/
+cover/
+
+# Mypy / type checkers
+.mypy_cache/
+.dmypy.json
+dmypy.json
+.pyre/
+.pytype/
+
+# Alembic
+# Keep versions tracked; ignore auto-generated migration heads
+# backend/alembic/versions/*.py  (keep these tracked)
+
+# Environment files
+.env
+.env.*
+!.env.example
+!.env.test.example
+
+# Logs
+*.log
+logs/
+
+# Media / uploads
+backend/media/
+media/
+
+# AI model weights (large binary files)
+*.pt
+*.pth
+*.onnx
+*.h5
+*.pkl
+models/
+
+# ── Node.js / React / Vite (frontend) ───────────────────────
+
+# Dependencies
+frontend/node_modules/
+node_modules/
+
+# Build output
+frontend/dist/
+frontend/dist-ssr/
+dist/
+
+# Vite / TypeScript build cache
+frontend/.vite/
+frontend/node_modules/.tmp/
+*.tsbuildinfo
+
+# Environment files (already covered above, repeated for clarity)
+frontend/.env
+frontend/.env.*
+!frontend/.env.example
+
+# ESLint cache
+.eslintcache
+frontend/.eslintcache
+
+# ── IDE / Editor ─────────────────────────────────────────────
+
+# VS Code
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+
+# JetBrains (IntelliJ, PyCharm, WebStorm)
+.idea/
+*.iml
+*.iws
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+.Spotlight-V100
+.Trashes
+eDS_Store
+
+# Windows
+Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+ehthumbs_vista.db
+Desktop.ini
+$RECYCLE.BIN/
+*.cab
+*.msi
+*.msm
+*.msp
+*.lnk
+
+# Linux
+*~
+.fuse_hidden*
+.directory
+.Trash-*
+.nfs*
+
+# ── Misc ─────────────────────────────────────────────────────
+
+# Kiro AI spec outputs (optional — keep if you want them tracked)
+# .kiro/
+
+# Temporary files
+*.tmp
+*.temp
+*.swp
+*.swo
+.tmp/
+tmp/
+
+.kiro
