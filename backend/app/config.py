@@ -23,7 +23,7 @@ class Settings(BaseSettings):
     environment: str = "production"
 
     # Database
-    database_url: str = "postgresql://postgres:password@localhost:5432/donation_db"
+    database_url: str = "postgresql://postgres:123456@localhost:5432/donation_db"
     db_echo: bool = False
 
     # JWT

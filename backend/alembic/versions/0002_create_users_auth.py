@@ -5,7 +5,7 @@ Revises: 0001
 Create Date: 2024-01-01 00:01:00.000000
 """
 import sqlalchemy as sa
-from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy.dialects.postgresql import UUID, ENUM
 from alembic import op
 
 revision = "0002"
@@ -21,7 +21,7 @@ def upgrade() -> None:
         sa.Column("email", sa.String(255), nullable=False),
         sa.Column("password_hash", sa.String(255), nullable=False),
         sa.Column("full_name", sa.String(255), nullable=False),
-        sa.Column("role", sa.Enum("donor","ngo","admin", name="user_role", create_type=False), nullable=False),
+        sa.Column("role", ENUM("donor","ngo","admin", name="user_role", create_type=False), nullable=False),
         sa.Column("is_active", sa.Boolean, nullable=False, server_default="true"),
         sa.Column("is_verified", sa.Boolean, nullable=False, server_default="false"),
         sa.Column("created_at", sa.DateTime(timezone=True), nullable=False, server_default=sa.func.now()),
