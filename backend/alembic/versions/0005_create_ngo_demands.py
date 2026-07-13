@@ -5,7 +5,7 @@ Revises: 0004
 Create Date: 2024-01-01 00:04:00.000000
 """
 import sqlalchemy as sa
-from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy.dialects.postgresql import UUID, ENUM as PgEnum
 from alembic import op
 
 revision = "0005"
@@ -19,12 +19,12 @@ def upgrade() -> None:
         "ngo_demands",
         sa.Column("id", UUID(as_uuid=True), primary_key=True),
         sa.Column("ngo_id", UUID(as_uuid=True), sa.ForeignKey("ngo_profiles.id", ondelete="CASCADE"), nullable=False),
-        sa.Column("item_category", sa.Enum("clothing","food","electronics","furniture","books","medical","toys","other",
+        sa.Column("item_category", PgEnum("clothing","food","electronics","furniture","books","medical","toys","other",
                                            name="item_category", create_type=False), nullable=False),
         sa.Column("item_name", sa.String(255), nullable=True),
         sa.Column("quantity_needed", sa.Integer, nullable=False),
         sa.Column("quantity_fulfilled", sa.Integer, nullable=False, server_default="0"),
-        sa.Column("urgency_level", sa.Enum("low","medium","high","critical",
+        sa.Column("urgency_level", PgEnum("low","medium","high","critical",
                                            name="demand_urgency", create_type=False),
                   nullable=False, server_default="medium"),
         sa.Column("description", sa.Text, nullable=True),

@@ -5,7 +5,7 @@ Revises: 0007
 Create Date: 2024-01-01 00:07:00.000000
 """
 import sqlalchemy as sa
-from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy.dialects.postgresql import UUID, ENUM as PgEnum
 from alembic import op
 
 revision = "0008"
@@ -19,7 +19,7 @@ def upgrade() -> None:
         "notifications",
         sa.Column("id", UUID(as_uuid=True), primary_key=True),
         sa.Column("user_id", UUID(as_uuid=True), sa.ForeignKey("users.id", ondelete="CASCADE"), nullable=False),
-        sa.Column("type", sa.Enum(
+        sa.Column("type", PgEnum(
             "match_found","match_accepted","match_rejected","pickup_scheduled",
             "pickup_completed","demand_fulfilled","donation_received","ngo_verified","system",
             name="notification_type", create_type=False), nullable=False),

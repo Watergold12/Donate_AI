@@ -5,7 +5,7 @@ Revises: 0006
 Create Date: 2024-01-01 00:06:00.000000
 """
 import sqlalchemy as sa
-from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy.dialects.postgresql import UUID, ENUM as PgEnum
 from alembic import op
 
 revision = "0007"
@@ -21,7 +21,7 @@ def upgrade() -> None:
         sa.Column("donation_id", UUID(as_uuid=True), sa.ForeignKey("donations.id", ondelete="RESTRICT"), nullable=False),
         sa.Column("ngo_id", UUID(as_uuid=True), sa.ForeignKey("ngo_profiles.id", ondelete="RESTRICT"), nullable=False),
         sa.Column("match_id", UUID(as_uuid=True), sa.ForeignKey("matches.id", ondelete="RESTRICT"), nullable=False),
-        sa.Column("status", sa.Enum("scheduled","in_transit","completed","failed","cancelled",
+        sa.Column("status", PgEnum("scheduled","in_transit","completed","failed","cancelled",
                                     name="pickup_status", create_type=False),
                   nullable=False, server_default="scheduled"),
         sa.Column("scheduled_at", sa.DateTime(timezone=True), nullable=False),

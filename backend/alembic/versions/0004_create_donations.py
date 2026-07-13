@@ -5,7 +5,7 @@ Revises: 0003
 Create Date: 2024-01-01 00:03:00.000000
 """
 import sqlalchemy as sa
-from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy.dialects.postgresql import UUID, ENUM as PgEnum
 from alembic import op
 
 revision = "0004"
@@ -19,7 +19,7 @@ def upgrade() -> None:
         "donations",
         sa.Column("id", UUID(as_uuid=True), primary_key=True),
         sa.Column("donor_id", UUID(as_uuid=True), sa.ForeignKey("donor_profiles.id", ondelete="RESTRICT"), nullable=False),
-        sa.Column("status", sa.Enum("draft","pending_match","matched","scheduled","completed","cancelled",
+        sa.Column("status", PgEnum("draft","pending_match","matched","scheduled","completed","cancelled",
                                     name="donation_status", create_type=False), nullable=False, server_default="draft"),
         sa.Column("notes", sa.Text, nullable=True),
         sa.Column("total_items", sa.Integer, nullable=False, server_default="0"),
@@ -39,10 +39,10 @@ def upgrade() -> None:
         sa.Column("id", UUID(as_uuid=True), primary_key=True),
         sa.Column("donation_id", UUID(as_uuid=True), sa.ForeignKey("donations.id", ondelete="CASCADE"), nullable=False),
         sa.Column("item_name", sa.String(255), nullable=False),
-        sa.Column("category", sa.Enum("clothing","food","electronics","furniture","books","medical","toys","other",
+        sa.Column("category", PgEnum("clothing","food","electronics","furniture","books","medical","toys","other",
                                       name="item_category", create_type=False), nullable=False),
         sa.Column("quantity", sa.Integer, nullable=False, server_default="1"),
-        sa.Column("condition", sa.Enum("new","good","fair","poor", name="item_condition", create_type=False),
+        sa.Column("condition", PgEnum("new","good","fair","poor", name="item_condition", create_type=False),
                   nullable=False, server_default="good"),
         sa.Column("ai_detected", sa.Boolean, nullable=False, server_default="false"),
         sa.Column("confidence_score", sa.Float, nullable=True),
