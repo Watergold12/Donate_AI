@@ -4,7 +4,11 @@ Configures CORS, middleware, lifespan events, and registers all API routers.
 """
 import logging
 import os
+import warnings
 from contextlib import asynccontextmanager
+
+# Suppress bcrypt version detection warning (cosmetic only — bcrypt works fine)
+warnings.filterwarnings("ignore", message=".*error reading bcrypt version.*")
 from typing import AsyncGenerator
 
 from fastapi import FastAPI, Request
@@ -91,6 +95,10 @@ def create_application() -> FastAPI:
     # ── Static Files (media uploads) ─────────────────────────
     os.makedirs(settings.media_path, exist_ok=True)
     app.mount("/media", StaticFiles(directory=settings.media_path), name="media")
+
+    # ── Exception Handlers ────────────────────────────────────
+    from app.core.exceptions import register_exception_handlers
+    register_exception_handlers(app)
 
     # ── API Routers ───────────────────────────────────────────
     # Imported lazily to avoid circular imports during startup
