@@ -5,22 +5,27 @@ export default {
   theme: {
     extend: {
       colors: {
-        brand: {
-          50:  '#f0fdf4',
-          100: '#dcfce7',
-          200: '#bbf7d0',
-          300: '#86efac',
-          400: '#4ade80',
-          500: '#22c55e',
-          600: '#16a34a',
-          700: '#15803d',
-          800: '#166534',
-          900: '#14532d',
-          950: '#052e16',
+        // DonateAI dark theme design tokens
+        da: {
+          bg:        '#0B0F14',
+          card:      '#171B22',
+          sidebar:   '#11161D',
+          border:    'rgba(255,255,255,0.08)',
+          primary:   '#1D8CF8',
+          hover:     '#3AA0FF',
+          success:   '#22C55E',
+          danger:    '#EF4444',
+          warning:   '#F59E0B',
+          text:      '#FFFFFF',
+          secondary: '#A1A8B3',
+          muted:     '#6B7280',
         },
       },
       fontFamily: {
         sans: ['Inter', 'system-ui', 'sans-serif'],
+      },
+      borderColor: {
+        DEFAULT: 'rgba(255,255,255,0.08)',
       },
     },
   },

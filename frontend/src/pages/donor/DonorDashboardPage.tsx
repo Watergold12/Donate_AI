@@ -1,20 +1,17 @@
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { DashboardLayout } from '../../components/templates/DashboardLayout'
-import { PageHeader } from '../../components/molecules/PageHeader'
-import { StatCard } from '../../components/molecules/StatCard'
 import { StatusBadge } from '../../components/molecules/StatusBadge'
-import { EmptyState } from '../../components/molecules/EmptyState'
-import { Button } from '../../components/atoms/Button'
-import { Card } from '../../components/atoms/Card'
 import { Spinner } from '../../components/atoms/Spinner'
 import { analyticsApi } from '../../api/analytics'
 import { donationsApi } from '../../api/donations'
 import type { DonorSummary } from '../../types/index'
 import type { Donation } from '../../types/index'
 import { formatDate } from '../../utils/index'
+import { useAuthContext } from '../../store/authStore'
 
 export function DonorDashboardPage() {
+  const { user } = useAuthContext()
   const [summary, setSummary] = useState<DonorSummary | null>(null)
   const [donations, setDonations] = useState<Donation[]>([])
   const [loading, setLoading] = useState(true)
@@ -37,51 +34,84 @@ export function DonorDashboardPage() {
     )
   }
 
+  const firstName = user?.full_name?.split(' ')[0] ?? 'there'
+
   return (
     <DashboardLayout>
       <div className="flex flex-col gap-6">
-        <PageHeader
-          title="My Dashboard"
-          subtitle="Track your donations and impact"
-          actions={<Link to="/donor/donate"><Button>+ New Donation</Button></Link>}
-        />
 
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          <StatCard title="Total Donations" value={summary?.total_donations ?? 0} icon={<span>🎁</span>} />
-          <StatCard title="Completed" value={summary?.completed_donations ?? 0} icon={<span>✅</span>} />
-          <StatCard title="In Progress" value={summary?.pending_donations ?? 0} icon={<span>⏳</span>} />
-          <StatCard title="Items Donated" value={summary?.total_items_donated ?? 0} icon={<span>📦</span>} />
+        {/* Welcome header */}
+        <div className="flex items-end justify-between">
+          <div>
+            <p className="text-sm text-[#A1A8B3]">Welcome back</p>
+            <h1 className="mt-0.5 text-2xl font-bold text-white">Hi {firstName}</h1>
+          </div>
+          <Link
+            to="/donor/donate"
+            className="flex items-center gap-2 rounded-lg bg-[#1D8CF8] px-4 py-2 text-sm font-medium text-white hover:bg-[#3AA0FF] transition-colors"
+          >
+            <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
+            </svg>
+            Donate item
+          </Link>
         </div>
 
-        <Card>
-          <div className="mb-4 flex items-center justify-between">
-            <h2 className="font-semibold text-gray-900 dark:text-white">Recent Donations</h2>
-            <Link to="/donor/history" className="text-sm text-green-600 hover:underline">View all</Link>
+        {/* Stat cards — 3 across */}
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+          <div className="rounded-xl border border-white/[0.08] bg-[#171B22] p-5">
+            <p className="text-3xl font-bold text-white">{summary?.total_donations ?? 0}</p>
+            <p className="mt-1 text-sm text-[#A1A8B3]">Donations</p>
           </div>
-          {donations.length === 0 ? (
-            <EmptyState
-              icon={<span className="text-4xl">🎁</span>}
-              title="No donations yet"
-              description="Start making a difference by creating your first donation"
-              action={<Link to="/donor/donate"><Button size="sm">Create Donation</Button></Link>}
-            />
-          ) : (
-            <div className="divide-y divide-gray-100 dark:divide-gray-800">
-              {donations.map(d => (
-                <div key={d.id} className="flex items-center justify-between py-3">
-                  <div>
-                    <p className="text-sm font-medium text-gray-900 dark:text-white">
-                      {d.total_items} item{d.total_items !== 1 ? 's' : ''}
-                      {d.notes ? ` — ${d.notes}` : ''}
+          <div className="rounded-xl border border-white/[0.08] bg-[#171B22] p-5">
+            <p className="text-3xl font-bold text-white">{summary?.completed_donations ?? 0}</p>
+            <p className="mt-1 text-sm text-[#A1A8B3]">NGOs helped</p>
+          </div>
+          <div className="rounded-xl border border-white/[0.08] bg-[#171B22] p-5">
+            <p className="text-3xl font-bold text-[#1D8CF8]">
+              {summary?.total_donations
+                ? `${Math.round((summary.completed_donations / summary.total_donations) * 100)}%`
+                : '—'}
+            </p>
+            <p className="mt-1 text-sm text-[#A1A8B3]">Match accuracy</p>
+          </div>
+        </div>
+
+        {/* Recent activity */}
+        <div>
+          <h2 className="mb-3 text-sm font-medium text-[#A1A8B3]">Recent activity</h2>
+          <div className="rounded-xl border border-white/[0.08] bg-[#171B22]">
+            {donations.length === 0 ? (
+              <div className="flex flex-col items-center justify-center py-12 text-center">
+                <p className="text-sm font-medium text-white">No donations yet</p>
+                <p className="mt-1 text-xs text-[#A1A8B3]">Start making a difference by creating your first donation</p>
+                <Link
+                  to="/donor/donate"
+                  className="mt-4 rounded-lg bg-[#1D8CF8] px-4 py-2 text-sm font-medium text-white hover:bg-[#3AA0FF] transition-colors"
+                >
+                  Create Donation
+                </Link>
+              </div>
+            ) : (
+              <div className="divide-y divide-white/[0.06]">
+                {donations.map(d => (
+                  <div key={d.id} className="flex items-center justify-between px-5 py-3.5">
+                    <p className="text-sm text-white">
+                      {d.notes
+                        ? d.notes
+                        : `${d.total_items} item${d.total_items !== 1 ? 's' : ''} donated`}
                     </p>
-                    <p className="text-xs text-gray-500 dark:text-gray-400">{formatDate(d.created_at)}</p>
+                    <div className="flex items-center gap-3">
+                      <StatusBadge status={d.status} />
+                      <span className="text-xs text-[#6B7280]">{formatDate(d.created_at)}</span>
+                    </div>
                   </div>
-                  <StatusBadge status={d.status} />
-                </div>
-              ))}
-            </div>
-          )}
-        </Card>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+
       </div>
     </DashboardLayout>
   )

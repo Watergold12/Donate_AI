@@ -47,15 +47,15 @@ export function DonorPickupsPage() {
               />
             </div>
           ) : (
-            <div className="divide-y divide-gray-100 dark:divide-gray-800">
+            <div className="divide-y divide-white/[0.06]">
               {pickups.map(p => (
                 <div key={p.id} className="flex items-start justify-between px-6 py-4">
                   <div className="flex flex-col gap-1">
-                    <p className="text-sm font-medium text-gray-900 dark:text-white">{p.pickup_address}</p>
-                    <p className="text-xs text-gray-500 dark:text-gray-400">{p.pickup_city}</p>
-                    <p className="text-xs text-gray-400">{formatDateTime(p.scheduled_at)}</p>
+                    <p className="text-sm font-medium text-white">{p.pickup_address}</p>
+                    <p className="text-xs text-[#A1A8B3]">{p.pickup_city}</p>
+                    <p className="text-xs text-[#6B7280]">{formatDateTime(p.scheduled_at)}</p>
                     {p.contact_phone && (
-                      <p className="text-xs text-gray-500">📞 {p.contact_phone}</p>
+                      <p className="text-xs text-[#A1A8B3]">📞 {p.contact_phone}</p>
                     )}
                   </div>
                   <StatusBadge status={p.status} />
@@ -63,7 +63,7 @@ export function DonorPickupsPage() {
               ))}
             </div>
           )}
-          <div className="border-t border-gray-100 px-6 dark:border-gray-800">
+          <div className="border-t border-white/[0.08] px-6">
             <Pagination page={page} pages={pages} total={total} onPageChange={setPage} />
           </div>
         </Card>

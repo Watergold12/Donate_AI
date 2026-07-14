@@ -57,7 +57,7 @@ export function CameraPage() {
               <img src={preview} alt="Preview" className="max-h-64 w-full rounded-lg object-contain" />
             ) : (
               <div
-                className="flex h-48 w-full cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed border-gray-300 text-gray-400 hover:border-green-400 hover:text-green-500 dark:border-gray-700"
+                className="flex h-48 w-full cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed border-white/20 text-[#6B7280] hover:border-[#1D8CF8] hover:text-[#1D8CF8] transition-colors"
                 onClick={() => inputRef.current?.click()}
               >
                 <span className="text-4xl">📷</span>
@@ -85,25 +85,25 @@ export function CameraPage() {
             </div>
           </Card>
 
-          {error && <p className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-600 dark:bg-red-900/20">{error}</p>}
+          {error && <p className="rounded-lg bg-red-500/10 px-3 py-2 text-sm text-red-400">{error}</p>}
 
           {loading && (
             <div className="flex items-center justify-center gap-3 py-8">
               <Spinner />
-              <p className="text-sm text-gray-500">Analysing image with AI...</p>
+              <p className="text-sm text-[#A1A8B3]">Analysing image with AI...</p>
             </div>
           )}
 
           {results.length > 0 && (
             <Card>
-              <h2 className="mb-4 font-semibold text-gray-900 dark:text-white">
+              <h2 className="mb-4 font-semibold text-white">
                 Detected {results.length} item{results.length !== 1 ? 's' : ''}
               </h2>
               <div className="flex flex-col gap-3">
                 {results.map((r, i) => (
-                  <div key={i} className="flex items-center justify-between rounded-lg border border-gray-100 p-3 dark:border-gray-800">
+                  <div key={i} className="flex items-center justify-between rounded-lg border border-white/[0.08] bg-[#0B0F14] p-3">
                     <div>
-                      <p className="text-sm font-medium text-gray-900 dark:text-white">{r.name}</p>
+                      <p className="text-sm font-medium text-white">{r.name}</p>
                       <div className="mt-1 flex gap-2">
                         <Badge variant="info">{capitalize(r.category)}</Badge>
                         <Badge variant={r.confidence > 0.7 ? 'success' : 'warning'}>
@@ -111,9 +111,9 @@ export function CameraPage() {
                         </Badge>
                       </div>
                     </div>
-                    <div className="h-2 w-24 overflow-hidden rounded-full bg-gray-200 dark:bg-gray-700">
+                    <div className="h-2 w-24 overflow-hidden rounded-full bg-white/10">
                       <div
-                        className="h-2 rounded-full bg-green-500"
+                        className="h-2 rounded-full bg-[#1D8CF8]"
                         style={{ width: `${Math.round(r.confidence * 100)}%` }}
                       />
                     </div>

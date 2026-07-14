@@ -12,11 +12,11 @@ interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 }
 
 const variants: Record<Variant, string> = {
-  primary: 'bg-green-600 text-white hover:bg-green-700 focus-visible:ring-green-500',
-  secondary: 'bg-gray-100 text-gray-900 hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-100 dark:hover:bg-gray-700 focus-visible:ring-gray-400',
-  danger: 'bg-red-600 text-white hover:bg-red-700 focus-visible:ring-red-500',
-  ghost: 'text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800 focus-visible:ring-gray-400',
-  outline: 'border border-gray-300 text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-800 focus-visible:ring-gray-400',
+  primary:   'bg-da-primary text-white hover:bg-da-hover focus-visible:ring-blue-500',
+  secondary: 'bg-white/10 text-da-secondary hover:bg-white/15 focus-visible:ring-white/20',
+  danger:    'bg-da-danger text-white hover:bg-red-500 focus-visible:ring-red-500',
+  ghost:     'text-da-secondary hover:bg-white/10 focus-visible:ring-white/20',
+  outline:   'border border-white/10 text-da-secondary hover:bg-white/10 focus-visible:ring-white/20',
 }
 
 const sizes: Record<Size, string> = {
@@ -38,9 +38,9 @@ export function Button({
     <button
       disabled={disabled || loading}
       className={cn(
-        'inline-flex items-center justify-center gap-2 rounded-lg font-medium transition-colors',
-        'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2',
-        'disabled:pointer-events-none disabled:opacity-50',
+        'inline-flex items-center justify-center gap-2 rounded-lg font-medium transition-all duration-200',
+        'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-da-bg',
+        'disabled:pointer-events-none disabled:opacity-40',
         variants[variant],
         sizes[size],
         className,

@@ -85,18 +85,18 @@ export function NGOMatchesPage() {
               />
             </div>
           ) : (
-            <div className="divide-y divide-gray-100 dark:divide-gray-800">
+            <div className="divide-y divide-white/[0.06]">
               {matches.map(m => (
                 <div key={m.id} className="flex items-start justify-between px-6 py-4">
                   <div className="flex flex-col gap-1">
                     <div className="flex items-center gap-2">
-                      <span className="text-sm font-semibold text-gray-900 dark:text-white">{scoreToPercent(m.score)}</span>
+                      <span className="text-sm font-semibold text-white">{scoreToPercent(m.score)}</span>
                       <StatusBadge status={m.status} />
                     </div>
-                    <div className="h-2 w-28 overflow-hidden rounded-full bg-gray-200 dark:bg-gray-700">
-                      <div className="h-2 rounded-full bg-green-500" style={{ width: scoreToPercent(m.score) }} />
+                    <div className="h-2 w-28 overflow-hidden rounded-full bg-white/10">
+                      <div className="h-2 rounded-full bg-[#1D8CF8]" style={{ width: scoreToPercent(m.score) }} />
                     </div>
-                    <p className="text-xs text-gray-400">Expires {formatDate(m.expires_at)}</p>
+                    <p className="text-xs text-[#6B7280]">Expires {formatDate(m.expires_at)}</p>
                   </div>
                   {m.status === 'proposed' && (
                     <div className="flex gap-2">
@@ -108,7 +108,7 @@ export function NGOMatchesPage() {
               ))}
             </div>
           )}
-          <div className="border-t border-gray-100 px-6 dark:border-gray-800">
+          <div className="border-t border-white/[0.08] px-6">
             <Pagination page={page} pages={pages} total={total} onPageChange={setPage} />
           </div>
         </Card>
