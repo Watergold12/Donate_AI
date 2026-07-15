@@ -86,10 +86,31 @@ export function RegisterPage() {
         <header className="flex h-12 items-center justify-between border-b border-white/[0.08] bg-[#0B0F14] px-6">
           <h1 className="text-base font-semibold text-white">Register</h1>
           <div className="flex items-center gap-2">
-            <button className="rounded-lg px-3 py-1.5 text-sm text-[#A1A8B3] hover:bg-white/[0.06]">
+            <button
+              onClick={() => navigate('/login')}
+              className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm text-[#A1A8B3] hover:bg-white/[0.06] hover:text-white transition-colors"
+            >
               ↪ Sign in
             </button>
-            <button className="rounded-lg p-2 text-[#A1A8B3] hover:bg-white/[0.06]">⚙</button>
+            <button
+              onClick={() => {
+                const html = document.documentElement
+                if (html.classList.contains('dark')) {
+                  html.classList.remove('dark')
+                  html.classList.add('light')
+                  localStorage.setItem('theme', 'light')
+                } else {
+                  html.classList.remove('light')
+                  html.classList.add('dark')
+                  localStorage.setItem('theme', 'dark')
+                }
+              }}
+              className="rounded-lg p-2 text-[#A1A8B3] hover:bg-white/[0.06] hover:text-white transition-colors"
+              title="Toggle light/dark theme"
+              aria-label="Toggle theme"
+            >
+              ⚙
+            </button>
           </div>
         </header>
 
