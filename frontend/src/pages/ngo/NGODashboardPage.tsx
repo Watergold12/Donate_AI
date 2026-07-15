@@ -63,7 +63,7 @@ export function NGODashboardPage() {
           <StatCard title="Pickups Done"   value={s?.pickups_completed ?? 0} icon={<span>🚚</span>} />
         </div>
         <Card>
-          <h2 className="mb-4 font-semibold text-gray-900 dark:text-white">Pending Matches</h2>
+          <h2 className="mb-4 font-semibold text-white">Pending Matches</h2>
           {matches.length === 0 ? (
             <EmptyState
               icon={<span className="text-4xl">🤝</span>}
@@ -71,15 +71,15 @@ export function NGODashboardPage() {
               description="Matches appear here when donations match your demands"
             />
           ) : (
-            <div className="flex flex-col divide-y divide-gray-100 dark:divide-gray-800">
+            <div className="flex flex-col divide-y divide-white/[0.06]">
               {matches.map(m => (
                 <div key={m.id} className="flex items-center justify-between py-3">
                   <div className="flex flex-col gap-1">
                     <div className="flex items-center gap-2">
-                      <span className="text-sm font-medium text-gray-900 dark:text-white">Score: {scoreToPercent(m.score)}</span>
+                      <span className="text-sm font-medium text-white">Score: {scoreToPercent(m.score)}</span>
                       <StatusBadge status={m.status} />
                     </div>
-                    <div className="h-2 w-32 overflow-hidden rounded-full bg-gray-200 dark:bg-gray-700">
+                    <div className="h-2 w-32 overflow-hidden rounded-full bg-white/10">
                       <div className="h-2 rounded-full bg-green-500" style={{ width: scoreToPercent(m.score) }} />
                     </div>
                     <p className="text-xs text-gray-400">Expires {formatDate(m.expires_at)}</p>

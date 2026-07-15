@@ -50,7 +50,7 @@ export function NGOAnalyticsPage() {
         </div>
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
           <Card>
-            <h2 className="mb-4 font-semibold text-gray-900 dark:text-white">Match Acceptance Rate (30 days)</h2>
+            <h2 className="mb-4 font-semibold text-white">Match Acceptance Rate (30 days)</h2>
             {matchRate.length === 0 ? (
               <p className="py-8 text-center text-sm text-gray-500">No data yet</p>
             ) : (

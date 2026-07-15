@@ -55,7 +55,7 @@ export function AdminDashboardPage() {
           }
         />
         {triggerMsg && (
-          <p className="rounded-lg bg-green-50 px-4 py-2 text-sm text-green-700 dark:bg-green-900/20 dark:text-green-400">
+          <p className="rounded-lg bg-[#22C55E]/10 px-4 py-2 text-sm text-[#22C55E]">
             ✓ {triggerMsg}
           </p>
         )}

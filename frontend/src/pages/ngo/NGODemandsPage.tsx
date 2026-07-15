@@ -109,17 +109,17 @@ export function NGODemandsPage() {
               />
             </div>
           ) : (
-            <div className="divide-y divide-gray-100 dark:divide-gray-800">
+            <div className="divide-y divide-white/[0.06]">
               {demands.map(d => (
                 <div key={d.id} className="flex items-start justify-between px-6 py-4">
                   <div className="flex flex-col gap-1">
-                    <p className="text-sm font-medium text-gray-900 dark:text-white">{d.item_name}</p>
+                    <p className="text-sm font-medium text-white">{d.item_name}</p>
                     <div className="flex flex-wrap gap-2">
                       <Badge variant="info">{capitalize(d.item_category)}</Badge>
                       <Badge variant={URGENCY_VARIANTS[d.urgency_level] ?? 'default'}>{capitalize(d.urgency_level)}</Badge>
                       <Badge variant="default">Qty {d.quantity_needed}</Badge>
                     </div>
-                    <p className="text-xs text-gray-400">Added {formatDate(d.created_at)}</p>
+                    <p className="text-xs text-[#6B7280]">Added {formatDate(d.created_at)}</p>
                   </div>
                   <Button size="sm" variant="danger" loading={deleting === d.id} onClick={() => deleteDemand(d.id)}>
                     Delete
@@ -128,7 +128,7 @@ export function NGODemandsPage() {
               ))}
             </div>
           )}
-          <div className="border-t border-gray-100 px-6 dark:border-gray-800">
+          <div className="border-t border-white/[0.08] px-6">
             <Pagination page={page} pages={pages} total={total} onPageChange={setPage} />
           </div>
         </Card>

@@ -77,7 +77,7 @@ export function AdminUsersPage() {
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="border-b border-gray-100 dark:border-gray-800 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">
+                  <tr className="border-b border-white/[0.08] text-left text-xs font-semibold uppercase tracking-wide text-[#6B7280]">
                     <th className="px-6 py-3">Name</th>
                     <th className="px-6 py-3">Email</th>
                     <th className="px-6 py-3">Role</th>

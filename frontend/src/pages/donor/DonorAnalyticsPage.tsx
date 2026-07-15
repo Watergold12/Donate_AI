@@ -55,19 +55,19 @@ export function DonorAnalyticsPage() {
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
           {/* Donation trend line chart */}
           <Card>
-            <h2 className="mb-4 font-semibold text-gray-900 dark:text-white">
+            <h2 className="mb-4 font-semibold text-white">
               Donation Trend (30 days)
             </h2>
             {trend.length === 0 ? (
-              <p className="py-8 text-center text-sm text-gray-500">No trend data yet</p>
+              <p className="py-8 text-center text-sm text-[#A1A8B3]">No trend data yet</p>
             ) : (
               <ResponsiveContainer width="100%" height={220}>
                 <LineChart data={trend} margin={{ top: 4, right: 8, bottom: 4, left: 0 }}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                  <CartesianGrid strokeDasharray="3 3" stroke="#2d3748" />
                   <XAxis dataKey="date" tick={{ fontSize: 11 }} />
                   <YAxis tick={{ fontSize: 11 }} allowDecimals={false} />
                   <Tooltip />
-                  <Line type="monotone" dataKey="count" stroke="#22c55e" strokeWidth={2} dot={false} name="Donations" />
+                  <Line type="monotone" dataKey="count" stroke="#1D8CF8" strokeWidth={2} dot={false} name="Donations" />
                 </LineChart>
               </ResponsiveContainer>
             )}
