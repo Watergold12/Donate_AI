@@ -8,6 +8,8 @@ export function useAuth() {
   const login = async (email: string, password: string): Promise<User> => {
     const res = await authApi.login(email, password)
     const { access_token, refresh_token } = res.data.data
+    localStorage.setItem("access_token", access_token)
+    localStorage.setItem("refresh_token", refresh_token)
     const meRes = await authApi.me()
     ctx.setAuth(meRes.data.data, access_token, refresh_token)
     return meRes.data.data

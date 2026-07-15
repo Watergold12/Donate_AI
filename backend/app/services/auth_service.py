@@ -65,6 +65,10 @@ def login_user(db: Session, email: str, password: str, request=None) -> TokenRes
     db.add(RefreshToken(user_id=user.id, token_hash=hash_token(raw_refresh), expires_at=expires_at))
     log_action(db, AuditAction.LOGIN, "user", user.id, actor_id=user.id, request=request)
     db.commit()
+    print("Email:", email)
+    print("Password entered:", password)
+    print("Hash from DB:", user.password_hash)
+    print("Verify:", verify_password(password, user.password_hash))
     return TokenResponse(access_token=access_token, refresh_token=raw_refresh, role=user.role)
 
 

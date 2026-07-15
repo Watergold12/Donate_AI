@@ -9,8 +9,6 @@ import type { DonorSummary } from '../../types/index'
 import type { Donation } from '../../types/index'
 import { formatDate } from '../../utils/index'
 import { useAuthContext } from '../../store/authStore'
-import { Sidebar } from '../../components/organisms/Sidebar'
-
 export function DonorDashboardPage() {
   const { user } = useAuthContext()
   const [summary, setSummary] = useState<DonorSummary | null>(null)
