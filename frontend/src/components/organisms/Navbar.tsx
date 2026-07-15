@@ -22,7 +22,7 @@ export function Navbar({ onToggleSidebar, title }: NavbarProps) {
         )}
         <button
           onClick={onToggleSidebar}
-          className="rounded-lg p-1.5 text-da-secondary hover:bg-white/[0.06] hover:text-white lg:hidden"
+          className="rounded-lg p-1.5 text-da-secondary hover:bg-white/[0.06] hover:text-white transition-colors lg:hidden"
           aria-label="Toggle menu"
         >
           <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -35,10 +35,23 @@ export function Navbar({ onToggleSidebar, title }: NavbarProps) {
       <div className="ml-auto flex items-center gap-2">
         <NotificationBell />
 
-        {/* Theme toggle (decorative — wired up for future use) */}
+        {/* Theme toggle */}
         <button
+          onClick={() => {
+            const html = document.documentElement
+            if (html.classList.contains('dark')) {
+              html.classList.remove('dark')
+              html.classList.add('light')
+              localStorage.setItem('theme', 'light')
+            } else {
+              html.classList.remove('light')
+              html.classList.add('dark')
+              localStorage.setItem('theme', 'dark')
+            }
+          }}
           className="rounded-lg p-2 text-da-secondary hover:bg-white/[0.06] hover:text-white transition-colors"
-          aria-label="Settings"
+          aria-label="Toggle theme"
+          title="Toggle light/dark theme"
         >
           <Settings className="h-4 w-4" />
         </button>

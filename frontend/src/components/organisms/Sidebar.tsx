@@ -47,7 +47,7 @@ export function Sidebar({ role, collapsed = false }: SidebarProps) {
   return (
     <aside
       className={cn(
-        'flex h-full flex-col bg-da-sidebar border-r border-white/[0.08] transition-all duration-200',
+        'flex h-screen flex-col bg-da-sidebar border-r border-white/[0.08] transition-all duration-200',
         collapsed ? 'w-16' : 'w-[132px]',
       )}
     >
@@ -79,7 +79,7 @@ export function Sidebar({ role, collapsed = false }: SidebarProps) {
                     collapsed && 'justify-center px-2',
                   )}
                 >
-                  <Icon className="h-4 w-4 flex-shrink-0" aria-hidden="true" />
+                <Icon className="h-4 w-4 flex-shrink-0" aria-hidden="true" />
                   {!collapsed && <span>{item.label}</span>}
                 </NavLink>
               </li>
