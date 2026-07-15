@@ -75,22 +75,22 @@ export function DonorAnalyticsPage() {
 
           {/* Category breakdown bar chart */}
           <Card>
-            <h2 className="mb-4 font-semibold text-gray-900 dark:text-white">
+            <h2 className="mb-4 font-semibold text-white">
               Items by Category
             </h2>
             {categories.length === 0 ? (
-              <p className="py-8 text-center text-sm text-gray-500">No category data yet</p>
+              <p className="py-8 text-center text-sm text-[#A1A8B3]">No category data yet</p>
             ) : (
               <ResponsiveContainer width="100%" height={220}>
                 <BarChart
                   data={categories.map(c => ({ ...c, category: capitalize(c.category) }))}
                   margin={{ top: 4, right: 8, bottom: 4, left: 0 }}
                 >
-                  <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                  <CartesianGrid strokeDasharray="3 3" stroke="#2d3748" />
                   <XAxis dataKey="category" tick={{ fontSize: 11 }} />
                   <YAxis tick={{ fontSize: 11 }} allowDecimals={false} />
                   <Tooltip />
-                  <Bar dataKey="count" fill="#22c55e" name="Items" radius={[4, 4, 0, 0]} />
+                  <Bar dataKey="count" fill="#1D8CF8" name="Items" radius={[4, 4, 0, 0]} />
                 </BarChart>
               </ResponsiveContainer>
             )}

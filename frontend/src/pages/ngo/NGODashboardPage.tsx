@@ -80,9 +80,9 @@ export function NGODashboardPage() {
                       <StatusBadge status={m.status} />
                     </div>
                     <div className="h-2 w-32 overflow-hidden rounded-full bg-white/10">
-                      <div className="h-2 rounded-full bg-green-500" style={{ width: scoreToPercent(m.score) }} />
+                      <div className="h-2 rounded-full bg-[#1D8CF8]" style={{ width: scoreToPercent(m.score) }} />
                     </div>
-                    <p className="text-xs text-gray-400">Expires {formatDate(m.expires_at)}</p>
+                    <p className="text-xs text-[#6B7280]">Expires {formatDate(m.expires_at)}</p>
                   </div>
                   <div className="flex gap-2">
                     <Button size="sm" loading={acting === m.id} onClick={() => accept(m.id)}>Accept</Button>

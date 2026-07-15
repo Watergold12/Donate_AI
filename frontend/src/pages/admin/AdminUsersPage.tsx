@@ -86,14 +86,14 @@ export function AdminUsersPage() {
                     <th className="px-6 py-3">Action</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
+                <tbody className="divide-y divide-white/[0.06]">
                   {users.map(u => (
-                    <tr key={u.id} className="hover:bg-gray-50 dark:hover:bg-gray-800/50">
-                      <td className="px-6 py-3 font-medium text-gray-900 dark:text-white">{u.full_name}</td>
-                      <td className="px-6 py-3 text-gray-500 dark:text-gray-400">{u.email}</td>
+                    <tr key={u.id} className="hover:bg-white/[0.03]">
+                      <td className="px-6 py-3 font-medium text-white">{u.full_name}</td>
+                      <td className="px-6 py-3 text-[#A1A8B3]">{u.email}</td>
                       <td className="px-6 py-3"><Badge variant={ROLE_VARIANTS[u.role] ?? 'default'}>{capitalize(u.role)}</Badge></td>
                       <td className="px-6 py-3"><Badge variant={u.is_active ? 'success' : 'danger'}>{u.is_active ? 'Active' : 'Inactive'}</Badge></td>
-                      <td className="px-6 py-3 text-gray-500">{formatDate(u.id)}</td>
+                      <td className="px-6 py-3 text-[#6B7280]">{formatDate(u.id)}</td>
                       <td className="px-6 py-3">
                         <Button size="sm" variant={u.is_active ? 'danger' : 'secondary'} loading={toggling === u.id} onClick={() => toggleStatus(u)}>
                           {u.is_active ? 'Disable' : 'Enable'}
@@ -105,7 +105,7 @@ export function AdminUsersPage() {
               </table>
             </div>
           )}
-          <div className="border-t border-gray-100 px-6 dark:border-gray-800">
+          <div className="border-t border-white/[0.08] px-6">
             <Pagination page={page} pages={pages} total={total} onPageChange={setPage} />
           </div>
         </Card>

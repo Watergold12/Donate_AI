@@ -61,51 +61,51 @@ export function AdminAnalyticsPage() {
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
           <Card>
             <h2 className="mb-4 font-semibold text-white">Donation Trend (30 days)</h2>
-            {trend.length === 0 ? <p className="py-8 text-center text-sm text-gray-500">No data yet</p> : (
+            {trend.length === 0 ? <p className="py-8 text-center text-sm text-[#A1A8B3]">No data yet</p> : (
               <ResponsiveContainer width="100%" height={220}>
                 <AreaChart data={trend} margin={{ top: 4, right: 8, bottom: 4, left: 0 }}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                  <CartesianGrid strokeDasharray="3 3" stroke="#2d3748" />
                   <XAxis dataKey="date" tick={{ fontSize: 11 }} />
                   <YAxis tick={{ fontSize: 11 }} allowDecimals={false} />
                   <Tooltip />
-                  <Area type="monotone" dataKey="count" stroke="#22c55e" fill="#dcfce7" name="Donations" />
+                  <Area type="monotone" dataKey="count" stroke="#1D8CF8" fill="rgba(29,140,248,0.15)" name="Donations" />
                 </AreaChart>
               </ResponsiveContainer>
             )}
           </Card>
 
           <Card>
-            <h2 className="mb-4 font-semibold text-gray-900 dark:text-white">Items by Category</h2>
-            {categories.length === 0 ? <p className="py-8 text-center text-sm text-gray-500">No data yet</p> : (
+            <h2 className="mb-4 font-semibold text-white">Items by Category</h2>
+            {categories.length === 0 ? <p className="py-8 text-center text-sm text-[#A1A8B3]">No data yet</p> : (
               <ResponsiveContainer width="100%" height={220}>
                 <BarChart data={categories.map(c => ({ ...c, category: capitalize(c.category) }))} margin={{ top: 4, right: 8, bottom: 4, left: 0 }}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                  <CartesianGrid strokeDasharray="3 3" stroke="#2d3748" />
                   <XAxis dataKey="category" tick={{ fontSize: 11 }} />
                   <YAxis tick={{ fontSize: 11 }} allowDecimals={false} />
                   <Tooltip />
-                  <Bar dataKey="count" fill="#22c55e" name="Items" radius={[4, 4, 0, 0]} />
+                  <Bar dataKey="count" fill="#1D8CF8" name="Items" radius={[4, 4, 0, 0]} />
                 </BarChart>
               </ResponsiveContainer>
             )}
           </Card>
 
           <Card>
-            <h2 className="mb-4 font-semibold text-gray-900 dark:text-white">Match Acceptance Rate (30 days)</h2>
-            {matchRate.length === 0 ? <p className="py-8 text-center text-sm text-gray-500">No data yet</p> : (
+            <h2 className="mb-4 font-semibold text-white">Match Acceptance Rate (30 days)</h2>
+            {matchRate.length === 0 ? <p className="py-8 text-center text-sm text-[#A1A8B3]">No data yet</p> : (
               <ResponsiveContainer width="100%" height={220}>
                 <LineChart data={matchRate} margin={{ top: 4, right: 8, bottom: 4, left: 0 }}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                  <CartesianGrid strokeDasharray="3 3" stroke="#2d3748" />
                   <XAxis dataKey="date" tick={{ fontSize: 11 }} />
                   <YAxis tick={{ fontSize: 11 }} allowDecimals={false} unit="%" />
                   <Tooltip />
-                  <Line type="monotone" dataKey="rate" stroke="#16a34a" strokeWidth={2} dot={false} name="Rate %" />
+                  <Line type="monotone" dataKey="rate" stroke="#1D8CF8" strokeWidth={2} dot={false} name="Rate %" />
                 </LineChart>
               </ResponsiveContainer>
             )}
           </Card>
 
           <Card>
-            <h2 className="mb-4 font-semibold text-gray-900 dark:text-white">Pickup Statistics</h2>
+            <h2 className="mb-4 font-semibold text-white">Pickup Statistics</h2>
             <div className="grid grid-cols-3 gap-4">
               <StatCard title="Scheduled"   value={p?.total_scheduled ?? 0} />
               <StatCard title="Completed"   value={p?.completed        ?? 0} />
