@@ -9,6 +9,7 @@ import { Spinner } from '../../components/atoms/Spinner'
 import { detectionApi } from '../../api/detection'
 import type { DetectionResult } from '../../types/index'
 import { capitalize, scoreToPercent } from '../../utils/index'
+import { Sidebar } from '../../components/organisms/Sidebar'
 
 export function CameraPage() {
   const navigate = useNavigate()

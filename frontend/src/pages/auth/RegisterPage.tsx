@@ -8,6 +8,7 @@ import { Button } from '../../components/atoms/Button'
 import { Select } from '../../components/atoms/Select'
 import { authApi } from '../../api/auth'
 import { useAuth } from '../../hooks/useAuth'
+import { Sidebar } from '../../components/organisms/Sidebar'
 
 const schema = z.object({
   full_name: z.string().min(2, 'Name is required'),
@@ -62,23 +63,7 @@ export function RegisterPage() {
     <div className="flex min-h-screen bg-[#0B0F14]">
       {/* Sidebar strip */}
       <aside className="flex w-[132px] flex-shrink-0 flex-col border-r border-white/[0.08] bg-[#11161D]">
-        <div className="flex items-center gap-2.5 px-4 py-5">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#1D8CF8] text-sm font-bold text-white">
-            D
-          </div>
-          <span className="text-sm font-semibold text-white">DonateAI</span>
-        </div>
-        <nav className="flex-1 py-2 px-2">
-          <ul className="flex flex-col gap-0.5">
-            {['Home','Scan and catalog','Matches','Tracker','Profile'].map(label => (
-              <li key={label}>
-                <span className="flex items-center gap-2.5 rounded-lg px-3 py-2 text-xs font-medium text-[#A1A8B3]">
-                  {label}
-                </span>
-              </li>
-            ))}
-          </ul>
-        </nav>
+        <Sidebar role="donor" />
       </aside>
 
       {/* Main */}
