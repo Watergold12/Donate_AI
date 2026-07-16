@@ -9,6 +9,7 @@ import { LandingPage } from './pages/shared/LandingPage'
 import { DonorDashboardPage } from './pages/donor/DonorDashboardPage'
 import { DonationPage } from './pages/donor/DonationPage'
 import { CameraPage } from './pages/donor/CameraPage'
+import { PickupSchedulePage } from './pages/donor/PickupSchedulePage'
 import { DonationHistoryPage } from './pages/donor/DonationHistoryPage'
 import { DonorPickupsPage } from './pages/donor/DonorPickupsPage'
 import { DonorAnalyticsPage } from './pages/donor/DonorAnalyticsPage'
@@ -56,6 +57,7 @@ export default function App() {
         <Route path="/donor" element={<RequireAuth role="donor"><DonorDashboardPage /></RequireAuth>} />
         <Route path="/donor/donate" element={<RequireAuth role="donor"><DonationPage /></RequireAuth>} />
         <Route path="/donor/camera" element={<RequireAuth role="donor"><CameraPage /></RequireAuth>} />
+        <Route path="/donor/pickup-schedule" element={<RequireAuth role="donor"><PickupSchedulePage /></RequireAuth>} />
         <Route path="/donor/history" element={<RequireAuth role="donor"><DonationHistoryPage /></RequireAuth>} />
         <Route path="/donor/pickups" element={<RequireAuth role="donor"><DonorPickupsPage /></RequireAuth>} />
         <Route path="/donor/analytics" element={<RequireAuth role="donor"><DonorAnalyticsPage /></RequireAuth>} />

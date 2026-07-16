@@ -7,6 +7,7 @@ import { Button } from '../../components/atoms/Button'
 import { Badge } from '../../components/atoms/Badge'
 import { Spinner } from '../../components/atoms/Spinner'
 import { detectionApi } from '../../api/detection'
+import { donationsApi } from '../../api/donations'
 import type { DetectionResult } from '../../types/index'
 import { capitalize, scoreToPercent } from '../../utils/index'
 import { Camera, Upload, X, ZoomIn } from 'lucide-react'
@@ -29,6 +30,8 @@ export function CameraPage() {
   const [error, setError]       = useState('')
   const [file, setFile]         = useState<File | null>(null)
   const [stream, setStream]     = useState<MediaStream | null>(null)
+  const [cart, setCart]         = useState<typeof results>([])
+  const [confirming, setConfirming] = useState(false)
 
   // ── Camera helpers ─────────────────────────────────────────
   const startCamera = useCallback(async () => {
@@ -283,9 +286,70 @@ export function CameraPage() {
               )}
 
               {results.length > 0 && (
-                <Button onClick={() => navigate('/donor/donate')} className="mt-auto w-full">
-                  Confirm cart
-                </Button>
+                <div className="flex flex-col gap-2 mt-2">
+                  <Button
+                    variant="secondary"
+                    size="sm"
+                    className="w-full"
+                    onClick={() => setCart(prev => {
+                      const merged = [...prev]
+                      results.forEach(r => {
+                        const existing = merged.find(c => c.name === r.name)
+                        if (!existing) merged.push({ ...r })
+                      })
+                      return merged
+                    })}
+                  >
+                    + Add to cart ({cart.length + results.length})
+                  </Button>
+                </div>
+              )}
+
+              {cart.length > 0 && (
+                <div className="mt-3 border-t border-white/[0.08] pt-3 flex flex-col gap-2">
+                  <p className="text-xs font-medium text-[#A1A8B3]">Cart ({cart.length} items)</p>
+                  {cart.map((c, i) => (
+                    <div key={i} className="flex items-center justify-between rounded bg-[#0B0F14] px-2 py-1.5">
+                      <span className="text-xs text-white">{c.name}</span>
+                      <button
+                        onClick={() => setCart(prev => prev.filter((_, idx) => idx !== i))}
+                        className="text-xs text-red-400 hover:text-red-300"
+                      >
+                        ✕
+                      </button>
+                    </div>
+                  ))}
+                  <Button
+                    loading={confirming}
+                    disabled={confirming}
+                    className="w-full mt-1"
+                    onClick={async () => {
+                      setConfirming(true)
+                      try {
+                        const donation = await donationsApi.create('Scanned donation')
+                        const id = donation.data.data.id
+                        for (const item of cart) {
+                          await donationsApi.addItem(id, {
+                            item_name: item.name,
+                            category: item.category,
+                            quantity: 1,
+                            condition: 'good',
+                            ai_detected: true,
+                            confidence_score: item.confidence,
+                          })
+                        }
+                        await donationsApi.submit(id)
+                        navigate(`/donor/pickup-schedule?donationId=${id}`)
+                      } catch {
+                        setError('Failed to confirm donation. Please try again.')
+                      } finally {
+                        setConfirming(false)
+                      }
+                    }}
+                  >
+                    Confirm & Schedule Pickup →
+                  </Button>
+                </div>
               )}
             </Card>
           </div>

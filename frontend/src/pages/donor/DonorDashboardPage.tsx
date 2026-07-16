@@ -46,7 +46,7 @@ export function DonorDashboardPage() {
             <h1 className="mt-0.5 text-2xl font-bold text-white">Hi {firstName}</h1>
           </div>
           <Link
-            to="/donor/donate"
+            to="/donor/camera"
             className="flex items-center gap-2 rounded-lg bg-[#1D8CF8] px-4 py-2 text-sm font-medium text-white hover:bg-[#3AA0FF] transition-colors"
           >
             <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -85,7 +85,7 @@ export function DonorDashboardPage() {
                 <p className="text-sm font-medium text-white">No donations yet</p>
                 <p className="mt-1 text-xs text-[#A1A8B3]">Start making a difference by creating your first donation</p>
                 <Link
-                  to="/donor/donate"
+                  to="/donor/camera"
                   className="mt-4 rounded-lg bg-[#1D8CF8] px-4 py-2 text-sm font-medium text-white hover:bg-[#3AA0FF] transition-colors"
                 >
                   Create Donation
