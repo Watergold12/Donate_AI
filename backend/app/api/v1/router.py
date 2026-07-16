@@ -1,6 +1,6 @@
 """Aggregate API v1 router — all sub-routers registered here."""
 from fastapi import APIRouter
-from app.api.v1 import admin, analytics, auth, detection, donations, donors, matching, ngos, notifications, pickups
+from app.api.v1 import admin, analytics, auth, detection, donations, donors, matching, matching_engine, ngos, notifications, pickups
 
 api_router = APIRouter()
 api_router.include_router(auth.router)
