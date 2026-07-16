@@ -1,1 +1,1 @@
-# AI detection interface and implementations
+"""AI detection module."""

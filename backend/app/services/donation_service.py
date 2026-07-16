@@ -177,6 +177,7 @@ def add_item(db: Session, user: User, donation_id: UUID,
         is_confirmed=True,
     )
     db.add(item)
+    db.flush()
     donation.total_items += payload.quantity
     log_action(db, AuditAction.CREATE, "donation_item", item.id, actor_id=user.id,
                new_data={"item_name": item.item_name, "category": item.category}, request=request)

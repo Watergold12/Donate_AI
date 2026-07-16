@@ -9,7 +9,7 @@ import { Spinner } from '../../components/atoms/Spinner'
 import { detectionApi } from '../../api/detection'
 import { donationsApi } from '../../api/donations'
 import type { DetectionResult } from '../../types/index'
-import { capitalize, scoreToPercent } from '../../utils/index'
+import { capitalize, scoreToPercent, getApiError } from '../../utils/index'
 import { Camera, Upload, X, ZoomIn } from 'lucide-react'
 
 type Mode = 'idle' | 'camera' | 'preview'
@@ -340,8 +340,8 @@ export function CameraPage() {
                         }
                         await donationsApi.submit(id)
                         navigate(`/donor/pickup-schedule?donationId=${id}`)
-                      } catch {
-                        setError('Failed to confirm donation. Please try again.')
+                      } catch (err: unknown) {
+                        setError(getApiError(err))
                       } finally {
                         setConfirming(false)
                       }
