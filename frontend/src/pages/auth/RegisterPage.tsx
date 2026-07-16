@@ -5,6 +5,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { Input } from '../../components/atoms/Input'
 import { Button } from '../../components/atoms/Button'
+import { PasswordInput } from '../../components/atoms/PasswordInput'
 import { Select } from '../../components/atoms/Select'
 import { authApi } from '../../api/auth'
 import { useAuth } from '../../hooks/useAuth'
@@ -105,7 +106,7 @@ export function RegisterPage() {
             <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4" noValidate>
               <Input label="Name" autoComplete="name" error={errors.full_name?.message} {...register('full_name')} />
               <Input label="Email" type="email" autoComplete="email" error={errors.email?.message} {...register('email')} />
-              <Input label="Password" type="password" autoComplete="new-password" error={errors.password?.message} {...register('password')} />
+              <PasswordInput label="Password" autoComplete="new-password" error={errors.password?.message} {...register('password')} />
               <Select label="Role" options={roleOptions} error={errors.role?.message} {...register('role')} />
               {role === 'ngo' && (
                 <>

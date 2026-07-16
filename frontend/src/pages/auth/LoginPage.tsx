@@ -5,6 +5,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { Input } from '../../components/atoms/Input'
 import { Button } from '../../components/atoms/Button'
+import { PasswordInput } from '../../components/atoms/PasswordInput'
 import { useAuth } from '../../hooks/useAuth'
 import { Sidebar } from '../../components/organisms/Sidebar'
 
@@ -58,7 +59,7 @@ export function LoginPage() {
             <h2 className="mb-6 text-xl font-semibold text-white">Sign in to DonateAI</h2>
             <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4" noValidate>
               <Input label="Email" type="email" autoComplete="email" error={errors.email?.message} {...register('email')} />
-              <Input label="Password" type="password" autoComplete="current-password" error={errors.password?.message} {...register('password')} />
+              <PasswordInput label="Password" autoComplete="current-password" error={errors.password?.message} {...register('password')} />
               {error && <p className="rounded-lg bg-red-500/10 px-3 py-2 text-sm text-red-400">{error}</p>}
               <Button type="submit" loading={isSubmitting} className="w-full mt-1">Sign in</Button>
               <p className="text-center text-sm text-[#A1A8B3]">
