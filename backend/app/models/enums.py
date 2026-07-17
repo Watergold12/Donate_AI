@@ -26,12 +26,18 @@ class ItemCondition(str, enum.Enum):
 
 
 class DonationStatus(str, enum.Enum):
-    draft = "draft"
-    pending_match = "pending_match"
-    matched = "matched"
-    scheduled = "scheduled"
-    completed = "completed"
-    cancelled = "cancelled"
+    draft             = "draft"
+    pending           = "pending"          # submitted, awaiting detection
+    detected          = "detected"         # AI detection completed
+    pending_match     = "pending_match"    # submitted to matching engine
+    matched           = "matched"          # NGO match proposed
+    accepted          = "accepted"         # NGO accepted the match
+    pickup_scheduled  = "pickup_scheduled" # pickup date confirmed
+    collected         = "collected"        # items picked up from donor
+    delivered         = "delivered"        # items delivered to NGO
+    completed         = "completed"        # full workflow done
+    scheduled         = "scheduled"        # legacy alias (kept for compat)
+    cancelled         = "cancelled"
 
 
 class DemandUrgency(str, enum.Enum):
@@ -50,11 +56,14 @@ class MatchStatus(str, enum.Enum):
 
 
 class PickupStatus(str, enum.Enum):
-    scheduled = "scheduled"
-    in_transit = "in_transit"
-    completed = "completed"
-    failed = "failed"
-    cancelled = "cancelled"
+    scheduled  = "scheduled"
+    confirmed  = "confirmed"   # NGO confirmed the pickup date
+    in_transit = "in_transit"  # driver en route to donor
+    collected  = "collected"   # items picked up from donor
+    delivered  = "delivered"   # items delivered to NGO
+    completed  = "completed"   # fully done
+    failed     = "failed"
+    cancelled  = "cancelled"
 
 
 class NotificationType(str, enum.Enum):

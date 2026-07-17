@@ -21,11 +21,14 @@ from app.utils.pagination import PaginationParams, paginate
 logger = logging.getLogger(__name__)
 
 VALID_PICKUP_TRANSITIONS = {
-    PickupStatus.scheduled: [PickupStatus.in_transit, PickupStatus.cancelled],
-    PickupStatus.in_transit: [PickupStatus.completed, PickupStatus.failed],
-    PickupStatus.completed: [],
-    PickupStatus.failed: [],
-    PickupStatus.cancelled: [],
+    PickupStatus.scheduled:  [PickupStatus.confirmed, PickupStatus.in_transit, PickupStatus.cancelled],
+    PickupStatus.confirmed:  [PickupStatus.in_transit, PickupStatus.cancelled],
+    PickupStatus.in_transit: [PickupStatus.collected, PickupStatus.failed],
+    PickupStatus.collected:  [PickupStatus.delivered],
+    PickupStatus.delivered:  [PickupStatus.completed],
+    PickupStatus.completed:  [],
+    PickupStatus.failed:     [],
+    PickupStatus.cancelled:  [],
 }
 
 
@@ -109,24 +112,55 @@ def update_status(db: Session, user: User, pickup_id: UUID,
         )
     old_status = pickup.status
     pickup.status = payload.status
-    if payload.status in (PickupStatus.completed, PickupStatus.failed):
-        pickup.completed_at = datetime.now(timezone.utc)
-    if payload.status == PickupStatus.completed:
-        donation = pickup.donation
+    now = datetime.now(timezone.utc)
+    donation = pickup.donation
+
+    # Sync donation status with pickup pipeline (event-driven)
+    if payload.status == PickupStatus.confirmed:
+        if donation and donation.status in (
+            DonationStatus.matched, DonationStatus.accepted, DonationStatus.scheduled
+        ):
+            donation.status = DonationStatus.pickup_scheduled
+
+    elif payload.status == PickupStatus.collected:
+        pickup.completed_at = now
+        if donation:
+            donation.status = DonationStatus.collected
+
+    elif payload.status == PickupStatus.delivered:
+        if donation:
+            donation.status = DonationStatus.delivered
+
+    elif payload.status == PickupStatus.completed:
+        pickup.completed_at = now
         if donation:
             donation.status = DonationStatus.completed
-            donation.completed_at = datetime.now(timezone.utc)
+            donation.completed_at = now
+
+    elif payload.status in (PickupStatus.failed, PickupStatus.cancelled):
+        pickup.completed_at = now
+
     log_action(db, AuditAction.UPDATE, "pickup", pickup.id, actor_id=user.id,
                old_data={"status": old_status}, new_data={"status": payload.status}, request=request)
     db.commit()
     db.refresh(pickup)
 
-    if payload.status == PickupStatus.completed:
-        try:
+    # Event-driven notifications
+    try:
+        if payload.status == PickupStatus.confirmed:
+            from app.services.notification_service import notify_pickup_confirmed
+            notify_pickup_confirmed(db, pickup)
+        elif payload.status == PickupStatus.collected:
+            from app.services.notification_service import notify_pickup_collected
+            notify_pickup_collected(db, pickup)
+        elif payload.status == PickupStatus.delivered:
+            from app.services.notification_service import notify_pickup_delivered
+            notify_pickup_delivered(db, pickup)
+        elif payload.status == PickupStatus.completed:
             from app.services.notification_service import notify_pickup_completed
             notify_pickup_completed(db, pickup)
-        except Exception as exc:
-            logger.error("notify_pickup_completed failed: %s", exc)
+    except Exception as exc:
+        logger.error("Pickup notification failed for status %s: %s", payload.status, exc)
 
     return pickup
 

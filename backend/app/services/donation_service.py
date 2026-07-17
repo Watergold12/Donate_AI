@@ -21,14 +21,20 @@ from app.utils.pagination import PaginationParams, paginate
 
 logger = logging.getLogger(__name__)
 
-# Valid status transitions
+# Valid status transitions — full event-driven pipeline
 VALID_TRANSITIONS = {
-    DonationStatus.draft: [DonationStatus.pending_match, DonationStatus.cancelled],
-    DonationStatus.pending_match: [DonationStatus.matched, DonationStatus.cancelled],
-    DonationStatus.matched: [DonationStatus.scheduled, DonationStatus.cancelled],
-    DonationStatus.scheduled: [DonationStatus.completed, DonationStatus.cancelled],
-    DonationStatus.completed: [],
-    DonationStatus.cancelled: [],
+    DonationStatus.draft:            [DonationStatus.pending, DonationStatus.pending_match, DonationStatus.cancelled],
+    DonationStatus.pending:          [DonationStatus.detected, DonationStatus.pending_match, DonationStatus.cancelled],
+    DonationStatus.detected:         [DonationStatus.pending_match, DonationStatus.cancelled],
+    DonationStatus.pending_match:    [DonationStatus.matched, DonationStatus.cancelled],
+    DonationStatus.matched:          [DonationStatus.accepted, DonationStatus.scheduled, DonationStatus.cancelled],
+    DonationStatus.accepted:         [DonationStatus.pickup_scheduled, DonationStatus.cancelled],
+    DonationStatus.pickup_scheduled: [DonationStatus.collected, DonationStatus.cancelled],
+    DonationStatus.collected:        [DonationStatus.delivered],
+    DonationStatus.delivered:        [DonationStatus.completed],
+    DonationStatus.scheduled:        [DonationStatus.completed, DonationStatus.pickup_scheduled, DonationStatus.cancelled],
+    DonationStatus.completed:        [],
+    DonationStatus.cancelled:        [],
 }
 
 
