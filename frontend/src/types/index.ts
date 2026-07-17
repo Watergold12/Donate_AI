@@ -2,10 +2,14 @@
 export type UserRole = 'donor' | 'ngo' | 'admin'
 export type ItemCategory = 'clothing' | 'food' | 'electronics' | 'furniture' | 'books' | 'medical' | 'toys' | 'other'
 export type ItemCondition = 'new' | 'good' | 'fair' | 'poor'
-export type DonationStatus = 'draft' | 'pending_match' | 'matched' | 'scheduled' | 'completed' | 'cancelled'
+export type DonationStatus =
+  | 'draft' | 'pending' | 'detected'
+  | 'pending_match' | 'matched' | 'accepted'
+  | 'pickup_scheduled' | 'collected' | 'delivered'
+  | 'scheduled' | 'completed' | 'cancelled'
 export type DemandUrgency = 'low' | 'medium' | 'high' | 'critical'
 export type MatchStatus = 'proposed' | 'accepted' | 'rejected' | 'expired' | 'completed'
-export type PickupStatus = 'scheduled' | 'in_transit' | 'completed' | 'failed' | 'cancelled'
+export type PickupStatus = 'scheduled' | 'confirmed' | 'in_transit' | 'collected' | 'delivered' | 'completed' | 'failed' | 'cancelled'
 export type NotificationType = 'match_found' | 'match_accepted' | 'match_rejected' | 'pickup_scheduled' | 'pickup_completed' | 'demand_fulfilled' | 'donation_received' | 'ngo_verified' | 'system'
 
 // ── API Envelope ───────────────────────────────────────────────────────────

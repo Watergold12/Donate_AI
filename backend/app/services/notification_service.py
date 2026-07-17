@@ -200,3 +200,57 @@ def notify_ngo_verified(db: Session, ngo_user_id: UUID, ngo_profile_id: UUID) ->
     except Exception as exc:
         logger.error("notify_ngo_verified failed: %s", exc)
         db.rollback()
+
+
+def notify_pickup_confirmed(db: Session, pickup) -> None:
+    """Notify donor that the NGO confirmed the pickup date."""
+    try:
+        donor_user_id = pickup.donation.donor.user_id
+        create_notification(
+            db, donor_user_id,
+            NotificationType.pickup_scheduled,
+            "Pickup Confirmed",
+            f"The NGO has confirmed your pickup for {pickup.scheduled_at.strftime('%Y-%m-%d %H:%M')} UTC.",
+            reference_id=pickup.id,
+            reference_type="pickup",
+        )
+        db.commit()
+    except Exception as exc:
+        logger.error("notify_pickup_confirmed failed: %s", exc)
+        db.rollback()
+
+
+def notify_pickup_collected(db: Session, pickup) -> None:
+    """Notify donor that items have been collected from their location."""
+    try:
+        donor_user_id = pickup.donation.donor.user_id
+        create_notification(
+            db, donor_user_id,
+            NotificationType.pickup_completed,
+            "Items Collected",
+            "The NGO volunteer has collected your donated items and is on the way.",
+            reference_id=pickup.id,
+            reference_type="pickup",
+        )
+        db.commit()
+    except Exception as exc:
+        logger.error("notify_pickup_collected failed: %s", exc)
+        db.rollback()
+
+
+def notify_pickup_delivered(db: Session, pickup) -> None:
+    """Notify donor that items have been delivered to the NGO."""
+    try:
+        donor_user_id = pickup.donation.donor.user_id
+        create_notification(
+            db, donor_user_id,
+            NotificationType.pickup_completed,
+            "Items Delivered!",
+            "Your donated items have been delivered to the NGO. Thank you for your generosity!",
+            reference_id=pickup.id,
+            reference_type="pickup",
+        )
+        db.commit()
+    except Exception as exc:
+        logger.error("notify_pickup_delivered failed: %s", exc)
+        db.rollback()
