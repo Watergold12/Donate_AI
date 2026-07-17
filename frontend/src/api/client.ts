@@ -18,34 +18,79 @@ apiClient.interceptors.request.use((config: InternalAxiosRequestConfig) => {
   return config
 })
 
+// --- Refresh race condition prevention ---
+let isRefreshing = false
+let refreshQueue: Array<{
+  resolve: (token: string) => void
+  reject: (error: unknown) => void
+}> = []
+
+function processQueue(error: unknown, token: string | null = null): void {
+  refreshQueue.forEach(({ resolve, reject }) => {
+    if (error) reject(error)
+    else if (token) resolve(token)
+  })
+  refreshQueue = []
+}
+
 // Refresh access token on 401
 apiClient.interceptors.response.use(
   (response) => response,
   async (error) => {
     const originalRequest = error.config as InternalAxiosRequestConfig & { _retry?: boolean }
+
     if (error.response?.status === 401 && !originalRequest._retry) {
-      originalRequest._retry = true
       const refreshToken = localStorage.getItem('refresh_token')
-      if (refreshToken) {
-        try {
-          const { data } = await axios.post(`${BASE_URL}/auth/refresh`, {
-            refresh_token: refreshToken,
-          })
-          const newToken: string = data.data.access_token
-          localStorage.setItem('access_token', newToken)
+
+      if (!refreshToken) {
+        window.location.href = '/login'
+        return Promise.reject(error)
+      }
+
+      if (isRefreshing) {
+        // Queue this request until the in-flight refresh completes
+        return new Promise<string>((resolve, reject) => {
+          refreshQueue.push({ resolve, reject })
+        }).then((token) => {
           if (originalRequest.headers) {
-            originalRequest.headers.Authorization = `Bearer ${newToken}`
+            originalRequest.headers.Authorization = `Bearer ${token}`
           }
           return apiClient(originalRequest)
-        } catch {
-          localStorage.removeItem('access_token')
-          localStorage.removeItem('refresh_token')
-          window.location.href = '/login'
+        })
+      }
+
+      originalRequest._retry = true
+      isRefreshing = true
+
+      try {
+        const { data } = await axios.post(`${BASE_URL}/auth/refresh`, {
+          refresh_token: refreshToken,
+        })
+        const newToken: string = data.data.access_token
+        localStorage.setItem('access_token', newToken)
+
+        // Store rotated refresh token if server returned one
+        if (data.data.refresh_token) {
+          localStorage.setItem('refresh_token', data.data.refresh_token)
         }
-      } else {
+
+        if (originalRequest.headers) {
+          originalRequest.headers.Authorization = `Bearer ${newToken}`
+        }
+
+        processQueue(null, newToken)
+        return apiClient(originalRequest)
+      } catch (err) {
+        processQueue(err)
+        localStorage.removeItem('access_token')
+        localStorage.removeItem('refresh_token')
         window.location.href = '/login'
+        return Promise.reject(err)
+      } finally {
+        isRefreshing = false
       }
     }
+
     return Promise.reject(error)
   },
 )

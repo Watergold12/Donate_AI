@@ -2,10 +2,13 @@
 Application configuration using pydantic-settings.
 All settings are loaded from environment variables or .env file.
 """
+import logging as _logging
 from functools import lru_cache
 from typing import List
 from pydantic_settings import BaseSettings, SettingsConfigDict
 from pydantic import field_validator
+
+_config_logger = _logging.getLogger(__name__)
 
 
 class Settings(BaseSettings):
@@ -48,6 +51,19 @@ class Settings(BaseSettings):
     match_score_threshold: float = 0.50
     match_top_n: int = 3
     match_expiry_hours: int = 48
+
+    def model_post_init(self, __context) -> None:
+        """Warn on dangerous production config."""
+        if self.environment == "production" and "*" in self.allowed_origins:
+            _config_logger.warning(
+                "SECURITY WARNING: ALLOWED_ORIGINS contains '*' in production environment. "
+                "Set explicit frontend origins instead."
+            )
+        if self.secret_key == "change-this-secret-key-in-production-min-32-chars":
+            _config_logger.warning(
+                "SECURITY WARNING: SECRET_KEY is set to the default placeholder value. "
+                "Generate a strong secret key before deploying to production."
+            )
 
     @property
     def allowed_origins_list(self) -> List[str]:

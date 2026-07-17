@@ -65,10 +65,6 @@ def login_user(db: Session, email: str, password: str, request=None) -> TokenRes
     db.add(RefreshToken(user_id=user.id, token_hash=hash_token(raw_refresh), expires_at=expires_at))
     log_action(db, AuditAction.LOGIN, "user", user.id, actor_id=user.id, request=request)
     db.commit()
-    print("Email:", email)
-    print("Password entered:", password)
-    print("Hash from DB:", user.password_hash)
-    print("Verify:", verify_password(password, user.password_hash))
     return TokenResponse(access_token=access_token, refresh_token=raw_refresh, role=user.role)
 
 
@@ -85,7 +81,18 @@ def refresh_access_token(db: Session, raw_refresh_token: str) -> AccessTokenResp
     user = db.query(User).filter(User.id == record.user_id, User.is_active.is_(True), User.deleted_at.is_(None)).first()
     if not user:
         raise AuthenticationError("User not found or disabled")
-    return AccessTokenResponse(access_token=create_access_token({"sub": str(user.id), "role": user.role}))
+    # Rotate: revoke old refresh token
+    record.revoked = True
+    record.revoked_at = datetime.now(timezone.utc)
+    # Issue new refresh token
+    new_raw_refresh = create_refresh_token()
+    new_expires_at = datetime.now(timezone.utc) + timedelta(days=settings.refresh_token_expire_days)
+    db.add(RefreshToken(user_id=user.id, token_hash=hash_token(new_raw_refresh), expires_at=new_expires_at))
+    db.commit()
+    return AccessTokenResponse(
+        access_token=create_access_token({"sub": str(user.id), "role": user.role}),
+        refresh_token=new_raw_refresh,
+    )
 
 
 def logout_user(db: Session, raw_refresh_token: str, actor_id: UUID, request=None) -> None:
