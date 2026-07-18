@@ -7,7 +7,6 @@ import { Input } from '../../components/atoms/Input'
 import { Button } from '../../components/atoms/Button'
 import { PasswordInput } from '../../components/atoms/PasswordInput'
 import { useAuth } from '../../hooks/useAuth'
-import { Sidebar } from '../../components/organisms/Sidebar'
 
 const schema = z.object({
   email: z.string().email('Enter a valid email'),
@@ -35,9 +34,12 @@ export function LoginPage() {
 
   return (
     <div className="flex min-h-screen bg-[#0B0F14]">
-      {/* Sidebar-style left panel matching the screenshot */}
-      <aside className="flex w-[132px] flex-shrink-0 flex-col border-r border-white/[0.08] bg-[#11161D]">
-        <Sidebar role="donor" />
+      {/* Brand strip — logo only, no navigation */}
+      <aside className="hidden w-[132px] flex-shrink-0 flex-col items-center border-r border-white/[0.08] bg-[#11161D] pt-6 md:flex">
+        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#1D8CF8] text-lg font-bold text-white">
+          D
+        </div>
+        <span className="mt-2 text-xs font-semibold text-[#A1A8B3]">DonateAI</span>
       </aside>
 
       {/* Main area */}
@@ -46,10 +48,9 @@ export function LoginPage() {
         <header className="flex h-12 items-center justify-between border-b border-white/[0.08] bg-[#0B0F14] px-6">
           <h1 className="text-base font-semibold text-white">Login</h1>
           <div className="flex items-center gap-2">
-            <button className="rounded-lg px-3 py-1.5 text-sm text-[#A1A8B3] hover:bg-white/[0.06]">
-              ↪ Sign in
-            </button>
-            <button className="rounded-lg p-2 text-[#A1A8B3] hover:bg-white/[0.06]">⚙</button>
+            <Link to="/register" className="rounded-lg px-3 py-1.5 text-sm text-[#A1A8B3] hover:bg-white/[0.06] hover:text-white transition-colors">
+              ↪ Register
+            </Link>
           </div>
         </header>
 

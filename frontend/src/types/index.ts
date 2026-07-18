@@ -42,6 +42,7 @@ export interface User {
   role: UserRole
   is_active: boolean
   is_verified: boolean
+  created_at?: string
 }
 
 export interface TokenResponse {
@@ -111,6 +112,7 @@ export interface NGOProfile {
   service_areas: string[] | null
   is_verified: boolean
   verified_at: string | null
+  created_at?: string
 }
 
 export interface NGODemand {

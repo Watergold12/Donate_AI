@@ -93,7 +93,7 @@ export function AdminUsersPage() {
                       <td className="px-6 py-3 text-[#A1A8B3]">{u.email}</td>
                       <td className="px-6 py-3"><Badge variant={ROLE_VARIANTS[u.role] ?? 'default'}>{capitalize(u.role)}</Badge></td>
                       <td className="px-6 py-3"><Badge variant={u.is_active ? 'success' : 'danger'}>{u.is_active ? 'Active' : 'Inactive'}</Badge></td>
-                      <td className="px-6 py-3 text-[#6B7280]">{formatDate(u.id)}</td>
+                      <td className="px-6 py-3 text-[#6B7280]">{u.created_at ? formatDate(u.created_at) : '—'}</td>
                       <td className="px-6 py-3">
                         <Button size="sm" variant={u.is_active ? 'danger' : 'secondary'} loading={toggling === u.id} onClick={() => toggleStatus(u)}>
                           {u.is_active ? 'Disable' : 'Enable'}

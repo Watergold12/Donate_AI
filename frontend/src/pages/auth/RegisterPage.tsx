@@ -9,7 +9,6 @@ import { PasswordInput } from '../../components/atoms/PasswordInput'
 import { Select } from '../../components/atoms/Select'
 import { authApi } from '../../api/auth'
 import { useAuth } from '../../hooks/useAuth'
-import { Sidebar } from '../../components/organisms/Sidebar'
 
 const schema = z.object({
   full_name: z.string().min(2, 'Name is required'),
@@ -62,9 +61,12 @@ export function RegisterPage() {
 
   return (
     <div className="flex min-h-screen bg-[#0B0F14]">
-      {/* Sidebar strip */}
-      <aside className="flex w-[132px] flex-shrink-0 flex-col border-r border-white/[0.08] bg-[#11161D]">
-        <Sidebar role="donor" />
+      {/* Brand strip — logo only, no navigation */}
+      <aside className="hidden w-[132px] flex-shrink-0 flex-col items-center border-r border-white/[0.08] bg-[#11161D] pt-6 md:flex">
+        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#1D8CF8] text-lg font-bold text-white">
+          D
+        </div>
+        <span className="mt-2 text-xs font-semibold text-[#A1A8B3]">DonateAI</span>
       </aside>
 
       {/* Main */}
@@ -72,37 +74,18 @@ export function RegisterPage() {
         <header className="flex h-12 items-center justify-between border-b border-white/[0.08] bg-[#0B0F14] px-6">
           <h1 className="text-base font-semibold text-white">Register</h1>
           <div className="flex items-center gap-2">
-            <button
-              onClick={() => navigate('/login')}
+            <Link
+              to="/login"
               className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm text-[#A1A8B3] hover:bg-white/[0.06] hover:text-white transition-colors"
             >
               ↪ Sign in
-            </button>
-            <button
-              onClick={() => {
-                const html = document.documentElement
-                if (html.classList.contains('dark')) {
-                  html.classList.remove('dark')
-                  html.classList.add('light')
-                  localStorage.setItem('theme', 'light')
-                } else {
-                  html.classList.remove('light')
-                  html.classList.add('dark')
-                  localStorage.setItem('theme', 'dark')
-                }
-              }}
-              className="rounded-lg p-2 text-[#A1A8B3] hover:bg-white/[0.06] hover:text-white transition-colors"
-              title="Toggle light/dark theme"
-              aria-label="Toggle theme"
-            >
-              ⚙
-            </button>
+            </Link>
           </div>
         </header>
 
         <main className="flex flex-1 items-center justify-center px-4">
           <div className="w-full max-w-sm rounded-2xl border border-white/[0.08] bg-[#171B22] p-8">
-            <h2 className="mb-6 text-xl font-semibold text-white">Create your NGO account</h2>
+            <h2 className="mb-6 text-xl font-semibold text-white">Create your account</h2>
             <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4" noValidate>
               <Input label="Name" autoComplete="name" error={errors.full_name?.message} {...register('full_name')} />
               <Input label="Email" type="email" autoComplete="email" error={errors.email?.message} {...register('email')} />

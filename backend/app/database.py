@@ -5,7 +5,7 @@ Uses SQLAlchemy 2.0 with connection pooling.
 import logging
 from typing import Generator
 
-from sqlalchemy import create_engine, event
+from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, Session
 
 from app.config import settings

@@ -33,6 +33,7 @@ class NGOProfileResponse(BaseModel):
     service_areas: Optional[List[str]] = None
     is_verified: bool
     verified_at: Optional[datetime] = None
+    created_at: Optional[datetime] = None
 
 
 class NGOVerifyRequest(BaseModel):

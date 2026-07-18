@@ -1,4 +1,5 @@
 """Auth request/response schemas."""
+from datetime import datetime
 from typing import Optional
 from uuid import UUID
 from pydantic import BaseModel, EmailStr, field_validator
@@ -58,3 +59,4 @@ class UserResponse(BaseModel):
     role: UserRole
     is_active: bool
     is_verified: bool
+    created_at: Optional[datetime] = None

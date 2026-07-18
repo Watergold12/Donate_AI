@@ -70,7 +70,7 @@ export function AdminNGOsPage() {
                     {(ngo.city ?? ngo.state) && (
                       <p className="text-xs text-gray-400">{[ngo.city, ngo.state].filter(Boolean).join(', ')}</p>
                     )}
-                    <p className="text-xs text-gray-400">Applied {formatDate(ngo.id)}</p>
+                    <p className="text-xs text-gray-400">Applied {ngo.created_at ? formatDate(ngo.created_at) : '—'}</p>
                   </div>
                   <div className="flex gap-2">
                     <Button size="sm" loading={actioning === ngo.id} onClick={() => approve(ngo.id)}>Approve</Button>

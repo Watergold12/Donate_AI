@@ -6,7 +6,6 @@ import logging as _logging
 from functools import lru_cache
 from typing import List
 from pydantic_settings import BaseSettings, SettingsConfigDict
-from pydantic import field_validator
 
 _config_logger = _logging.getLogger(__name__)
 
