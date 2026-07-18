@@ -34,6 +34,10 @@ export function AuthProvider({ children }: AuthProviderProps) {
     setState(prev => ({ ...prev, isLoading: loading }))
   }, [])
 
+  const setUser = useCallback((user: User) => {
+    setState(prev => ({ ...prev, user }))
+  }, [])
+
   useEffect(() => {
     const token = localStorage.getItem('access_token')
     if (token) {
@@ -50,7 +54,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     }
   }, [clearAuth])
 
-  const value: AuthContextType = { ...state, setAuth, clearAuth, setLoading }
+  const value: AuthContextType = { ...state, setAuth, clearAuth, setLoading, setUser }
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
 }

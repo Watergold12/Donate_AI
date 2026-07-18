@@ -13,6 +13,7 @@ export interface AuthActions {
   setAuth: (user: User, accessToken: string, refreshToken: string) => void
   clearAuth: () => void
   setLoading: (loading: boolean) => void
+  setUser: (user: User) => void
 }
 
 export type AuthContextType = AuthState & AuthActions

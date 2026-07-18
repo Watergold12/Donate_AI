@@ -25,4 +25,7 @@ export const authApi = {
 
   me: () =>
     apiClient.get<APIResponse<User>>('/auth/me'),
+
+  updateMe: (data: { full_name?: string }) =>
+    apiClient.put<APIResponse<User>>('/auth/me', data),
 }

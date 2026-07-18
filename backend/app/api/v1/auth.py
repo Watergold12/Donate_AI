@@ -1,6 +1,7 @@
 """Auth API endpoints."""
-from typing import Annotated
+from typing import Annotated, Optional
 from fastapi import APIRouter, Depends, Request, status
+from pydantic import BaseModel
 from sqlalchemy.orm import Session
 from app.core.dependencies import get_current_active_user
 from app.database import get_db
@@ -13,6 +14,10 @@ from app.schemas.common import APIResponse
 from app.services import auth_service
 
 router = APIRouter(prefix="/auth", tags=["Authentication"])
+
+
+class UpdateMeRequest(BaseModel):
+    full_name: Optional[str] = None
 
 
 @router.post("/register", response_model=APIResponse[UserResponse], status_code=status.HTTP_201_CREATED)
@@ -47,3 +52,17 @@ def logout(
 @router.get("/me", response_model=APIResponse[UserResponse])
 def get_me(current_user: Annotated[User, Depends(get_current_active_user)]):
     return APIResponse.ok(UserResponse.model_validate(current_user), "User profile retrieved")
+
+
+@router.put("/me", response_model=APIResponse[UserResponse])
+def update_me(
+    payload: UpdateMeRequest,
+    current_user: Annotated[User, Depends(get_current_active_user)],
+    db: Annotated[Session, Depends(get_db)],
+):
+    """Update the authenticated user's own profile (full_name)."""
+    if payload.full_name is not None:
+        current_user.full_name = payload.full_name
+    db.commit()
+    db.refresh(current_user)
+    return APIResponse.ok(UserResponse.model_validate(current_user), "Profile updated")

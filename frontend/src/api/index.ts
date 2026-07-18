@@ -1,5 +1,6 @@
 export { apiClient } from './client'
 export { authApi } from './auth'
+export { donorsApi } from './donors'
 export { donationsApi } from './donations'
 export { ngosApi } from './ngos'
 export { pickupsApi } from './pickups'
