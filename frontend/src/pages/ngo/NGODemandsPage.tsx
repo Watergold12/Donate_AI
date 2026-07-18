@@ -15,6 +15,7 @@ import { Textarea } from '../../components/atoms/Textarea'
 import { Badge } from '../../components/atoms/Badge'
 import { Spinner } from '../../components/atoms/Spinner'
 import { ngosApi } from '../../api/ngos'
+import { useToast } from '../../store/ToastProvider'
 import type { NGODemand, ItemCategory, DemandUrgency } from '../../types/index'
 import { capitalize, formatDate } from '../../utils/index'
 
@@ -48,6 +49,7 @@ export function NGODemandsPage() {
   const [showModal, setShowModal] = useState(false)
   const [submitting, setSubmitting] = useState(false)
   const [deleting, setDeleting] = useState<string | null>(null)
+  const toast = useToast()
 
   const { register, handleSubmit: rhfSubmit, reset, formState: { errors } } = useForm<FormData>({
     resolver: zodResolver(schema),
@@ -79,13 +81,17 @@ export function NGODemandsPage() {
         description: data.description,
       })
       reset(); setShowModal(false); setPage(1); load()
-    } catch { /* silent */ }
+      toast.success('Demand created')
+    } catch { toast.error('Failed to create demand') }
     finally { setSubmitting(false) }
   }
 
   function deleteDemand(id: string) {
     setDeleting(id)
-    ngosApi.deleteDemand(id).then(() => load()).catch(() => null).finally(() => setDeleting(null))
+    ngosApi.deleteDemand(id)
+      .then(() => { load(); toast.success('Demand deleted') })
+      .catch(() => toast.error('Failed to delete demand'))
+      .finally(() => setDeleting(null))
   }
 
   return (

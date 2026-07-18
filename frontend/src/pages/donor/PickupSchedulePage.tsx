@@ -11,12 +11,14 @@ import { pickupsApi } from '../../api/pickups'
 import type { Match } from '../../types/index'
 import { scoreToPercent, formatDate } from '../../utils/index'
 import { useAuthContext } from '../../store/authStore'
+import { useToast } from '../../store/ToastProvider'
 
 export function PickupSchedulePage() {
   const navigate = useNavigate()
   const [params] = useSearchParams()
   const donationId = params.get('donationId') ?? ''
   const { user } = useAuthContext()
+  const toast = useToast()
 
   const [matches, setMatches]       = useState<Match[]>([])
   const [loading, setLoading]       = useState(true)
@@ -55,9 +57,11 @@ export function PickupSchedulePage() {
         pickup_city: city,
         contact_phone: phone || undefined,
       })
+      toast.success('Pickup scheduled successfully!')
       navigate('/donor/pickups')
     } catch {
       setError('Failed to schedule pickup. Please try again.')
+      toast.error('Failed to schedule pickup')
     } finally {
       setScheduling(false)
     }

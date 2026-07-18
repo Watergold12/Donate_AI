@@ -14,6 +14,7 @@ import { authApi } from '../../api/auth'
 import { donorsApi } from '../../api/donors'
 import { ngosApi } from '../../api/ngos'
 import { LogOut, Save, User as UserIcon, Building2, MapPin } from 'lucide-react'
+import { useToast } from '../../store/ToastProvider'
 
 /* ── Schemas ─────────────────────────────────────────────── */
 
@@ -52,28 +53,13 @@ const TAB_ITEMS: { key: Tab; icon: typeof UserIcon; label: string }[] = [
   { key: 'details', icon: MapPin, label: 'Details' },
 ]
 
-/* ── Toast Component ─────────────────────────────────────── */
-
-function Toast({ message, onClose }: { message: string; onClose: () => void }) {
-  useEffect(() => {
-    const t = setTimeout(onClose, 3000)
-    return () => clearTimeout(t)
-  }, [onClose])
-
-  return (
-    <div className="fixed bottom-6 right-6 z-50 animate-[slideUp_0.3s_ease] rounded-xl border border-[#22C55E]/20 bg-[#22C55E]/10 px-5 py-3 text-sm font-medium text-[#22C55E] shadow-lg backdrop-blur-md">
-      ✓ {message}
-    </div>
-  )
-}
-
 /* ── Main Component ──────────────────────────────────────── */
 
 export function SettingsPage() {
   const { user, clearAuth, refreshToken, setUser } = useAuthContext()
   const [tab, setTab] = useState<Tab>('account')
-  const [toast, setToast] = useState<string | null>(null)
   const [loadingProfile, setLoadingProfile] = useState(false)
+  const toast = useToast()
 
   /* ── Account form ───────────────────────────────────────── */
   const {
@@ -89,9 +75,9 @@ export function SettingsPage() {
     try {
       const res = await authApi.updateMe({ full_name: data.full_name })
       if (res.data.data) setUser(res.data.data)
-      setToast('Account details saved')
+      toast.success('Account details saved')
     } catch {
-      setToast('Failed to save account details')
+      toast.error('Failed to save account details')
     }
   }
 
@@ -108,9 +94,9 @@ export function SettingsPage() {
   const saveDonor = async (data: DonorForm) => {
     try {
       await donorsApi.updateProfile(data)
-      setToast('Address details saved')
+      toast.success('Address details saved')
     } catch {
-      setToast('Failed to save details')
+      toast.error('Failed to save details')
     }
   }
 
@@ -127,9 +113,9 @@ export function SettingsPage() {
   const saveNgo = async (data: NGOForm) => {
     try {
       await ngosApi.updateProfile(data)
-      setToast('Organisation details saved')
+      toast.success('Organisation details saved')
     } catch {
-      setToast('Failed to save details')
+      toast.error('Failed to save details')
     }
   }
 
@@ -419,8 +405,6 @@ export function SettingsPage() {
           </button>
         </Card>
       </div>
-
-      {toast && <Toast message={toast} onClose={() => setToast(null)} />}
     </DashboardLayout>
   )
 }

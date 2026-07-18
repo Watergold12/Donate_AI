@@ -9,6 +9,7 @@ import { Badge } from '../../components/atoms/Badge'
 import { Select } from '../../components/atoms/Select'
 import { Spinner } from '../../components/atoms/Spinner'
 import { adminApi } from '../../api/admin'
+import { useToast } from '../../store/ToastProvider'
 import type { User, UserRole } from '../../types/index'
 import { capitalize, formatDate } from '../../utils/index'
 
@@ -31,6 +32,7 @@ export function AdminUsersPage() {
   const [total, setTotal] = useState(0)
   const [roleFilter, setRoleFilter] = useState<UserRole | ''>('')
   const [toggling, setToggling] = useState<string | null>(null)
+  const toast = useToast()
 
   const load = useCallback(() => {
     setLoading(true)
@@ -49,8 +51,8 @@ export function AdminUsersPage() {
   function toggleStatus(user: User) {
     setToggling(user.id)
     adminApi.setUserStatus(user.id, !user.is_active)
-      .then(() => load())
-      .catch(() => null)
+      .then(() => { load(); toast.success(`User ${!user.is_active ? 'activated' : 'deactivated'}`) })
+      .catch(() => toast.error('Failed to update user status'))
       .finally(() => setToggling(null))
   }
 

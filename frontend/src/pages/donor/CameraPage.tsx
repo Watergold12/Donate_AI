@@ -8,6 +8,7 @@ import { Badge } from '../../components/atoms/Badge'
 import { Spinner } from '../../components/atoms/Spinner'
 import { detectionApi } from '../../api/detection'
 import { donationsApi } from '../../api/donations'
+import { useToast } from '../../store/ToastProvider'
 import type { DetectionResult } from '../../types/index'
 import { capitalize, scoreToPercent, getApiError } from '../../utils/index'
 import { Camera, Upload, X, ZoomIn } from 'lucide-react'
@@ -32,6 +33,7 @@ export function CameraPage() {
   const [stream, setStream]     = useState<MediaStream | null>(null)
   const [cart, setCart]         = useState<typeof results>([])
   const [confirming, setConfirming] = useState(false)
+  const toast = useToast()
 
   // ── Camera helpers ─────────────────────────────────────────
   const startCamera = useCallback(async () => {
@@ -104,8 +106,10 @@ export function CameraPage() {
     try {
       const res = await detectionApi.analyze(file)
       setResults(res.data.data.items)
+      toast.success(`Detected ${res.data.data.items.length} item(s)`)
     } catch {
       setError('Detection failed. Please try a different image.')
+      toast.error('Detection failed')
     } finally {
       setLoading(false)
     }
@@ -339,9 +343,11 @@ export function CameraPage() {
                           })
                         }
                         await donationsApi.submit(id)
+                        toast.success('Donation confirmed & submitted!')
                         navigate(`/donor/pickup-schedule?donationId=${id}`)
                       } catch (err: unknown) {
                         setError(getApiError(err))
+                        toast.error('Failed to confirm donation')
                       } finally {
                         setConfirming(false)
                       }

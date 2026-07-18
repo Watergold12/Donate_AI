@@ -11,6 +11,7 @@ import { Select } from '../../components/atoms/Select'
 import { Textarea } from '../../components/atoms/Textarea'
 import { Spinner } from '../../components/atoms/Spinner'
 import { ngosApi } from '../../api/ngos'
+import { useToast } from '../../store/ToastProvider'
 import type { Match, MatchStatus } from '../../types/index'
 import { scoreToPercent, formatDate } from '../../utils/index'
 
@@ -32,6 +33,7 @@ export function NGOMatchesPage() {
   const [rejectTarget, setRejectTarget] = useState<string | null>(null)
   const [rejectReason, setRejectReason] = useState('')
   const [acting, setActing] = useState<string | null>(null)
+  const toast = useToast()
 
   const load = useCallback(() => {
     setLoading(true)
@@ -49,15 +51,18 @@ export function NGOMatchesPage() {
 
   function accept(id: string) {
     setActing(id)
-    ngosApi.acceptMatch(id).then(() => load()).catch(() => null).finally(() => setActing(null))
+    ngosApi.acceptMatch(id)
+      .then(() => { load(); toast.success('Match accepted') })
+      .catch(() => toast.error('Failed to accept match'))
+      .finally(() => setActing(null))
   }
 
   function submitReject() {
     if (!rejectTarget) return
     setActing(rejectTarget)
     ngosApi.rejectMatch(rejectTarget, rejectReason || undefined)
-      .then(() => { setRejectTarget(null); setRejectReason(''); load() })
-      .catch(() => null)
+      .then(() => { setRejectTarget(null); setRejectReason(''); load(); toast.info('Match rejected') })
+      .catch(() => toast.error('Failed to reject match'))
       .finally(() => setActing(null))
   }
 

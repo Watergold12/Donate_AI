@@ -7,6 +7,7 @@ import { Input } from '../../components/atoms/Input'
 import { Button } from '../../components/atoms/Button'
 import { PasswordInput } from '../../components/atoms/PasswordInput'
 import { useAuth } from '../../hooks/useAuth'
+import { useToast } from '../../store/ToastProvider'
 
 const schema = z.object({
   email: z.string().email('Enter a valid email'),
@@ -17,6 +18,7 @@ type FormData = z.infer<typeof schema>
 export function LoginPage() {
   const { login } = useAuth()
   const navigate = useNavigate()
+  const toast = useToast()
   const [error, setError] = useState('')
   const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<FormData>({ resolver: zodResolver(schema) })
 
@@ -24,10 +26,12 @@ export function LoginPage() {
     setError('')
     try {
       const user = await login(data.email, data.password)
+      toast.success(`Welcome back, ${user.full_name}!`)
       if (user.role === 'donor') navigate('/donor')
       else if (user.role === 'ngo') navigate('/ngo')
       else navigate('/admin')
     } catch {
+      toast.error('Invalid email or password')
       setError('Invalid email or password')
     }
   }

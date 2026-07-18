@@ -7,6 +7,7 @@ import { Card } from '../../components/atoms/Card'
 import { Button } from '../../components/atoms/Button'
 import { Spinner } from '../../components/atoms/Spinner'
 import { adminApi } from '../../api/admin'
+import { useToast } from '../../store/ToastProvider'
 import type { NGOProfile } from '../../types/index'
 import { formatDate } from '../../utils/index'
 
@@ -17,6 +18,7 @@ export function AdminNGOsPage() {
   const [pages, setPages] = useState(1)
   const [total, setTotal] = useState(0)
   const [actioning, setActioning] = useState<string | null>(null)
+  const toast = useToast()
 
   const load = useCallback(() => {
     setLoading(true)
@@ -34,12 +36,18 @@ export function AdminNGOsPage() {
 
   function approve(id: string) {
     setActioning(id)
-    adminApi.verifyNGO(id, true).then(() => load()).catch(() => null).finally(() => setActioning(null))
+    adminApi.verifyNGO(id, true)
+      .then(() => { load(); toast.success('NGO approved') })
+      .catch(() => toast.error('Failed to approve NGO'))
+      .finally(() => setActioning(null))
   }
 
   function reject(id: string) {
     setActioning(id)
-    adminApi.verifyNGO(id, false).then(() => load()).catch(() => null).finally(() => setActioning(null))
+    adminApi.verifyNGO(id, false)
+      .then(() => { load(); toast.info('NGO rejected') })
+      .catch(() => toast.error('Failed to reject NGO'))
+      .finally(() => setActioning(null))
   }
 
   return (

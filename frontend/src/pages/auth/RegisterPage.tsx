@@ -9,6 +9,7 @@ import { PasswordInput } from '../../components/atoms/PasswordInput'
 import { Select } from '../../components/atoms/Select'
 import { authApi } from '../../api/auth'
 import { useAuth } from '../../hooks/useAuth'
+import { useToast } from '../../store/ToastProvider'
 
 const schema = z.object({
   full_name: z.string().min(2, 'Name is required'),
@@ -32,6 +33,7 @@ const roleOptions = [
 export function RegisterPage() {
   const { login } = useAuth()
   const navigate = useNavigate()
+  const toast = useToast()
   const [error, setError] = useState('')
   const { register, handleSubmit, watch, formState: { errors, isSubmitting } } = useForm<FormData>({
     resolver: zodResolver(schema),
@@ -51,10 +53,12 @@ export function RegisterPage() {
         registration_number: data.registration_number,
       })
       const user = await login(data.email, data.password)
+      toast.success('Account created successfully!')
       if (user.role === 'donor') navigate('/donor')
       else navigate('/ngo')
     } catch (e: unknown) {
       const msg = e instanceof Error ? e.message : 'Registration failed. Please try again.'
+      toast.error(msg)
       setError(msg)
     }
   }

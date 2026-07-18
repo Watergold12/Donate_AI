@@ -13,6 +13,7 @@ import { Select } from '../../components/atoms/Select'
 import { Textarea } from '../../components/atoms/Textarea'
 import { Badge } from '../../components/atoms/Badge'
 import { donationsApi } from '../../api/donations'
+import { useToast } from '../../store/ToastProvider'
 import type { Donation, ItemCategory, ItemCondition } from '../../types/index'
 import { capitalize } from '../../utils/index'
 
@@ -46,6 +47,8 @@ export function DonationPage() {
   const [showModal, setShowModal] = useState(false)
   const [error, setError] = useState('')
 
+  const toast = useToast()
+
   const { register, handleSubmit: rhfSubmit, reset, formState: { errors } } = useForm<ItemFormData>({
     resolver: zodResolver(schema),
     defaultValues: { condition: 'good', quantity: 1 },
@@ -54,8 +57,8 @@ export function DonationPage() {
   function createDonation() {
     setCreating(true); setError('')
     donationsApi.create(notes || undefined)
-      .then(r => { setDonation(r.data.data); setStep('items') })
-      .catch(() => setError('Failed to create donation.'))
+      .then(r => { setDonation(r.data.data); setStep('items'); toast.success('Donation created') })
+      .catch(() => { setError('Failed to create donation.'); toast.error('Failed to create donation') })
       .finally(() => setCreating(false))
   }
 
@@ -71,22 +74,23 @@ export function DonationPage() {
       })
       setDonation(prev => prev ? { ...prev, items: [...prev.items, r.data.data], total_items: prev.total_items + data.quantity } : prev)
       reset(); setShowModal(false)
-    } catch { setError('Failed to add item.') }
+      toast.success('Item added')
+    } catch { setError('Failed to add item.'); toast.error('Failed to add item') }
     finally { setAddingItem(false) }
   }
   function removeItem(itemId: string, qty: number) {
     if (!donation) return
     donationsApi.removeItem(donation.id, itemId)
-      .then(() => setDonation(prev => prev ? { ...prev, items: prev.items.filter(i => i.id !== itemId), total_items: Math.max(0, prev.total_items - qty) } : prev))
-      .catch(() => setError('Failed to remove item.'))
+      .then(() => { setDonation(prev => prev ? { ...prev, items: prev.items.filter(i => i.id !== itemId), total_items: Math.max(0, prev.total_items - qty) } : prev); toast.info('Item removed') })
+      .catch(() => { setError('Failed to remove item.'); toast.error('Failed to remove item') })
   }
 
   function submitDonation() {
     if (!donation) return
     setSubmitting(true)
     donationsApi.submit(donation.id)
-      .then(() => setStep('done'))
-      .catch(() => setError('Submission failed. Add at least one item first.'))
+      .then(() => { setStep('done'); toast.success('Donation submitted successfully!') })
+      .catch(() => { setError('Submission failed. Add at least one item first.'); toast.error('Submission failed') })
       .finally(() => setSubmitting(false))
   }
 
