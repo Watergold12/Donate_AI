@@ -254,35 +254,35 @@ export function CameraPage() {
           <div className="flex flex-col gap-4">
             <Card className="flex flex-1 flex-col gap-3">
               <div className="flex items-center justify-between">
-                <h2 className="text-sm font-medium text-white">Detected items</h2>
-                <span className="text-xs text-[#6B7280]">{results.length} item{results.length !== 1 ? 's' : ''}</span>
+                <h2 className="text-sm font-medium text-da-text">Detected items</h2>
+                <span className="text-xs text-da-muted">{results.length} item{results.length !== 1 ? 's' : ''}</span>
               </div>
 
               {loading ? (
                 <div className="flex flex-col items-center gap-2 py-8">
                   <Spinner />
-                  <p className="text-xs text-[#A1A8B3]">Analysing with AI...</p>
+                  <p className="text-xs text-da-secondary">Analysing with AI...</p>
                 </div>
               ) : results.length === 0 ? (
-                <p className="py-8 text-center text-xs text-[#6B7280]">
+                <p className="py-8 text-center text-xs text-da-muted">
                   No items yet. Capture or upload a photo to get started.
                 </p>
               ) : (
                 <div className="flex flex-col gap-2">
                   {results.map((r, i) => (
-                    <div key={i} className="rounded-lg border border-white/[0.08] bg-[#0B0F14] p-3">
+                    <div key={i} className="rounded-lg border border-da-border bg-da-bg p-3">
                       <div className="flex items-center justify-between">
-                        <p className="text-sm font-medium text-white">{r.name}</p>
+                        <p className="text-sm font-medium text-da-text">{r.name}</p>
                         <Badge variant="info">{capitalize(r.category)}</Badge>
                       </div>
                       <div className="mt-2 flex items-center gap-2">
-                        <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-white/10">
+                        <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-da-border">
                           <div
-                            className="h-1.5 rounded-full bg-[#1D8CF8] transition-all"
+                            className="h-1.5 rounded-full bg-da-primary transition-all"
                             style={{ width: `${Math.round(r.confidence * 100)}%` }}
                           />
                         </div>
-                        <span className="text-xs text-[#6B7280]">{scoreToPercent(r.confidence)}</span>
+                        <span className="text-xs text-da-muted">{scoreToPercent(r.confidence)}</span>
                       </div>
                     </div>
                   ))}
@@ -310,11 +310,11 @@ export function CameraPage() {
               )}
 
               {cart.length > 0 && (
-                <div className="mt-3 border-t border-white/[0.08] pt-3 flex flex-col gap-2">
-                  <p className="text-xs font-medium text-[#A1A8B3]">Cart ({cart.length} items)</p>
+                <div className="mt-3 border-t border-da-border pt-3 flex flex-col gap-2">
+                  <p className="text-xs font-medium text-da-secondary">Cart ({cart.length} items)</p>
                   {cart.map((c, i) => (
-                    <div key={i} className="flex items-center justify-between rounded bg-[#0B0F14] px-2 py-1.5">
-                      <span className="text-xs text-white">{c.name}</span>
+                    <div key={i} className="flex items-center justify-between rounded bg-da-bg px-2 py-1.5">
+                      <span className="text-xs text-da-text">{c.name}</span>
                       <button
                         onClick={() => setCart(prev => prev.filter((_, idx) => idx !== i))}
                         className="text-xs text-red-400 hover:text-red-300"

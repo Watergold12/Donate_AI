@@ -64,23 +64,23 @@ export function RegisterPage() {
   }
 
   return (
-    <div className="flex min-h-screen bg-[#0B0F14]">
+    <div className="flex min-h-screen bg-da-bg">
       {/* Brand strip — logo only, no navigation */}
-      <aside className="hidden w-[132px] flex-shrink-0 flex-col items-center border-r border-white/[0.08] bg-[#11161D] pt-6 md:flex">
-        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#1D8CF8] text-lg font-bold text-white">
+      <aside className="hidden w-[132px] flex-shrink-0 flex-col items-center border-r border-da-border bg-da-sidebar pt-6 md:flex">
+        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-da-primary text-lg font-bold text-white">
           D
         </div>
-        <span className="mt-2 text-xs font-semibold text-[#A1A8B3]">DonateAI</span>
+        <span className="mt-2 text-xs font-semibold text-da-secondary">DonateAI</span>
       </aside>
 
       {/* Main */}
       <div className="flex flex-1 flex-col">
-        <header className="flex h-12 items-center justify-between border-b border-white/[0.08] bg-[#0B0F14] px-6">
-          <h1 className="text-base font-semibold text-white">Register</h1>
+        <header className="flex h-12 items-center justify-between border-b border-da-border bg-da-bg px-6">
+          <h1 className="text-base font-semibold text-da-text">Register</h1>
           <div className="flex items-center gap-2">
             <Link
               to="/login"
-              className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm text-[#A1A8B3] hover:bg-white/[0.06] hover:text-white transition-colors"
+              className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm text-da-secondary hover:bg-da-border hover:text-da-text transition-colors"
             >
               ↪ Sign in
             </Link>
@@ -88,8 +88,8 @@ export function RegisterPage() {
         </header>
 
         <main className="flex flex-1 items-center justify-center px-4">
-          <div className="w-full max-w-sm rounded-2xl border border-white/[0.08] bg-[#171B22] p-8">
-            <h2 className="mb-6 text-xl font-semibold text-white">Create your account</h2>
+          <div className="w-full max-w-sm rounded-2xl border border-da-border bg-da-card p-8">
+            <h2 className="mb-6 text-xl font-semibold text-da-text">Create your account</h2>
             <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4" noValidate>
               <Input label="Name" autoComplete="name" error={errors.full_name?.message} {...register('full_name')} />
               <Input label="Email" type="email" autoComplete="email" error={errors.email?.message} {...register('email')} />
@@ -103,9 +103,9 @@ export function RegisterPage() {
               )}
               {error && <p className="rounded-lg bg-red-500/10 px-3 py-2 text-sm text-red-400">{error}</p>}
               <Button type="submit" loading={isSubmitting} className="w-full mt-1">Register</Button>
-              <p className="text-center text-sm text-[#A1A8B3]">
+              <p className="text-center text-sm text-da-secondary">
                 Already have an account?{' '}
-                <Link to="/login" className="text-[#1D8CF8] hover:underline">Sign in</Link>
+                <Link to="/login" className="text-da-primary hover:underline">Sign in</Link>
               </p>
             </form>
           </div>

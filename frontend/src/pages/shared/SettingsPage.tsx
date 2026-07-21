@@ -231,7 +231,7 @@ export function SettingsPage() {
 
               <div className="flex flex-col gap-1.5">
                 <label className="text-sm font-medium text-da-secondary">Email</label>
-                <div className="flex h-10 items-center rounded-lg border border-white/10 bg-[#0B0F14]/50 px-3 text-sm text-[#6B7280]">
+                <div className="flex h-10 items-center rounded-lg border border-da-border bg-da-bg px-3 text-sm text-da-muted">
                   {user?.email}
                 </div>
                 <p className="text-xs text-da-muted">Email cannot be changed</p>
@@ -239,12 +239,12 @@ export function SettingsPage() {
 
               <div className="flex flex-col gap-1.5">
                 <label className="text-sm font-medium text-da-secondary">Role</label>
-                <div className="flex h-10 items-center rounded-lg border border-white/10 bg-[#0B0F14]/50 px-3 text-sm text-[#6B7280]">
+                <div className="flex h-10 items-center rounded-lg border border-da-border bg-da-bg px-3 text-sm text-da-muted">
                   {user?.role === 'donor' ? 'Donor' : user?.role === 'ngo' ? 'NGO' : 'Admin'}
                 </div>
               </div>
 
-              <div className="flex justify-end border-t border-white/[0.06] pt-4">
+              <div className="flex justify-end border-t border-da-border pt-4">
                 <Button type="submit" loading={savingAccount}>
                   <Save className="h-4 w-4" />
                   Save Changes

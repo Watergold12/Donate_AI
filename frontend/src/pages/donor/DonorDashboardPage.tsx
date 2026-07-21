@@ -42,12 +42,12 @@ export function DonorDashboardPage() {
         {/* Welcome header */}
         <div className="flex items-end justify-between">
           <div>
-            <p className="text-sm text-[#A1A8B3]">Welcome back</p>
-            <h1 className="mt-0.5 text-2xl font-bold text-white">Hi {firstName}</h1>
+            <p className="text-sm text-da-secondary">Welcome back</p>
+            <h1 className="mt-0.5 text-2xl font-bold text-da-text">Hi {firstName}</h1>
           </div>
           <Link
             to="/donor/camera"
-            className="flex items-center gap-2 rounded-lg bg-[#1D8CF8] px-4 py-2 text-sm font-medium text-white hover:bg-[#3AA0FF] transition-colors"
+            className="flex items-center gap-2 rounded-lg bg-da-primary px-4 py-2 text-sm font-medium text-white hover:bg-da-hover transition-colors"
           >
             <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
@@ -58,44 +58,44 @@ export function DonorDashboardPage() {
 
         {/* Stat cards — 3 across */}
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-          <div className="rounded-xl border border-white/[0.08] bg-[#171B22] p-5">
-            <p className="text-3xl font-bold text-white">{summary?.total_donations ?? 0}</p>
-            <p className="mt-1 text-sm text-[#A1A8B3]">Donations</p>
+          <div className="rounded-xl border border-da-border bg-da-card p-5">
+            <p className="text-3xl font-bold text-da-text">{summary?.total_donations ?? 0}</p>
+            <p className="mt-1 text-sm text-da-secondary">Donations</p>
           </div>
-          <div className="rounded-xl border border-white/[0.08] bg-[#171B22] p-5">
-            <p className="text-3xl font-bold text-white">{summary?.completed_donations ?? 0}</p>
-            <p className="mt-1 text-sm text-[#A1A8B3]">NGOs helped</p>
+          <div className="rounded-xl border border-da-border bg-da-card p-5">
+            <p className="text-3xl font-bold text-da-text">{summary?.completed_donations ?? 0}</p>
+            <p className="mt-1 text-sm text-da-secondary">NGOs helped</p>
           </div>
-          <div className="rounded-xl border border-white/[0.08] bg-[#171B22] p-5">
-            <p className="text-3xl font-bold text-[#1D8CF8]">
+          <div className="rounded-xl border border-da-border bg-da-card p-5">
+            <p className="text-3xl font-bold text-da-primary">
               {summary?.total_donations
                 ? `${Math.round((summary.completed_donations / summary.total_donations) * 100)}%`
                 : '—'}
             </p>
-            <p className="mt-1 text-sm text-[#A1A8B3]">Match accuracy</p>
+            <p className="mt-1 text-sm text-da-secondary">Match accuracy</p>
           </div>
         </div>
 
         {/* Recent activity */}
         <div>
-          <h2 className="mb-3 text-sm font-medium text-[#A1A8B3]">Recent activity</h2>
-          <div className="rounded-xl border border-white/[0.08] bg-[#171B22]">
+          <h2 className="mb-3 text-sm font-medium text-da-secondary">Recent activity</h2>
+          <div className="rounded-xl border border-da-border bg-da-card">
             {donations.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-12 text-center">
-                <p className="text-sm font-medium text-white">No donations yet</p>
-                <p className="mt-1 text-xs text-[#A1A8B3]">Start making a difference by creating your first donation</p>
+                <p className="text-sm font-medium text-da-text">No donations yet</p>
+                <p className="mt-1 text-xs text-da-secondary">Start making a difference by creating your first donation</p>
                 <Link
                   to="/donor/camera"
-                  className="mt-4 rounded-lg bg-[#1D8CF8] px-4 py-2 text-sm font-medium text-white hover:bg-[#3AA0FF] transition-colors"
+                  className="mt-4 rounded-lg bg-da-primary px-4 py-2 text-sm font-medium text-white hover:bg-da-hover transition-colors"
                 >
                   Create Donation
                 </Link>
               </div>
             ) : (
-              <div className="divide-y divide-white/[0.06]">
+              <div className="divide-y divide-da-border">
                 {donations.map(d => (
                   <div key={d.id} className="flex items-center justify-between px-5 py-3.5">
-                    <p className="text-sm text-white">
+                    <p className="text-sm text-da-text">
                       {d.notes
                         ? d.notes
                         : `${d.total_items} item${d.total_items !== 1 ? 's' : ''} donated`}
@@ -105,12 +105,12 @@ export function DonorDashboardPage() {
                       {!['completed', 'cancelled', 'pickup_scheduled', 'collected', 'delivered'].includes(d.status) && (
                         <Link
                           to={`/donor/pickup-schedule?donationId=${d.id}`}
-                          className="rounded-lg bg-[#1D8CF8] px-3 py-1 text-xs font-medium text-white hover:bg-[#3AA0FF] transition-colors"
+                          className="rounded-lg bg-da-primary px-3 py-1 text-xs font-medium text-white hover:bg-da-hover transition-colors"
                         >
                           Schedule Pickup
                         </Link>
                       )}
-                      <span className="text-xs text-[#6B7280]">{formatDate(d.created_at)}</span>
+                      <span className="text-xs text-da-muted">{formatDate(d.created_at)}</span>
                     </div>
                   </div>
                 ))}

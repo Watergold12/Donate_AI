@@ -89,13 +89,13 @@ export function PickupSchedulePage() {
 
         {/* Matches */}
         <Card>
-          <h2 className="mb-4 text-sm font-medium text-[#A1A8B3]">Matched NGOs</h2>
+          <h2 className="mb-4 text-sm font-medium text-da-secondary">Matched NGOs</h2>
           {loading ? (
             <div className="flex items-center justify-center py-8"><Spinner /></div>
           ) : matches.length === 0 ? (
             <div className="py-8 text-center">
-              <p className="text-sm text-white">No matches yet</p>
-              <p className="mt-1 text-xs text-[#A1A8B3]">
+              <p className="text-sm text-da-text">No matches yet</p>
+              <p className="mt-1 text-xs text-da-secondary">
                 The AI matching engine is still finding the best NGO for your donation.
               </p>
               <Button
@@ -122,19 +122,19 @@ export function PickupSchedulePage() {
                   className={[
                     'flex items-center justify-between rounded-xl border p-4 text-left transition-colors',
                     selectedMatch === m.id
-                      ? 'border-[#1D8CF8] bg-[#1D8CF8]/10'
-                      : 'border-white/[0.08] bg-[#0B0F14] hover:border-white/20',
+                      ? 'border-da-primary bg-da-primary/10'
+                      : 'border-da-border bg-da-bg hover:border-da-primary/40',
                   ].join(' ')}
                 >
                   <div className="flex flex-col gap-1">
-                    <p className="text-sm font-medium text-white">NGO Match</p>
-                    <p className="text-xs text-[#A1A8B3]">Match strength: {scoreToPercent(m.score)}</p>
-                    <p className="text-xs text-[#6B7280]">Expires {formatDate(m.expires_at)}</p>
+                    <p className="text-sm font-medium text-da-text">NGO Match</p>
+                    <p className="text-xs text-da-secondary">Match strength: {scoreToPercent(m.score)}</p>
+                    <p className="text-xs text-da-muted">Expires {formatDate(m.expires_at)}</p>
                   </div>
                   <div className="flex flex-col items-end gap-1">
-                    <div className="h-1.5 w-24 overflow-hidden rounded-full bg-white/10">
+                    <div className="h-1.5 w-24 overflow-hidden rounded-full bg-da-border">
                       <div
-                        className="h-1.5 rounded-full bg-[#1D8CF8]"
+                        className="h-1.5 rounded-full bg-da-primary"
                         style={{ width: scoreToPercent(m.score) }}
                       />
                     </div>
@@ -150,49 +150,49 @@ export function PickupSchedulePage() {
 
         {/* Pickup details */}
         <Card className="flex flex-col gap-4">
-          <h2 className="text-sm font-medium text-[#A1A8B3]">Pickup Details</h2>
+          <h2 className="text-sm font-medium text-da-secondary">Pickup Details</h2>
 
           <div className="flex flex-col gap-1.5">
-            <label className="text-sm font-medium text-[#A1A8B3]">Pickup Address</label>
+            <label className="text-sm font-medium text-da-secondary">Pickup Address</label>
             <input
               type="text"
               value={address}
               onChange={e => setAddress(e.target.value)}
               placeholder="e.g. 123 Main Street"
-              className="h-10 w-full rounded-lg border border-white/10 bg-[#0B0F14] px-3 text-sm text-white placeholder:text-[#6B7280] focus:border-[#1D8CF8] focus:outline-none"
+              className="h-10 w-full rounded-lg border border-da-border bg-da-bg px-3 text-sm text-da-text placeholder:text-da-muted focus:border-da-primary focus:outline-none"
             />
           </div>
 
           <div className="flex flex-col gap-1.5">
-            <label className="text-sm font-medium text-[#A1A8B3]">City</label>
+            <label className="text-sm font-medium text-da-secondary">City</label>
             <input
               type="text"
               value={city}
               onChange={e => setCity(e.target.value)}
               placeholder="e.g. Mumbai"
-              className="h-10 w-full rounded-lg border border-white/10 bg-[#0B0F14] px-3 text-sm text-white placeholder:text-[#6B7280] focus:border-[#1D8CF8] focus:outline-none"
+              className="h-10 w-full rounded-lg border border-da-border bg-da-bg px-3 text-sm text-da-text placeholder:text-da-muted focus:border-da-primary focus:outline-none"
             />
           </div>
 
           <div className="flex flex-col gap-1.5">
-            <label className="text-sm font-medium text-[#A1A8B3]">Preferred Pickup Date &amp; Time</label>
+            <label className="text-sm font-medium text-da-secondary">Preferred Pickup Date &amp; Time</label>
             <input
               type="datetime-local"
               value={scheduledAt}
               onChange={e => setScheduledAt(e.target.value)}
               min={new Date().toISOString().slice(0, 16)}
-              className="h-10 w-full rounded-lg border border-white/10 bg-[#0B0F14] px-3 text-sm text-white focus:border-[#1D8CF8] focus:outline-none"
+              className="h-10 w-full rounded-lg border border-da-border bg-da-bg px-3 text-sm text-da-text focus:border-da-primary focus:outline-none"
             />
           </div>
 
           <div className="flex flex-col gap-1.5">
-            <label className="text-sm font-medium text-[#A1A8B3]">Contact Phone (optional)</label>
+            <label className="text-sm font-medium text-da-secondary">Contact Phone (optional)</label>
             <input
               type="tel"
               value={phone}
               onChange={e => setPhone(e.target.value)}
               placeholder="e.g. +91 98765 43210"
-              className="h-10 w-full rounded-lg border border-white/10 bg-[#0B0F14] px-3 text-sm text-white placeholder:text-[#6B7280] focus:border-[#1D8CF8] focus:outline-none"
+              className="h-10 w-full rounded-lg border border-da-border bg-da-bg px-3 text-sm text-da-text placeholder:text-da-muted focus:border-da-primary focus:outline-none"
             />
           </div>
 

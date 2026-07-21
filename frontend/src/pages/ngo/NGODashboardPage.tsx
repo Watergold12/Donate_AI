@@ -63,7 +63,7 @@ export function NGODashboardPage() {
           <StatCard title="Pickups Done"   value={s?.pickups_completed ?? 0} icon={<span>🚚</span>} />
         </div>
         <Card>
-          <h2 className="mb-4 font-semibold text-white">Pending Matches</h2>
+          <h2 className="mb-4 font-semibold text-da-text">Pending Matches</h2>
           {matches.length === 0 ? (
             <EmptyState
               icon={<span className="text-4xl">🤝</span>}
@@ -71,18 +71,18 @@ export function NGODashboardPage() {
               description="Matches appear here when donations match your demands"
             />
           ) : (
-            <div className="flex flex-col divide-y divide-white/[0.06]">
+            <div className="flex flex-col divide-y divide-da-border">
               {matches.map(m => (
                 <div key={m.id} className="flex items-center justify-between py-3">
                   <div className="flex flex-col gap-1">
                     <div className="flex items-center gap-2">
-                      <span className="text-sm font-medium text-white">Score: {scoreToPercent(m.score)}</span>
+                      <span className="text-sm font-medium text-da-text">Score: {scoreToPercent(m.score)}</span>
                       <StatusBadge status={m.status} />
                     </div>
-                    <div className="h-2 w-32 overflow-hidden rounded-full bg-white/10">
-                      <div className="h-2 rounded-full bg-[#1D8CF8]" style={{ width: scoreToPercent(m.score) }} />
+                    <div className="h-2 w-32 overflow-hidden rounded-full bg-da-border">
+                      <div className="h-2 rounded-full bg-da-primary" style={{ width: scoreToPercent(m.score) }} />
                     </div>
-                    <p className="text-xs text-[#6B7280]">Expires {formatDate(m.expires_at)}</p>
+                    <p className="text-xs text-da-muted">Expires {formatDate(m.expires_at)}</p>
                   </div>
                   <div className="flex gap-2">
                     <Button size="sm" loading={acting === m.id} onClick={() => accept(m.id)}>Accept</Button>
