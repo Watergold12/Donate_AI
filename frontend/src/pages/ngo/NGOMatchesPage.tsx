@@ -113,15 +113,28 @@ export function NGOMatchesPage() {
             <div className="divide-y divide-white/[0.06]">
               {matches.map(m => (
                 <div key={m.id} className="flex items-start justify-between px-6 py-4">
-                  <div className="flex flex-col gap-1">
+                  <div className="flex flex-col gap-1.5">
                     <div className="flex items-center gap-2">
-                      <span className="text-sm font-semibold text-white">{scoreToPercent(m.score)}</span>
+                      <span className="text-sm font-semibold text-white">{scoreToPercent(m.score)} Match</span>
                       <StatusBadge status={m.status} />
                     </div>
-                    <div className="h-2 w-28 overflow-hidden rounded-full bg-white/10">
-                      <div className="h-2 rounded-full bg-[#1D8CF8]" style={{ width: scoreToPercent(m.score) }} />
+                    {m.demand_item_name && (
+                      <p className="text-sm font-medium text-white">
+                        Demand: <span className="text-[#1D8CF8]">{m.demand_item_name}</span>
+                      </p>
+                    )}
+                    {m.items_summary && (
+                      <p className="text-xs text-[#A1A8B3]">
+                        Items: <span className="text-gray-200">{m.items_summary}</span>
+                      </p>
+                    )}
+                    {m.donation_notes && (
+                      <p className="text-xs italic text-[#6B7280]">"{m.donation_notes}"</p>
+                    )}
+                    <div className="mt-1 h-1.5 w-28 overflow-hidden rounded-full bg-white/10">
+                      <div className="h-1.5 rounded-full bg-[#1D8CF8]" style={{ width: scoreToPercent(m.score) }} />
                     </div>
-                    <p className="text-xs text-[#6B7280]">Expires {formatDate(m.expires_at)}</p>
+                    <p className="text-[11px] text-[#6B7280]">Expires {formatDate(m.expires_at)}</p>
                   </div>
                   {m.status === 'proposed' && (
                     <div className="flex gap-2">

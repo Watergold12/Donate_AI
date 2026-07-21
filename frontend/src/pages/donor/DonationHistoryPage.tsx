@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react'
+import { Link } from 'react-router-dom'
 import { DashboardLayout } from '../../components/templates/DashboardLayout'
 import { PageHeader } from '../../components/molecules/PageHeader'
 import { StatusBadge } from '../../components/molecules/StatusBadge'
@@ -82,6 +83,15 @@ export function DonationHistoryPage() {
                     </div>
                     <div className="flex items-center gap-3">
                       <StatusBadge status={d.status} />
+                      {!['completed', 'cancelled', 'pickup_scheduled', 'collected', 'delivered'].includes(d.status) && (
+                        <Link
+                          to={`/donor/pickup-schedule?donationId=${d.id}`}
+                          onClick={e => e.stopPropagation()}
+                          className="rounded-lg bg-[#1D8CF8] px-3 py-1.5 text-xs font-medium text-white hover:bg-[#3AA0FF] transition-colors"
+                        >
+                          Schedule Pickup
+                        </Link>
+                      )}
                       <span className="text-gray-400">{expanded === d.id ? '▲' : '▼'}</span>
                     </div>
                   </button>

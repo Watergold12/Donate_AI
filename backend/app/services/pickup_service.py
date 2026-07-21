@@ -34,13 +34,14 @@ VALID_PICKUP_TRANSITIONS = {
 
 def create_pickup(db: Session, user: User, payload: PickupCreate, request=None) -> PickupRequest:
     # Verify match exists and is accepted
-    match = db.query(Match).filter(Match.id == payload.match_id).first()
-    if not match:
-        raise NotFoundError("Match")
-    if match.status not in (MatchStatus.accepted, MatchStatus.proposed):
-        raise BusinessLogicError("Pickup can only be created for active matches")
-    if match.status == MatchStatus.proposed:
-        match.status = MatchStatus.accepted
+    if payload.match_id:
+        match = db.query(Match).filter(Match.id == payload.match_id).first()
+        if not match:
+            raise NotFoundError("Match")
+        if match.status not in (MatchStatus.accepted, MatchStatus.proposed):
+            raise BusinessLogicError("Pickup can only be created for active matches")
+        if match.status == MatchStatus.proposed:
+            match.status = MatchStatus.accepted
 
     # Check no existing pickup for this donation
     existing = db.query(PickupRequest).filter(

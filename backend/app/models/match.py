@@ -28,6 +28,20 @@ class Match(Base, TimestampMixin):
     ngo = relationship("NGOProfile", back_populates="matches")
     pickup = relationship("PickupRequest", back_populates="match", uselist=False)
 
+    @property
+    def donation_notes(self) -> Optional[str]:
+        return self.donation.notes if self.donation else None
+
+    @property
+    def items_summary(self) -> Optional[str]:
+        if not self.donation or not self.donation.items:
+            return None
+        return ", ".join(f"{i.quantity}x {i.item_name}" for i in self.donation.items if i.is_confirmed)
+
+    @property
+    def demand_item_name(self) -> Optional[str]:
+        return self.ngo_demand.item_name if self.ngo_demand else None
+
     __table_args__ = (
         Index("ix_matches_donation_id", "donation_id"),
         Index("ix_matches_ngo_id", "ngo_id"),

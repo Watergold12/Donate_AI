@@ -12,7 +12,7 @@ class PickupRequest(Base, TimestampMixin):
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     donation_id = Column(UUID(as_uuid=True), ForeignKey("donations.id", ondelete="RESTRICT"), nullable=False, unique=True)
     ngo_id = Column(UUID(as_uuid=True), ForeignKey("ngo_profiles.id", ondelete="RESTRICT"), nullable=False)
-    match_id = Column(UUID(as_uuid=True), ForeignKey("matches.id", ondelete="RESTRICT"), nullable=False, unique=True)
+    match_id = Column(UUID(as_uuid=True), ForeignKey("matches.id", ondelete="RESTRICT"), nullable=True, unique=True)
     status = Column(PgEnum(PickupStatus, name="pickup_status", create_type=False), default=PickupStatus.scheduled, nullable=False)
     scheduled_at = Column(DateTime(timezone=True), nullable=False)
     pickup_address = Column(String(500), nullable=False)

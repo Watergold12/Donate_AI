@@ -18,6 +18,9 @@ class MatchResponse(BaseModel):
     responded_at: Optional[datetime] = None
     expires_at: datetime
     rejection_reason: Optional[str] = None
+    donation_notes: Optional[str] = None
+    items_summary: Optional[str] = None
+    demand_item_name: Optional[str] = None
 
 
 class MatchActionRequest(BaseModel):

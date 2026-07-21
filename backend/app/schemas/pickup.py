@@ -9,7 +9,7 @@ from app.models.enums import PickupStatus
 class PickupCreate(BaseModel):
     donation_id: UUID
     ngo_id: UUID
-    match_id: UUID
+    match_id: Optional[UUID] = None
     scheduled_at: datetime
     pickup_address: str
     pickup_city: str
@@ -34,7 +34,7 @@ class PickupResponse(BaseModel):
     id: UUID
     donation_id: UUID
     ngo_id: UUID
-    match_id: UUID
+    match_id: Optional[UUID] = None
     status: PickupStatus
     scheduled_at: datetime
     pickup_address: str

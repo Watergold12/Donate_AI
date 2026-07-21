@@ -4,7 +4,7 @@ import type { APIResponse, PaginatedAPIResponse, Pickup, PickupStatus } from '..
 interface CreatePickupPayload {
   donation_id: string
   ngo_id: string
-  match_id: string
+  match_id?: string
   scheduled_at: string
   pickup_address: string
   pickup_city: string

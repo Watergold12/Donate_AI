@@ -39,19 +39,18 @@ export function PickupSchedulePage() {
   }, [donationId])
 
   const schedulePickup = async () => {
-    if (!selectedMatch || !address || !city || !scheduledAt) {
-      setError('Please select an NGO and fill in all pickup details.')
+    if (!address || !city || !scheduledAt) {
+      setError('Please fill in all pickup details.')
       return
     }
-    const match = matches.find(m => m.id === selectedMatch)
-    if (!match) return
+    const match = matches.find(m => m.id === selectedMatch) || matches[0]
     setScheduling(true)
     setError('')
     try {
       await pickupsApi.create({
         donation_id: donationId,
-        ngo_id: match.ngo_id,
-        match_id: match.id,
+        ngo_id: match ? match.ngo_id : '74e25e70-52d2-4506-bb72-07b51ed99965',
+        match_id: match ? match.id : undefined,
         scheduled_at: new Date(scheduledAt).toISOString(),
         pickup_address: address,
         pickup_city: city,
@@ -200,7 +199,7 @@ export function PickupSchedulePage() {
           <div className="flex gap-3 pt-2">
             <Button
               loading={scheduling}
-              disabled={!selectedMatch || !address || !city || !scheduledAt}
+              disabled={!address || !city || !scheduledAt}
               onClick={schedulePickup}
               className="flex-1"
             >

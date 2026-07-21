@@ -102,6 +102,14 @@ export function DonorDashboardPage() {
                     </p>
                     <div className="flex items-center gap-3">
                       <StatusBadge status={d.status} />
+                      {!['completed', 'cancelled', 'pickup_scheduled', 'collected', 'delivered'].includes(d.status) && (
+                        <Link
+                          to={`/donor/pickup-schedule?donationId=${d.id}`}
+                          className="rounded-lg bg-[#1D8CF8] px-3 py-1 text-xs font-medium text-white hover:bg-[#3AA0FF] transition-colors"
+                        >
+                          Schedule Pickup
+                        </Link>
+                      )}
                       <span className="text-xs text-[#6B7280]">{formatDate(d.created_at)}</span>
                     </div>
                   </div>

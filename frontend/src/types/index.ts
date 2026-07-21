@@ -140,6 +140,9 @@ export interface Match {
   responded_at: string | null
   expires_at: string
   rejection_reason: string | null
+  donation_notes?: string | null
+  items_summary?: string | null
+  demand_item_name?: string | null
 }
 
 // ── Pickup ─────────────────────────────────────────────────────────────────
