@@ -21,11 +21,7 @@ class APIResponse(BaseModel, Generic[T]):
         return cls(success=False, data=data, message=message)
 
 
-class PaginationMeta(BaseModel):
-    page: int
-    size: int
-    total: int
-    pages: int
+from app.utils.pagination import PaginationMeta
 
 
 class PaginatedAPIResponse(BaseModel, Generic[T]):

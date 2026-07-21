@@ -60,28 +60,40 @@ export function NGODemandsPage() {
     setLoading(true)
     ngosApi.listDemands(page, 20)
       .then(r => {
-        setDemands(r.data.data)
-        setPages(r.data.pagination.pages)
-        setTotal(r.data.pagination.total)
+        setDemands(r.data.data ?? [])
+        setPages(r.data.pagination?.pages ?? 1)
+        setTotal(r.data.pagination?.total ?? 0)
       })
-      .catch(() => null)
+      .catch(err => {
+        toast.error(getApiError(err))
+      })
       .finally(() => setLoading(false))
-  }, [page])
+  }, [page, toast])
 
   useEffect(() => { load() }, [load])
 
   const onSubmit = async (data: FormData) => {
     setSubmitting(true)
     try {
-      await ngosApi.createDemand({
+      const res = await ngosApi.createDemand({
         item_name: data.item_name,
         item_category: data.item_category as ItemCategory,
         quantity_needed: data.quantity_needed,
         urgency_level: data.urgency_level as DemandUrgency,
         description: data.description,
       })
-      reset(); setShowModal(false); setPage(1); load()
+      reset()
+      setShowModal(false)
       toast.success('Demand created')
+      if (res.data.data) {
+        setDemands(prev => [res.data.data, ...prev])
+        setTotal(prev => prev + 1)
+      }
+      if (page === 1) {
+        load()
+      } else {
+        setPage(1)
+      }
     } catch (err: unknown) {
       toast.error(getApiError(err))
     } finally {
