@@ -21,7 +21,7 @@ class NGOProfile(Base, TimestampMixin):
     description = Column(Text, nullable=True)
     service_areas = Column(ARRAY(String), nullable=True, default=list)
     verification_doc_path = Column(String(500), nullable=True)
-    is_verified = Column(Boolean, default=False, nullable=False)
+    is_verified = Column(Boolean, default=True, nullable=False)
     verified_by = Column(UUID(as_uuid=True), ForeignKey("users.id", ondelete="SET NULL"), nullable=True)
     verified_at = Column(DateTime(timezone=True), nullable=True)
 

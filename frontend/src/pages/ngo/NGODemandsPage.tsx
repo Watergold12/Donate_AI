@@ -17,7 +17,7 @@ import { Spinner } from '../../components/atoms/Spinner'
 import { ngosApi } from '../../api/ngos'
 import { useToast } from '../../store/ToastProvider'
 import type { NGODemand, ItemCategory, DemandUrgency } from '../../types/index'
-import { capitalize, formatDate } from '../../utils/index'
+import { capitalize, formatDate, getApiError } from '../../utils/index'
 
 const CATEGORY_OPTIONS = [
   { value: 'clothing', label: 'Clothing' }, { value: 'food', label: 'Food' },
@@ -82,8 +82,11 @@ export function NGODemandsPage() {
       })
       reset(); setShowModal(false); setPage(1); load()
       toast.success('Demand created')
-    } catch { toast.error('Failed to create demand') }
-    finally { setSubmitting(false) }
+    } catch (err: unknown) {
+      toast.error(getApiError(err))
+    } finally {
+      setSubmitting(false)
+    }
   }
 
   function deleteDemand(id: string) {

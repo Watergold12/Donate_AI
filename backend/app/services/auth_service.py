@@ -43,7 +43,7 @@ def register_user(db: Session, payload: RegisterRequest, request=None) -> User:
             user_id=user.id,
             org_name=payload.org_name,
             registration_number=payload.registration_number,
-            is_verified=False,
+            is_verified=True,
         ))
     log_action(db, AuditAction.CREATE, "user", user.id, request=request,
                new_data={"email": user.email, "role": user.role})
