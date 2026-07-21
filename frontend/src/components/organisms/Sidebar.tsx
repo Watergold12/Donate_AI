@@ -47,7 +47,7 @@ export function Sidebar({ role, collapsed = false }: SidebarProps) {
   return (
     <aside
       className={cn(
-        'flex h-screen flex-col bg-da-sidebar border-r border-white/[0.08] transition-all duration-200',
+        'flex h-screen flex-col bg-da-sidebar border-r border-da-border transition-all duration-200',
         collapsed ? 'w-16' : 'w-[132px]',
       )}
     >
@@ -57,7 +57,7 @@ export function Sidebar({ role, collapsed = false }: SidebarProps) {
           D
         </div>
         {!collapsed && (
-          <span className="text-sm font-semibold text-white">DonateAI</span>
+          <span className="text-sm font-semibold text-da-text">DonateAI</span>
         )}
       </div>
 
@@ -75,7 +75,7 @@ export function Sidebar({ role, collapsed = false }: SidebarProps) {
                     'flex items-center gap-2.5 rounded-lg px-3 py-2 text-xs font-medium transition-colors duration-150',
                     isActive
                       ? 'bg-da-primary text-white'
-                      : 'text-da-secondary hover:bg-white/[0.06] hover:text-white',
+                      : 'text-da-secondary hover:bg-da-border hover:text-da-text',
                     collapsed && 'justify-center px-2',
                   )}
                 >

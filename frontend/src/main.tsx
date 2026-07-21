@@ -5,7 +5,10 @@ import App from './App.tsx'
 import { AuthProvider } from './store/AuthProvider'
 import { ToastProvider } from './store/ToastProvider'
 
-document.documentElement.classList.add('dark')
+const savedTheme = localStorage.getItem('theme') ?? 'dark'
+document.documentElement.classList.remove('light', 'dark')
+document.documentElement.classList.add(savedTheme)
+
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <AuthProvider>

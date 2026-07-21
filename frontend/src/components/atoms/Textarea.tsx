@@ -13,7 +13,7 @@ export const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
         <textarea
           ref={ref} id={taId} rows={4}
           className={cn(
-            'w-full resize-y rounded-lg border border-white/10 bg-[#0B0F14] px-3 py-2 text-sm text-white placeholder:text-da-muted',
+            'w-full resize-y rounded-lg border border-da-border bg-da-bg px-3 py-2 text-sm text-da-text placeholder:text-da-muted',
             'focus:border-da-primary focus:outline-none focus:ring-2 focus:ring-da-primary/20',
             error && 'border-da-danger', className,
           )}

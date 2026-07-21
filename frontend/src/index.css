@@ -1,26 +1,55 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 @import "tailwindcss";
 
+:root {
+  --da-bg:        #F8FAFC;
+  --da-card:      #FFFFFF;
+  --da-sidebar:   #F1F5F9;
+  --da-primary:   #1D8CF8;
+  --da-hover:     #3AA0FF;
+  --da-success:   #22C55E;
+  --da-danger:    #EF4444;
+  --da-warning:   #F59E0B;
+  --da-text:      #0F172A;
+  --da-secondary: #475569;
+  --da-muted:     #94A3B8;
+  --da-border:    rgba(0, 0, 0, 0.08);
+  color-scheme: light;
+}
+
+html.dark {
+  --da-bg:        #0B0F14;
+  --da-card:      #171B22;
+  --da-sidebar:   #11161D;
+  --da-primary:   #1D8CF8;
+  --da-hover:     #3AA0FF;
+  --da-success:   #22C55E;
+  --da-danger:    #EF4444;
+  --da-warning:   #F59E0B;
+  --da-text:      #FFFFFF;
+  --da-secondary: #A1A8B3;
+  --da-muted:     #6B7280;
+  --da-border:    rgba(255, 255, 255, 0.08);
+  color-scheme: dark;
+}
+
 @theme {
-  --color-da-bg:        #0B0F14;
-  --color-da-card:      #171B22;
-  --color-da-sidebar:   #11161D;
-  --color-da-primary:   #1D8CF8;
-  --color-da-hover:     #3AA0FF;
-  --color-da-success:   #22C55E;
-  --color-da-danger:    #EF4444;
-  --color-da-warning:   #F59E0B;
-  --color-da-text:      #FFFFFF;
-  --color-da-secondary: #A1A8B3;
-  --color-da-muted:     #6B7280;
+  --color-da-bg:        var(--da-bg);
+  --color-da-card:      var(--da-card);
+  --color-da-sidebar:   var(--da-sidebar);
+  --color-da-primary:   var(--da-primary);
+  --color-da-hover:     var(--da-hover);
+  --color-da-success:   var(--da-success);
+  --color-da-danger:    var(--da-danger);
+  --color-da-warning:   var(--da-warning);
+  --color-da-text:      var(--da-text);
+  --color-da-secondary: var(--da-secondary);
+  --color-da-muted:     var(--da-muted);
+  --color-da-border:    var(--da-border);
   --font-family-sans:   'Inter', system-ui, sans-serif;
 }
 
 @layer base {
-  :root {
-    color-scheme: dark;
-  }
-
   * {
     box-sizing: border-box;
   }
@@ -29,11 +58,12 @@
     margin: 0;
     width: 100%;
     min-height: 100vh;
-    background-color: #0B0F14;
-    color: #FFFFFF;
+    background-color: var(--da-bg);
+    color: var(--da-text);
     font-family: 'Inter', system-ui, sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    transition: background-color 0.2s ease, color 0.2s ease;
   }
 }
 

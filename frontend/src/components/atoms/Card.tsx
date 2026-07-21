@@ -12,7 +12,7 @@ export function Card({ children, padding = 'md', className, ...props }: CardProp
   return (
     <div
       className={cn(
-        'rounded-xl border border-white/[0.08] bg-da-card',
+        'rounded-xl border border-da-border bg-da-card',
         paddings[padding],
         className,
       )}

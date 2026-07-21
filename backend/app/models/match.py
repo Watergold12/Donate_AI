@@ -1,4 +1,5 @@
 import uuid
+from typing import Optional
 from sqlalchemy import (
     CheckConstraint, Column, DateTime, Enum as PgEnum,
     Float, ForeignKey, Index, Text,
