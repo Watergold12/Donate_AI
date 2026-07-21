@@ -41,7 +41,7 @@ def _pagination_meta(page: int, size: int, total: int) -> PaginationMeta:
 def create_pickup(
     payload: PickupCreate,
     request: Request,
-    current_user: Annotated[User, Depends(require_ngo)],
+    current_user: Annotated[User, Depends(get_current_active_user)],
     db: Annotated[Session, Depends(get_db)],
 ):
     pickup = pickup_service.create_pickup(db, current_user, payload, request)

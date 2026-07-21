@@ -9,7 +9,7 @@ import { EmptyState } from '../../components/molecules/EmptyState'
 import { donationsApi } from '../../api/donations'
 import { pickupsApi } from '../../api/pickups'
 import type { Match } from '../../types/index'
-import { scoreToPercent, formatDate } from '../../utils/index'
+import { scoreToPercent, formatDate, getApiError } from '../../utils/index'
 import { useAuthContext } from '../../store/authStore'
 import { useToast } from '../../store/ToastProvider'
 
@@ -59,9 +59,10 @@ export function PickupSchedulePage() {
       })
       toast.success('Pickup scheduled successfully!')
       navigate('/donor/pickups')
-    } catch {
-      setError('Failed to schedule pickup. Please try again.')
-      toast.error('Failed to schedule pickup')
+    } catch (err: unknown) {
+      const msg = getApiError(err)
+      setError(msg)
+      toast.error(msg)
     } finally {
       setScheduling(false)
     }
