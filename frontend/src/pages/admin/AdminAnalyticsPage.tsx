@@ -60,14 +60,14 @@ export function AdminAnalyticsPage() {
 
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
           <Card>
-            <h2 className="mb-4 font-semibold text-white">Donation Trend (30 days)</h2>
-            {trend.length === 0 ? <p className="py-8 text-center text-sm text-[#A1A8B3]">No data yet</p> : (
+            <h2 className="mb-4 font-semibold text-da-text">Donation Trend (30 days)</h2>
+            {trend.length === 0 ? <p className="py-8 text-center text-sm text-da-muted">No data yet</p> : (
               <ResponsiveContainer width="100%" height={220}>
                 <AreaChart data={trend} margin={{ top: 4, right: 8, bottom: 4, left: 0 }}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#2d3748" />
-                  <XAxis dataKey="date" tick={{ fontSize: 11 }} />
-                  <YAxis tick={{ fontSize: 11 }} allowDecimals={false} />
-                  <Tooltip />
+                  <CartesianGrid strokeDasharray="3 3" stroke="var(--da-border)" />
+                  <XAxis dataKey="date" tick={{ fontSize: 11, fill: 'var(--da-muted)' }} />
+                  <YAxis tick={{ fontSize: 11, fill: 'var(--da-muted)' }} allowDecimals={false} />
+                  <Tooltip contentStyle={{ backgroundColor: 'var(--da-card)', borderColor: 'var(--da-border)', color: 'var(--da-text)' }} />
                   <Area type="monotone" dataKey="count" stroke="#1D8CF8" fill="rgba(29,140,248,0.15)" name="Donations" />
                 </AreaChart>
               </ResponsiveContainer>
@@ -75,14 +75,14 @@ export function AdminAnalyticsPage() {
           </Card>
 
           <Card>
-            <h2 className="mb-4 font-semibold text-white">Items by Category</h2>
-            {categories.length === 0 ? <p className="py-8 text-center text-sm text-[#A1A8B3]">No data yet</p> : (
+            <h2 className="mb-4 font-semibold text-da-text">Items by Category</h2>
+            {categories.length === 0 ? <p className="py-8 text-center text-sm text-da-muted">No data yet</p> : (
               <ResponsiveContainer width="100%" height={220}>
                 <BarChart data={categories.map(c => ({ ...c, category: capitalize(c.category) }))} margin={{ top: 4, right: 8, bottom: 4, left: 0 }}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#2d3748" />
-                  <XAxis dataKey="category" tick={{ fontSize: 11 }} />
-                  <YAxis tick={{ fontSize: 11 }} allowDecimals={false} />
-                  <Tooltip />
+                  <CartesianGrid strokeDasharray="3 3" stroke="var(--da-border)" />
+                  <XAxis dataKey="category" tick={{ fontSize: 11, fill: 'var(--da-muted)' }} />
+                  <YAxis tick={{ fontSize: 11, fill: 'var(--da-muted)' }} allowDecimals={false} />
+                  <Tooltip contentStyle={{ backgroundColor: 'var(--da-card)', borderColor: 'var(--da-border)', color: 'var(--da-text)' }} />
                   <Bar dataKey="count" fill="#1D8CF8" name="Items" radius={[4, 4, 0, 0]} />
                 </BarChart>
               </ResponsiveContainer>
@@ -90,14 +90,14 @@ export function AdminAnalyticsPage() {
           </Card>
 
           <Card>
-            <h2 className="mb-4 font-semibold text-white">Match Acceptance Rate (30 days)</h2>
-            {matchRate.length === 0 ? <p className="py-8 text-center text-sm text-[#A1A8B3]">No data yet</p> : (
+            <h2 className="mb-4 font-semibold text-da-text">Match Acceptance Rate (30 days)</h2>
+            {matchRate.length === 0 ? <p className="py-8 text-center text-sm text-da-muted">No data yet</p> : (
               <ResponsiveContainer width="100%" height={220}>
                 <LineChart data={matchRate} margin={{ top: 4, right: 8, bottom: 4, left: 0 }}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#2d3748" />
-                  <XAxis dataKey="date" tick={{ fontSize: 11 }} />
-                  <YAxis tick={{ fontSize: 11 }} allowDecimals={false} unit="%" />
-                  <Tooltip />
+                  <CartesianGrid strokeDasharray="3 3" stroke="var(--da-border)" />
+                  <XAxis dataKey="date" tick={{ fontSize: 11, fill: 'var(--da-muted)' }} />
+                  <YAxis tick={{ fontSize: 11, fill: 'var(--da-muted)' }} allowDecimals={false} unit="%" />
+                  <Tooltip contentStyle={{ backgroundColor: 'var(--da-card)', borderColor: 'var(--da-border)', color: 'var(--da-text)' }} />
                   <Line type="monotone" dataKey="rate" stroke="#1D8CF8" strokeWidth={2} dot={false} name="Rate %" />
                 </LineChart>
               </ResponsiveContainer>
@@ -105,7 +105,7 @@ export function AdminAnalyticsPage() {
           </Card>
 
           <Card>
-            <h2 className="mb-4 font-semibold text-white">Pickup Statistics</h2>
+            <h2 className="mb-4 font-semibold text-da-text">Pickup Statistics</h2>
             <div className="grid grid-cols-3 gap-4">
               <StatCard title="Scheduled"   value={p?.total_scheduled ?? 0} />
               <StatCard title="Completed"   value={p?.completed        ?? 0} />

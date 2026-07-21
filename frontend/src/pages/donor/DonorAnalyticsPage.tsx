@@ -55,18 +55,18 @@ export function DonorAnalyticsPage() {
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
           {/* Donation trend line chart */}
           <Card>
-            <h2 className="mb-4 font-semibold text-white">
+            <h2 className="mb-4 font-semibold text-da-text">
               Donation Trend (30 days)
             </h2>
             {trend.length === 0 ? (
-              <p className="py-8 text-center text-sm text-[#A1A8B3]">No trend data yet</p>
+              <p className="py-8 text-center text-sm text-da-muted">No trend data yet</p>
             ) : (
               <ResponsiveContainer width="100%" height={220}>
                 <LineChart data={trend} margin={{ top: 4, right: 8, bottom: 4, left: 0 }}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#2d3748" />
-                  <XAxis dataKey="date" tick={{ fontSize: 11 }} />
-                  <YAxis tick={{ fontSize: 11 }} allowDecimals={false} />
-                  <Tooltip />
+                  <CartesianGrid strokeDasharray="3 3" stroke="var(--da-border)" />
+                  <XAxis dataKey="date" tick={{ fontSize: 11, fill: 'var(--da-muted)' }} />
+                  <YAxis tick={{ fontSize: 11, fill: 'var(--da-muted)' }} allowDecimals={false} />
+                  <Tooltip contentStyle={{ backgroundColor: 'var(--da-card)', borderColor: 'var(--da-border)', color: 'var(--da-text)' }} />
                   <Line type="monotone" dataKey="count" stroke="#1D8CF8" strokeWidth={2} dot={false} name="Donations" />
                 </LineChart>
               </ResponsiveContainer>
@@ -75,21 +75,21 @@ export function DonorAnalyticsPage() {
 
           {/* Category breakdown bar chart */}
           <Card>
-            <h2 className="mb-4 font-semibold text-white">
+            <h2 className="mb-4 font-semibold text-da-text">
               Items by Category
             </h2>
             {categories.length === 0 ? (
-              <p className="py-8 text-center text-sm text-[#A1A8B3]">No category data yet</p>
+              <p className="py-8 text-center text-sm text-da-muted">No category data yet</p>
             ) : (
               <ResponsiveContainer width="100%" height={220}>
                 <BarChart
                   data={categories.map(c => ({ ...c, category: capitalize(c.category) }))}
                   margin={{ top: 4, right: 8, bottom: 4, left: 0 }}
                 >
-                  <CartesianGrid strokeDasharray="3 3" stroke="#2d3748" />
-                  <XAxis dataKey="category" tick={{ fontSize: 11 }} />
-                  <YAxis tick={{ fontSize: 11 }} allowDecimals={false} />
-                  <Tooltip />
+                  <CartesianGrid strokeDasharray="3 3" stroke="var(--da-border)" />
+                  <XAxis dataKey="category" tick={{ fontSize: 11, fill: 'var(--da-muted)' }} />
+                  <YAxis tick={{ fontSize: 11, fill: 'var(--da-muted)' }} allowDecimals={false} />
+                  <Tooltip contentStyle={{ backgroundColor: 'var(--da-card)', borderColor: 'var(--da-border)', color: 'var(--da-text)' }} />
                   <Bar dataKey="count" fill="#1D8CF8" name="Items" radius={[4, 4, 0, 0]} />
                 </BarChart>
               </ResponsiveContainer>

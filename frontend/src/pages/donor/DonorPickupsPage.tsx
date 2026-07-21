@@ -53,7 +53,7 @@ function PipelineTimeline({ status }: { status: PickupStatus }) {
               </div>
               <span className={[
                 'text-[9px] text-center leading-tight',
-                done || active ? 'text-white' : 'text-[#6B7280]',
+                done || active ? 'text-da-text' : 'text-da-muted',
               ].join(' ')}>
                 {step.label}
               </span>
@@ -61,7 +61,7 @@ function PipelineTimeline({ status }: { status: PickupStatus }) {
             {i < PIPELINE.length - 1 && (
               <div className={[
                 'h-0.5 w-6 mb-4 flex-shrink-0',
-                i < cur ? 'bg-[#22C55E]' : 'bg-white/10',
+                i < cur ? 'bg-[#22C55E]' : 'bg-da-border',
               ].join(' ')} />
             )}
           </div>
@@ -112,7 +112,7 @@ export function DonorPickupsPage() {
               />
             </div>
           ) : (
-            <div className="divide-y divide-white/[0.06]">
+            <div className="divide-y divide-da-border">
               {pickups.map(p => (
                 <div key={p.id} className="px-6 py-4">
                   <button
@@ -120,16 +120,16 @@ export function DonorPickupsPage() {
                     onClick={() => setExpanded(expanded === p.id ? null : p.id)}
                   >
                     <div className="flex min-w-0 flex-col gap-1">
-                      <p className="truncate text-sm font-medium text-white">{p.pickup_address}</p>
-                      <p className="text-xs text-[#A1A8B3]">{p.pickup_city}</p>
-                      <p className="text-xs text-[#6B7280]">{formatDateTime(p.scheduled_at)}</p>
+                      <p className="truncate text-sm font-medium text-da-text">{p.pickup_address}</p>
+                      <p className="text-xs text-da-secondary">{p.pickup_city}</p>
+                      <p className="text-xs text-da-muted">{formatDateTime(p.scheduled_at)}</p>
                       {p.contact_phone && (
-                        <p className="text-xs text-[#A1A8B3]">📞 {p.contact_phone}</p>
+                        <p className="text-xs text-da-secondary">📞 {p.contact_phone}</p>
                       )}
                     </div>
                     <div className="flex flex-shrink-0 items-center gap-2 pt-0.5">
                       <StatusBadge status={p.status} />
-                      <span className="text-xs text-[#6B7280]">{expanded === p.id ? '▲' : '▼'}</span>
+                      <span className="text-xs text-da-muted">{expanded === p.id ? '▲' : '▼'}</span>
                     </div>
                   </button>
 
@@ -137,12 +137,12 @@ export function DonorPickupsPage() {
                     <div className="mt-3">
                       <PipelineTimeline status={p.status} />
                       {p.completed_at && (
-                        <p className="mt-2 text-xs text-[#6B7280]">
+                        <p className="mt-2 text-xs text-da-muted">
                           Completed: {formatDateTime(p.completed_at)}
                         </p>
                       )}
                       {p.notes && (
-                        <p className="mt-1 text-xs text-[#A1A8B3]">Note: {p.notes}</p>
+                        <p className="mt-1 text-xs text-da-secondary">Note: {p.notes}</p>
                       )}
                     </div>
                   )}
@@ -150,7 +150,7 @@ export function DonorPickupsPage() {
               ))}
             </div>
           )}
-          <div className="border-t border-white/[0.08] px-6">
+          <div className="border-t border-da-border px-6">
             <Pagination page={page} pages={pages} total={total} onPageChange={setPage} />
           </div>
         </Card>

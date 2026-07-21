@@ -106,8 +106,8 @@ export function DonationPage() {
       <DashboardLayout>
         <div className="flex flex-col items-center justify-center gap-4 py-24 text-center">
           <span className="text-6xl">🎉</span>
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Donation submitted!</h1>
-          <p className="text-gray-500">Our AI matching engine is finding the best NGO for your items.</p>
+          <h1 className="text-2xl font-bold text-da-text">Donation submitted!</h1>
+          <p className="text-da-secondary">Our AI matching engine is finding the best NGO for your items.</p>
           <Button onClick={() => navigate('/donor')}>Back to Dashboard</Button>
         </div>
       </DashboardLayout>
@@ -121,7 +121,7 @@ export function DonationPage() {
           title={step === 'create' ? 'New Donation' : 'Manage Items'}
           subtitle={step === 'create' ? 'Describe your donation' : `${donation?.total_items ?? 0} item(s) added`}
         />
-        {error && <p className="mt-4 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-600 dark:bg-red-900/20">{error}</p>}
+        {error && <p className="mt-4 rounded-lg bg-red-500/10 px-3 py-2 text-sm text-red-400">{error}</p>}
 
         {step === 'create' && (
           <Card className="mt-6 flex flex-col gap-4">
@@ -137,17 +137,17 @@ export function DonationPage() {
           <div className="mt-6 flex flex-col gap-4">
             <Card>
               <div className="mb-4 flex items-center justify-between">
-                <h2 className="font-semibold text-gray-900 dark:text-white">Items ({donation.total_items})</h2>
+                <h2 className="font-semibold text-da-text">Items ({donation.total_items})</h2>
                 <Button size="sm" onClick={() => setShowModal(true)}>+ Add Item</Button>
               </div>
               {donation.items.filter(i => i.is_confirmed).length === 0 ? (
-                <p className="text-sm text-gray-500">No items yet — click Add Item to start.</p>
+                <p className="text-sm text-da-muted">No items yet — click Add Item to start.</p>
               ) : (
                 <div className="flex flex-col gap-2">
                   {donation.items.filter(i => i.is_confirmed).map(item => (
-                    <div key={item.id} className="flex items-center justify-between rounded-lg border border-gray-100 p-3 dark:border-gray-800">
+                    <div key={item.id} className="flex items-center justify-between rounded-lg border border-da-border p-3">
                       <div className="flex flex-col gap-1">
-                        <span className="text-sm font-medium text-gray-900 dark:text-white">{item.item_name}</span>
+                        <span className="text-sm font-medium text-da-text">{item.item_name}</span>
                         <div className="flex gap-2">
                           <Badge variant="info">{capitalize(item.category)}</Badge>
                           <Badge variant="default">×{item.quantity}</Badge>

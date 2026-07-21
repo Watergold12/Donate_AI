@@ -50,23 +50,23 @@ export function NGOAnalyticsPage() {
         </div>
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
           <Card>
-            <h2 className="mb-4 font-semibold text-white">Match Acceptance Rate (30 days)</h2>
+            <h2 className="mb-4 font-semibold text-da-text">Match Acceptance Rate (30 days)</h2>
             {matchRate.length === 0 ? (
-              <p className="py-8 text-center text-sm text-gray-500">No data yet</p>
+              <p className="py-8 text-center text-sm text-da-muted">No data yet</p>
             ) : (
               <ResponsiveContainer width="100%" height={220}>
                 <LineChart data={matchRate} margin={{ top: 4, right: 8, bottom: 4, left: 0 }}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-                  <XAxis dataKey="date" tick={{ fontSize: 11 }} />
-                  <YAxis tick={{ fontSize: 11 }} unit="%" allowDecimals={false} />
-                  <Tooltip />
+                  <CartesianGrid strokeDasharray="3 3" stroke="var(--da-border)" />
+                  <XAxis dataKey="date" tick={{ fontSize: 11, fill: 'var(--da-muted)' }} />
+                  <YAxis tick={{ fontSize: 11, fill: 'var(--da-muted)' }} unit="%" allowDecimals={false} />
+                  <Tooltip contentStyle={{ backgroundColor: 'var(--da-card)', borderColor: 'var(--da-border)', color: 'var(--da-text)' }} />
                   <Line type="monotone" dataKey="rate" stroke="#22c55e" strokeWidth={2} dot={false} name="Rate %" />
                 </LineChart>
               </ResponsiveContainer>
             )}
           </Card>
           <Card>
-            <h2 className="mb-4 font-semibold text-gray-900 dark:text-white">Pickup Statistics</h2>
+            <h2 className="mb-4 font-semibold text-da-text">Pickup Statistics</h2>
             <div className="grid grid-cols-3 gap-4">
               <StatCard title="Scheduled"  value={p?.total_scheduled ?? 0} />
               <StatCard title="Completed"  value={p?.completed ?? 0} />

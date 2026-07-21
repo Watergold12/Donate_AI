@@ -69,16 +69,16 @@ export function AdminNGOsPage() {
               />
             </div>
           ) : (
-            <div className="divide-y divide-gray-100 dark:divide-gray-800">
+            <div className="divide-y divide-da-border">
               {ngos.map(ngo => (
                 <div key={ngo.id} className="flex items-start justify-between px-6 py-4">
                   <div className="flex flex-col gap-1">
-                    <p className="text-sm font-semibold text-gray-900 dark:text-white">{ngo.org_name}</p>
-                    <p className="text-xs text-gray-500 dark:text-gray-400">Reg: {ngo.registration_number}</p>
+                    <p className="text-sm font-semibold text-da-text">{ngo.org_name}</p>
+                    <p className="text-xs text-da-secondary">Reg: {ngo.registration_number}</p>
                     {(ngo.city ?? ngo.state) && (
-                      <p className="text-xs text-gray-400">{[ngo.city, ngo.state].filter(Boolean).join(', ')}</p>
+                      <p className="text-xs text-da-muted">{[ngo.city, ngo.state].filter(Boolean).join(', ')}</p>
                     )}
-                    <p className="text-xs text-gray-400">Applied {ngo.created_at ? formatDate(ngo.created_at) : '—'}</p>
+                    <p className="text-xs text-da-muted">Applied {ngo.created_at ? formatDate(ngo.created_at) : '—'}</p>
                   </div>
                   <div className="flex gap-2">
                     <Button size="sm" loading={actioning === ngo.id} onClick={() => approve(ngo.id)}>Approve</Button>
@@ -88,7 +88,7 @@ export function AdminNGOsPage() {
               ))}
             </div>
           )}
-          <div className="border-t border-gray-100 px-6 dark:border-gray-800">
+          <div className="border-t border-da-border px-6">
             <Pagination page={page} pages={pages} total={total} onPageChange={setPage} />
           </div>
         </Card>

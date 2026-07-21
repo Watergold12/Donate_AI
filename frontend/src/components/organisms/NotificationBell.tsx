@@ -42,18 +42,18 @@ export function NotificationBell() {
         {count > 0 && <span className="absolute right-1 top-1 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-xs font-bold text-white">{count > 9 ? '9+' : count}</span>}
       </button>
       {open && (
-        <div className="absolute right-0 top-full z-50 mt-2 w-80 rounded-xl border border-gray-200 bg-white shadow-lg dark:border-gray-800 dark:bg-gray-900">
-          <div className="flex items-center justify-between border-b border-gray-100 px-4 py-3 dark:border-gray-800">
-            <p className="font-semibold text-gray-900 dark:text-white">Notifications</p>
+        <div className="absolute right-0 top-full z-50 mt-2 w-80 rounded-xl border border-da-border bg-da-card shadow-lg">
+          <div className="flex items-center justify-between border-b border-da-border px-4 py-3">
+            <p className="font-semibold text-da-text">Notifications</p>
             {count > 0 && <button onClick={markAll} className="text-xs text-green-600 hover:underline">Mark all read</button>}
           </div>
           <ul className="max-h-72 overflow-y-auto">
-            {items.length === 0 && <li className="px-4 py-6 text-center text-sm text-gray-500">No notifications</li>}
+            {items.length === 0 && <li className="px-4 py-6 text-center text-sm text-da-muted">No notifications</li>}
             {items.map(n => (
-              <li key={n.id} className={cn('cursor-pointer px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-800', !n.is_read && 'bg-green-50 dark:bg-green-900/10')} onClick={() => !n.is_read && markRead(n.id)}>
-                <p className="text-sm font-medium text-gray-900 dark:text-white">{n.title}</p>
-                <p className="text-xs text-gray-500 dark:text-gray-400">{n.message}</p>
-                <p className="mt-1 text-xs text-gray-400">{formatDateTime(n.created_at)}</p>
+              <li key={n.id} className={cn('cursor-pointer px-4 py-3 hover:bg-da-border/30 transition-colors', !n.is_read && 'bg-green-500/10')} onClick={() => !n.is_read && markRead(n.id)}>
+                <p className="text-sm font-medium text-da-text">{n.title}</p>
+                <p className="text-xs text-da-secondary">{n.message}</p>
+                <p className="mt-1 text-xs text-da-muted">{formatDateTime(n.created_at)}</p>
               </li>
             ))}
           </ul>

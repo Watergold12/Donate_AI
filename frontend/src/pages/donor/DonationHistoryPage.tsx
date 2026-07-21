@@ -67,19 +67,19 @@ export function DonationHistoryPage() {
               <EmptyState icon={<span className="text-4xl">📋</span>} title="No donations found" description="Try adjusting your filter" />
             </div>
           ) : (
-            <div className="divide-y divide-gray-100 dark:divide-gray-800">
+            <div className="divide-y divide-da-border">
               {donations.map(d => (
                 <div key={d.id}>
                   <button
-                    className="flex w-full items-center justify-between px-6 py-4 text-left hover:bg-gray-50 dark:hover:bg-gray-800/50"
+                    className="flex w-full items-center justify-between px-6 py-4 text-left hover:bg-da-border/30 transition-colors"
                     onClick={() => setExpanded(expanded === d.id ? null : d.id)}
                   >
                     <div className="flex flex-col gap-0.5">
-                      <span className="text-sm font-medium text-gray-900 dark:text-white">
+                      <span className="text-sm font-medium text-da-text">
                         {d.total_items} item{d.total_items !== 1 ? 's' : ''}
                         {d.notes ? ` — ${d.notes}` : ''}
                       </span>
-                      <span className="text-xs text-gray-500">{formatDate(d.created_at)}</span>
+                      <span className="text-xs text-da-secondary">{formatDate(d.created_at)}</span>
                     </div>
                     <div className="flex items-center gap-3">
                       <StatusBadge status={d.status} />
@@ -87,20 +87,20 @@ export function DonationHistoryPage() {
                         <Link
                           to={`/donor/pickup-schedule?donationId=${d.id}`}
                           onClick={e => e.stopPropagation()}
-                          className="rounded-lg bg-[#1D8CF8] px-3 py-1.5 text-xs font-medium text-white hover:bg-[#3AA0FF] transition-colors"
+                          className="rounded-lg bg-da-primary px-3 py-1.5 text-xs font-medium text-white hover:bg-da-hover transition-colors"
                         >
                           Schedule Pickup
                         </Link>
                       )}
-                      <span className="text-gray-400">{expanded === d.id ? '▲' : '▼'}</span>
+                      <span className="text-da-muted">{expanded === d.id ? '▲' : '▼'}</span>
                     </div>
                   </button>
                   {expanded === d.id && d.items.length > 0 && (
-                    <div className="border-t border-gray-100 bg-gray-50 px-6 py-3 dark:border-gray-800 dark:bg-gray-900/50">
-                      <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-gray-500">Items</p>
+                    <div className="border-t border-da-border bg-da-bg px-6 py-3">
+                      <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-da-secondary">Items</p>
                       <div className="flex flex-col gap-1">
                         {d.items.map(item => (
-                          <div key={item.id} className="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300">
+                          <div key={item.id} className="flex items-center gap-2 text-sm text-da-text">
                             <span className="font-medium">{item.item_name}</span>
                             <span className="text-gray-400">·</span>
                             <span>{capitalize(item.category)}</span>
