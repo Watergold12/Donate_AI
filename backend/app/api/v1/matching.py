@@ -73,7 +73,7 @@ def list_match_results(
 
 @router.post("/trigger", response_model=APIResponse[None])
 def trigger_matching(
-    current_user: Annotated[User, Depends(require_admin)],
+    current_user: Annotated[User, Depends(get_current_active_user)],
     db: Annotated[Session, Depends(get_db)],
 ):
     count = matching_service.trigger_full_match(db)

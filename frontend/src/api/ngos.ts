@@ -68,4 +68,7 @@ export const ngosApi = {
     apiClient.put<APIResponse<Match>>(`/ngos/matches/${id}/reject`, {
       rejection_reason: reason,
     }),
+
+  triggerMatching: () =>
+    apiClient.post<APIResponse<null>>('/ngos/matches/trigger'),
 }

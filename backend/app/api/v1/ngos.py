@@ -24,7 +24,7 @@ from app.schemas.matching import MatchActionRequest, MatchResponse
 from app.schemas.ngo import NGOProfileResponse, NGOProfileUpdate
 from app.schemas.ngo_demand import NGODemandCreate, NGODemandResponse, NGODemandUpdate
 from app.schemas.analytics import NGOSummary
-from app.services import ngo_service
+from app.services import ngo_service, matching_service
 from app.utils.pagination import PaginationMeta, PaginationParams
 
 router = APIRouter(prefix="/ngos", tags=["NGOs"])
@@ -151,3 +151,13 @@ def get_analytics(
 ):
     data = ngo_service.get_ngo_analytics(db, current_user)
     return APIResponse.ok(NGOSummary(**data))
+
+
+@router.post("/matches/trigger", response_model=APIResponse[None])
+def trigger_matching(
+    current_user: Annotated[User, Depends(require_ngo)],
+    db: Annotated[Session, Depends(get_db)],
+):
+    count = matching_service.trigger_full_match(db)
+    return APIResponse.ok(None, f"{count} new match(es) created")
+

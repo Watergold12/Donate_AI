@@ -13,7 +13,7 @@ import { Spinner } from '../../components/atoms/Spinner'
 import { ngosApi } from '../../api/ngos'
 import { useToast } from '../../store/ToastProvider'
 import type { Match, MatchStatus } from '../../types/index'
-import { scoreToPercent, formatDate } from '../../utils/index'
+import { scoreToPercent, formatDate, getApiError } from '../../utils/index'
 
 const STATUS_OPTIONS = [
   { value: '', label: 'All statuses' },
@@ -33,6 +33,7 @@ export function NGOMatchesPage() {
   const [rejectTarget, setRejectTarget] = useState<string | null>(null)
   const [rejectReason, setRejectReason] = useState('')
   const [acting, setActing] = useState<string | null>(null)
+  const [triggering, setTriggering] = useState(false)
   const toast = useToast()
 
   const load = useCallback(() => {
@@ -48,6 +49,17 @@ export function NGOMatchesPage() {
   }, [page, statusFilter])
 
   useEffect(() => { load() }, [load])
+
+  function runMatching() {
+    setTriggering(true)
+    ngosApi.triggerMatching()
+      .then(r => {
+        toast.success(r.data.message || 'Matching process completed')
+        load()
+      })
+      .catch(err => toast.error(getApiError(err)))
+      .finally(() => setTriggering(false))
+  }
 
   function accept(id: string) {
     setActing(id)
@@ -69,7 +81,15 @@ export function NGOMatchesPage() {
   return (
     <DashboardLayout>
       <div className="flex flex-col gap-6">
-        <PageHeader title="Match Inbox" subtitle={`${total} match${total !== 1 ? 'es' : ''}`} />
+        <PageHeader
+          title="Match Inbox"
+          subtitle={`${total} match${total !== 1 ? 'es' : ''}`}
+          actions={
+            <Button loading={triggering} onClick={runMatching} variant="secondary">
+              ⚡ Run Matching Engine
+            </Button>
+          }
+        />
         <div className="flex items-center gap-3">
           <Select
             options={STATUS_OPTIONS}
