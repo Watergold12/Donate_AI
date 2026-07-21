@@ -21,11 +21,11 @@ from app.utils.pagination import PaginationParams, paginate
 logger = logging.getLogger(__name__)
 
 VALID_PICKUP_TRANSITIONS = {
-    PickupStatus.scheduled:  [PickupStatus.confirmed, PickupStatus.in_transit, PickupStatus.cancelled],
-    PickupStatus.confirmed:  [PickupStatus.in_transit, PickupStatus.cancelled],
-    PickupStatus.in_transit: [PickupStatus.collected, PickupStatus.failed],
-    PickupStatus.collected:  [PickupStatus.delivered],
-    PickupStatus.delivered:  [PickupStatus.completed],
+    PickupStatus.scheduled:  [PickupStatus.confirmed, PickupStatus.in_transit, PickupStatus.collected, PickupStatus.delivered, PickupStatus.completed, PickupStatus.failed, PickupStatus.cancelled],
+    PickupStatus.confirmed:  [PickupStatus.in_transit, PickupStatus.collected, PickupStatus.delivered, PickupStatus.completed, PickupStatus.failed, PickupStatus.cancelled],
+    PickupStatus.in_transit: [PickupStatus.collected, PickupStatus.delivered, PickupStatus.completed, PickupStatus.failed, PickupStatus.cancelled],
+    PickupStatus.collected:  [PickupStatus.delivered, PickupStatus.completed, PickupStatus.failed, PickupStatus.cancelled],
+    PickupStatus.delivered:  [PickupStatus.completed, PickupStatus.failed, PickupStatus.cancelled],
     PickupStatus.completed:  [],
     PickupStatus.failed:     [],
     PickupStatus.cancelled:  [],

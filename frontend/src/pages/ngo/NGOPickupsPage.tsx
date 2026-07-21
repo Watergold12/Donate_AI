@@ -8,11 +8,13 @@ import { Card } from '../../components/atoms/Card'
 import { Spinner } from '../../components/atoms/Spinner'
 import { pickupsApi } from '../../api/pickups'
 import type { Pickup, PickupStatus } from '../../types/index'
-import { formatDateTime } from '../../utils/index'
+import { formatDateTime, getApiError } from '../../utils/index'
+import { useToast } from '../../store/ToastProvider'
 
-const UPDATABLE_STATUSES: PickupStatus[] = ['scheduled', 'in_transit']
+const UPDATABLE_STATUSES: PickupStatus[] = ['scheduled', 'confirmed', 'in_transit', 'collected', 'delivered']
 const STATUS_OPTIONS: { value: PickupStatus; label: string }[] = [
   { value: 'in_transit', label: 'In Transit' },
+  { value: 'collected', label: 'Picked Up' },
   { value: 'completed', label: 'Completed' },
   { value: 'failed', label: 'Failed' },
 ]
@@ -24,6 +26,7 @@ export function NGOPickupsPage() {
   const [pages, setPages] = useState(1)
   const [total, setTotal] = useState(0)
   const [updating, setUpdating] = useState<string | null>(null)
+  const toast = useToast()
 
   const load = useCallback(() => {
     setLoading(true)
@@ -33,17 +36,17 @@ export function NGOPickupsPage() {
         setPages(r.data.pagination.pages)
         setTotal(r.data.pagination.total)
       })
-      .catch(() => null)
+      .catch(err => toast.error(getApiError(err)))
       .finally(() => setLoading(false))
-  }, [page])
+  }, [page, toast])
 
   useEffect(() => { load() }, [load])
 
   function updateStatus(id: string, status: PickupStatus) {
     setUpdating(id)
     pickupsApi.updateStatus(id, status)
-      .then(() => load())
-      .catch(() => null)
+      .then(() => { load(); toast.success('Status updated successfully') })
+      .catch(err => toast.error(getApiError(err)))
       .finally(() => setUpdating(null))
   }
 
