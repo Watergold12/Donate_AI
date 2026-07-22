@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
@@ -13,7 +13,7 @@ import { useAuthContext } from '../../store/authStore'
 import { authApi } from '../../api/auth'
 import { donorsApi } from '../../api/donors'
 import { ngosApi } from '../../api/ngos'
-import { LogOut, Save, User as UserIcon, Building2, MapPin } from 'lucide-react'
+import { LogOut, Save, User as UserIcon, Building2, MapPin, ShieldCheck, Globe2 } from 'lucide-react'
 import { useToast } from '../../store/ToastProvider'
 
 /* ── Schemas ─────────────────────────────────────────────── */
@@ -59,6 +59,7 @@ export function SettingsPage() {
   const { user, clearAuth, refreshToken, setUser } = useAuthContext()
   const [tab, setTab] = useState<Tab>('account')
   const [loadingProfile, setLoadingProfile] = useState(false)
+  const [profileReady, setProfileReady] = useState(false)
   const toast = useToast()
 
   /* ── Account form ───────────────────────────────────────── */
@@ -121,41 +122,58 @@ export function SettingsPage() {
 
   /* ── Load role-specific profile on mount ────────────────── */
   useEffect(() => {
-    if (!user) return
-    setLoadingProfile(true)
-    if (user.role === 'donor') {
-      donorsApi.getProfile()
-        .then(r => {
+    let isMounted = true
+
+    const loadProfile = async () => {
+      if (!user) {
+        if (isMounted) setProfileReady(false)
+        return
+      }
+
+      try {
+        if (user.role === 'donor') {
+          const response = await donorsApi.getProfile()
+          if (!isMounted) return
           resetDonor({
-            phone: r.data.data.phone ?? '',
-            address: r.data.data.address ?? '',
-            city: r.data.data.city ?? '',
-            state: r.data.data.state ?? '',
-            pincode: r.data.data.pincode ?? '',
+            phone: response.data.data.phone ?? '',
+            address: response.data.data.address ?? '',
+            city: response.data.data.city ?? '',
+            state: response.data.data.state ?? '',
+            pincode: response.data.data.pincode ?? '',
           })
-        })
-        .catch(() => null)
-        .finally(() => setLoadingProfile(false))
-    } else if (user.role === 'ngo') {
-      ngosApi.getProfile()
-        .then(r => {
+        } else if (user.role === 'ngo') {
+          const response = await ngosApi.getProfile()
+          if (!isMounted) return
           resetNgo({
-            org_name: r.data.data.org_name ?? '',
-            address: r.data.data.address ?? '',
-            city: r.data.data.city ?? '',
-            state: r.data.data.state ?? '',
-            pincode: r.data.data.pincode ?? '',
-            contact_phone: r.data.data.contact_phone ?? '',
-            website: r.data.data.website ?? '',
-            description: r.data.data.description ?? '',
+            org_name: response.data.data.org_name ?? '',
+            address: response.data.data.address ?? '',
+            city: response.data.data.city ?? '',
+            state: response.data.data.state ?? '',
+            pincode: response.data.data.pincode ?? '',
+            contact_phone: response.data.data.contact_phone ?? '',
+            website: response.data.data.website ?? '',
+            description: response.data.data.description ?? '',
           })
-        })
-        .catch(() => null)
-        .finally(() => setLoadingProfile(false))
-    } else {
-      setLoadingProfile(false)
+        }
+      } catch {
+        if (isMounted) toast.error('Unable to load profile details right now')
+      } finally {
+        if (isMounted) {
+          setLoadingProfile(false)
+          setProfileReady(true)
+        }
+      }
     }
-  }, [user, resetDonor, resetNgo])
+
+    const timer = window.setTimeout(() => {
+      void loadProfile()
+    }, 0)
+
+    return () => {
+      isMounted = false
+      window.clearTimeout(timer)
+    }
+  }, [user, resetDonor, resetNgo, toast])
 
   /* ── Sign out ───────────────────────────────────────────── */
   const handleSignOut = () => {
@@ -172,6 +190,11 @@ export function SettingsPage() {
     .toUpperCase() ?? 'U'
 
   const roleBadgeVariant = user?.role === 'donor' ? 'info' : user?.role === 'ngo' ? 'purple' : 'warning'
+  const profileSummary = useMemo(() => {
+    if (user?.role === 'donor') return 'Keep your contact details up to date so pickups and follow-ups are smoother.'
+    if (user?.role === 'ngo') return 'Share accurate organisation details so donors can trust and reach your team.'
+    return 'Manage your account information and access for the platform.'
+  }, [user?.role])
 
   return (
     <DashboardLayout>
@@ -187,6 +210,7 @@ export function SettingsPage() {
               <Badge variant={roleBadgeVariant}>{user?.role?.toUpperCase()}</Badge>
             </div>
             <p className="text-sm text-[#A1A8B3]">{user?.email}</p>
+            <p className="text-sm text-[#6B7280]">{profileSummary}</p>
           </div>
         </div>
 
@@ -220,6 +244,13 @@ export function SettingsPage() {
               <div className="flex items-center gap-2 border-b border-white/[0.06] pb-4">
                 <UserIcon className="h-5 w-5 text-[#1D8CF8]" />
                 <h2 className="text-base font-semibold text-white">Account Information</h2>
+              </div>
+
+              <div className="rounded-lg border border-da-border bg-da-bg/60 p-3 text-sm text-da-secondary">
+                <div className="flex items-center gap-2">
+                  <ShieldCheck className="h-4 w-4 text-[#1D8CF8]" />
+                  <span>Keep your display name and account contact details aligned with your identity.</span>
+                </div>
               </div>
 
               <Input
@@ -259,12 +290,21 @@ export function SettingsPage() {
           <Card>
             {loadingProfile ? (
               <div className="flex h-48 items-center justify-center"><Spinner /></div>
+            ) : !profileReady ? (
+              <div className="flex h-48 items-center justify-center text-sm text-da-muted">Preparing your profile…</div>
             ) : user?.role === 'donor' ? (
               /* ─── Donor Details ─────────────────────────── */
               <form onSubmit={handleDonor(saveDonor)} className="flex flex-col gap-5">
                 <div className="flex items-center gap-2 border-b border-white/[0.06] pb-4">
                   <MapPin className="h-5 w-5 text-[#1D8CF8]" />
                   <h2 className="text-base font-semibold text-white">Address &amp; Contact</h2>
+                </div>
+
+                <div className="rounded-lg border border-da-border bg-da-bg/60 p-3 text-sm text-da-secondary">
+                  <div className="flex items-center gap-2">
+                    <Globe2 className="h-4 w-4 text-[#1D8CF8]" />
+                    <span>These details help donors and NGOs coordinate pickups and drop-offs without confusion.</span>
+                  </div>
                 </div>
 
                 <Input
@@ -315,6 +355,13 @@ export function SettingsPage() {
                 <div className="flex items-center gap-2 border-b border-white/[0.06] pb-4">
                   <Building2 className="h-5 w-5 text-[#1D8CF8]" />
                   <h2 className="text-base font-semibold text-white">Organisation Details</h2>
+                </div>
+
+                <div className="rounded-lg border border-da-border bg-da-bg/60 p-3 text-sm text-da-secondary">
+                  <div className="flex items-center gap-2">
+                    <ShieldCheck className="h-4 w-4 text-[#1D8CF8]" />
+                    <span>Accurate organisation details help donors discover and trust your cause.</span>
+                  </div>
                 </div>
 
                 <Input

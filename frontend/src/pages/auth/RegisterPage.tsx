@@ -39,6 +39,7 @@ export function RegisterPage() {
     resolver: zodResolver(schema),
     defaultValues: { role: 'donor' },
   })
+  // eslint-disable-next-line react-hooks/incompatible-library
   const role = watch('role')
 
   const onSubmit = async (data: FormData) => {

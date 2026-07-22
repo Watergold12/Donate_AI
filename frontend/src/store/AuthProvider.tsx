@@ -39,19 +39,33 @@ export function AuthProvider({ children }: AuthProviderProps) {
   }, [])
 
   useEffect(() => {
-    const token = localStorage.getItem('access_token')
-    if (token) {
+    const timer = window.setTimeout(() => {
+      const token = localStorage.getItem('access_token')
+
+      if (!token) {
+        setState(prev => ({ ...prev, isLoading: false }))
+        return
+      }
+
+      let isMounted = true
+
       authApi.me()
         .then(res => {
+          if (!isMounted) return
           const user: User = res.data.data
           setState(prev => ({ ...prev, user, isAuthenticated: true, isLoading: false }))
         })
         .catch(() => {
+          if (!isMounted) return
           clearAuth()
         })
-    } else {
-      setState(prev => ({ ...prev, isLoading: false }))
-    }
+
+      return () => {
+        isMounted = false
+      }
+    }, 0)
+
+    return () => window.clearTimeout(timer)
   }, [clearAuth])
 
   const value: AuthContextType = { ...state, setAuth, clearAuth, setLoading, setUser }

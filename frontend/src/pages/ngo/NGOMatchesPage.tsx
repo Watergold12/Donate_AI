@@ -48,7 +48,13 @@ export function NGOMatchesPage() {
       .finally(() => setLoading(false))
   }, [page, statusFilter])
 
-  useEffect(() => { load() }, [load])
+  useEffect(() => {
+    const timer = window.setTimeout(() => {
+      void load()
+    }, 0)
+
+    return () => window.clearTimeout(timer)
+  }, [load])
 
   function runMatching() {
     setTriggering(true)

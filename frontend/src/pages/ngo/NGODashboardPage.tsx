@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { DashboardLayout } from '../../components/templates/DashboardLayout'
 import { PageHeader } from '../../components/molecules/PageHeader'
 import { StatCard } from '../../components/molecules/StatCard'
@@ -18,7 +18,7 @@ export function NGODashboardPage() {
   const [loading, setLoading] = useState(true)
   const [acting, setActing] = useState<string | null>(null)
 
-  function loadData() {
+  const loadData = useCallback(() => {
     setLoading(true)
     Promise.all([analyticsApi.summary(), ngosApi.listMatches(1, 5, 'proposed')])
       .then(([s, m]) => {
@@ -27,9 +27,15 @@ export function NGODashboardPage() {
       })
       .catch(() => null)
       .finally(() => setLoading(false))
-  }
+  }, [])
 
-  useEffect(() => { loadData() }, [])
+  useEffect(() => {
+    const timer = window.setTimeout(() => {
+      void loadData()
+    }, 0)
+
+    return () => window.clearTimeout(timer)
+  }, [loadData])
 
   function accept(id: string) {
     setActing(id)

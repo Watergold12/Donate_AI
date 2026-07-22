@@ -46,7 +46,13 @@ export function AdminUsersPage() {
       .finally(() => setLoading(false))
   }, [page, roleFilter])
 
-  useEffect(() => { load() }, [load])
+  useEffect(() => {
+    const timer = window.setTimeout(() => {
+      void load()
+    }, 0)
+
+    return () => window.clearTimeout(timer)
+  }, [load])
 
   function toggleStatus(user: User) {
     setToggling(user.id)

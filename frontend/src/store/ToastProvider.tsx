@@ -1,5 +1,7 @@
-import { createContext, useContext, useState, useCallback, useEffect } from 'react'
+/* eslint-disable react-refresh/only-export-components */
+import { createContext, useState, useCallback, useEffect } from 'react'
 import type { ReactNode } from 'react'
+export { useToast } from './useToast'
 
 /* ── Types ──────────────────────────────────────────────── */
 
@@ -19,13 +21,7 @@ interface ToastContextValue {
 
 /* ── Context ────────────────────────────────────────────── */
 
-const ToastContext = createContext<ToastContextValue | null>(null)
-
-export function useToast(): ToastContextValue {
-  const ctx = useContext(ToastContext)
-  if (!ctx) throw new Error('useToast must be used within ToastProvider')
-  return ctx
-}
+export const ToastContext = createContext<ToastContextValue | null>(null)
 
 /* ── Toast UI ───────────────────────────────────────────── */
 

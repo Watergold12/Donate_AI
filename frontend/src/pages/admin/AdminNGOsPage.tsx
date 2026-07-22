@@ -5,6 +5,7 @@ import { EmptyState } from '../../components/molecules/EmptyState'
 import { Pagination } from '../../components/molecules/Pagination'
 import { Card } from '../../components/atoms/Card'
 import { Button } from '../../components/atoms/Button'
+import { Badge } from '../../components/atoms/Badge'
 import { Spinner } from '../../components/atoms/Spinner'
 import { adminApi } from '../../api/admin'
 import { useToast } from '../../store/ToastProvider'
@@ -32,7 +33,13 @@ export function AdminNGOsPage() {
       .finally(() => setLoading(false))
   }, [page])
 
-  useEffect(() => { load() }, [load])
+  useEffect(() => {
+    const timer = window.setTimeout(() => {
+      void load()
+    }, 0)
+
+    return () => window.clearTimeout(timer)
+  }, [load])
 
   function approve(id: string) {
     setActioning(id)
@@ -71,16 +78,21 @@ export function AdminNGOsPage() {
           ) : (
             <div className="divide-y divide-da-border">
               {ngos.map(ngo => (
-                <div key={ngo.id} className="flex items-start justify-between px-6 py-4">
-                  <div className="flex flex-col gap-1">
-                    <p className="text-sm font-semibold text-da-text">{ngo.org_name}</p>
-                    <p className="text-xs text-da-secondary">Reg: {ngo.registration_number}</p>
+                <div key={ngo.id} className="flex flex-col gap-3 px-6 py-4 md:flex-row md:items-start md:justify-between">
+                  <div className="flex flex-col gap-1.5">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <p className="text-sm font-semibold text-da-text">{ngo.org_name}</p>
+                      {ngo.is_verified ? <Badge variant="success">Verified</Badge> : <Badge variant="warning">Pending</Badge>}
+                    </div>
+                    <p className="text-xs text-da-secondary">Registration: {ngo.registration_number}</p>
                     {(ngo.city ?? ngo.state) && (
-                      <p className="text-xs text-da-muted">{[ngo.city, ngo.state].filter(Boolean).join(', ')}</p>
+                      <p className="text-xs text-da-muted">Location: {[ngo.city, ngo.state].filter(Boolean).join(', ')}</p>
                     )}
+                    {ngo.contact_phone && <p className="text-xs text-da-muted">Contact: {ngo.contact_phone}</p>}
+                    {ngo.website && <p className="text-xs text-da-muted">Website: {ngo.website}</p>}
                     <p className="text-xs text-da-muted">Applied {ngo.created_at ? formatDate(ngo.created_at) : '—'}</p>
                   </div>
-                  <div className="flex gap-2">
+                  <div className="flex flex-wrap gap-2">
                     <Button size="sm" loading={actioning === ngo.id} onClick={() => approve(ngo.id)}>Approve</Button>
                     <Button size="sm" variant="danger" loading={actioning === ngo.id} onClick={() => reject(ngo.id)}>Reject</Button>
                   </div>

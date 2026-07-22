@@ -15,20 +15,40 @@ export function useApiQuery<T>(
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
-  const fetch = useCallback(() => {
+  const refetch = useCallback(() => {
     setLoading(true)
     setError(null)
-    fetcher()
+    void fetcher()
       .then(result => setData(result))
       .catch((err: unknown) => {
         const msg = err instanceof Error ? err.message : 'An unexpected error occurred'
         setError(msg)
       })
       .finally(() => setLoading(false))
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [fetcher])
+
+  useEffect(() => {
+    let isMounted = true
+
+    void fetcher()
+      .then(result => {
+        if (isMounted) setData(result)
+      })
+      .catch((err: unknown) => {
+        if (isMounted) {
+          const msg = err instanceof Error ? err.message : 'An unexpected error occurred'
+          setError(msg)
+        }
+      })
+      .finally(() => {
+        if (isMounted) setLoading(false)
+      })
+
+    return () => {
+      isMounted = false
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, deps)
 
-  useEffect(() => { fetch() }, [fetch])
-
-  return { data, loading, error, refetch: fetch }
+  return { data, loading, error, refetch }
 }
