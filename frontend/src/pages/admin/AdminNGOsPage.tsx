@@ -7,6 +7,7 @@ import { Card } from '../../components/atoms/Card'
 import { Button } from '../../components/atoms/Button'
 import { Badge } from '../../components/atoms/Badge'
 import { Spinner } from '../../components/atoms/Spinner'
+import { Select } from '../../components/atoms/Select'
 import { Modal } from '../../components/molecules/Modal'
 import { adminApi } from '../../api/admin'
 import { useToast } from '../../store/ToastProvider'
@@ -19,18 +20,17 @@ export function AdminNGOsPage() {
   const [page, setPage] = useState(1)
   const [pages, setPages] = useState(1)
   const [total, setTotal] = useState(0)
-  const [statusFilter, setStatusFilter] = useState<string>('pending')
+  const [statusFilter, setStatusFilter] = useState<string>('all')
   const [actioning, setActioning] = useState<string | null>(null)
-  
-  // Rejection Modal state
-  const [rejectingTarget, setRejectingTarget] = useState<NGOProfile | null>(null)
+  const [actionTarget, setActionTarget] = useState<NGOProfile | null>(null)
+  const [actionMode, setActionMode] = useState<'reject' | 'revoke' | null>(null)
   const [rejectionReason, setRejectionReason] = useState('')
   const toast = useToast()
 
   const load = useCallback(() => {
     setLoading(true)
     const filter = statusFilter === 'all' ? undefined : statusFilter
-    adminApi.pendingNGOs(page, 20, filter)
+    adminApi.listNGOs(page, 20, filter)
       .then(r => {
         setNgos(r.data.data)
         setPages(r.data.pagination.pages)
@@ -56,17 +56,29 @@ export function AdminNGOsPage() {
       .finally(() => setActioning(null))
   }
 
-  function handleConfirmReject() {
-    if (!rejectingTarget) return
-    setActioning(rejectingTarget.id)
-    adminApi.verifyNGO(rejectingTarget.id, false, rejectionReason || 'Document verification failed')
+  function openRejectModal(ngo: NGOProfile) {
+    setActionTarget(ngo)
+    setActionMode(ngo.is_verified ? 'revoke' : 'reject')
+    setRejectionReason('')
+  }
+
+  function handleConfirmAction() {
+    if (!actionTarget || !actionMode) return
+    setActioning(actionTarget.id)
+    const defaultReason = actionMode === 'revoke'
+      ? 'Authenticity revoked due to policy violation or fraudulent activity.'
+      : 'Document verification failed. Please re-submit valid documents.'
+    adminApi.verifyNGO(actionTarget.id, false, rejectionReason || defaultReason)
       .then(() => {
         load()
-        toast.info('NGO verification application rejected')
-        setRejectingTarget(null)
+        toast.info(actionMode === 'revoke'
+          ? 'NGO authenticity disabled and access revoked'
+          : 'NGO verification application rejected')
+        setActionTarget(null)
+        setActionMode(null)
         setRejectionReason('')
       })
-      .catch(() => toast.error('Failed to reject NGO application'))
+      .catch(() => toast.error(actionMode === 'revoke' ? 'Failed to revoke NGO authenticity' : 'Failed to reject NGO application'))
       .finally(() => setActioning(null))
   }
 
@@ -86,30 +98,26 @@ export function AdminNGOsPage() {
           subtitle="Review official registration documents and manage NGO verification approvals."
         />
 
-        {/* ── Status Filter Tabs ─────────────────────────────────── */}
-        <div className="flex flex-wrap items-center gap-2 border-b border-da-border/60 pb-3">
-          {[
-            { id: 'pending', label: 'Pending Review' },
-            { id: 'verified', label: 'Verified NGOs' },
-            { id: 'rejected', label: 'Rejected' },
-            { id: 'all', label: 'All NGOs' },
-          ].map(tab => (
-            <button
-              key={tab.id}
-              onClick={() => {
-                setStatusFilter(tab.id)
+        <div className="flex flex-col gap-2 border-b border-da-border/60 pb-4 sm:flex-row sm:items-end sm:justify-between">
+          <div className="w-full sm:max-w-sm">
+            <Select
+              label="Filter NGOs"
+              value={statusFilter}
+              onChange={e => {
+                setStatusFilter(e.target.value)
                 setPage(1)
               }}
-              className={[
-                'rounded-xl px-4 py-2 text-xs font-semibold transition-all',
-                statusFilter === tab.id
-                  ? 'bg-[#1D8CF8] text-white shadow-md shadow-[#1D8CF8]/20'
-                  : 'text-da-secondary hover:bg-da-surface hover:text-da-text',
-              ].join(' ')}
-            >
-              {tab.label}
-            </button>
-          ))}
+              options={[
+                { value: 'all', label: 'All NGOs' },
+                { value: 'pending', label: 'Pending Review' },
+                { value: 'verified', label: 'Verified NGOs' },
+                { value: 'rejected', label: 'Rejected NGOs' },
+              ]}
+            />
+          </div>
+          <p className="text-xs text-da-muted">
+            Showing {statusFilter === 'all' ? 'all NGOs' : `${statusFilter} NGOs`}
+          </p>
         </div>
 
         {/* ── NGO List Card ───────────────────────────────────────── */}
@@ -193,12 +201,9 @@ export function AdminNGOsPage() {
                         size="sm"
                         variant="danger"
                         loading={actioning === ngo.id}
-                        onClick={() => {
-                          setRejectingTarget(ngo)
-                          setRejectionReason('')
-                        }}
+                        onClick={() => openRejectModal(ngo)}
                       >
-                        {ngo.is_verified ? 'Revoke Access' : 'Reject'}
+                        {ngo.is_verified ? 'Disable Authenticity' : 'Reject'}
                       </Button>
                     )}
                   </div>
@@ -215,38 +220,52 @@ export function AdminNGOsPage() {
         </Card>
 
         {/* ── Rejection Reason Modal ──────────────────────────────── */}
-        {rejectingTarget && (
+        {actionTarget && actionMode && (
           <Modal
             open={true}
-            onClose={() => setRejectingTarget(null)}
-            title={`Reject Verification: ${rejectingTarget.org_name}`}
+            onClose={() => {
+              setActionTarget(null)
+              setActionMode(null)
+            }}
+            title={actionMode === 'revoke'
+              ? `Disable Authenticity: ${actionTarget.org_name}`
+              : `Reject Verification: ${actionTarget.org_name}`}
           >
             <div className="flex flex-col gap-4">
               <p className="text-xs text-da-secondary">
-                Please specify a reason for rejecting this NGO application. This feedback will be displayed to the NGO so they can re-submit valid documentation.
+                {actionMode === 'revoke'
+                  ? 'Please provide a reason for revoking this NGO’s authenticity. Their account access will be disabled and the record will be marked for follow-up.'
+                  : 'Please specify a reason for rejecting this NGO application. This feedback will be displayed to the NGO so they can re-submit valid documentation.'}
               </p>
 
               <div>
-                <label className="text-xs font-medium text-da-text mb-1 block">Rejection Reason</label>
+                <label className="text-xs font-medium text-da-text mb-1 block">
+                  {actionMode === 'revoke' ? 'Revocation Reason' : 'Rejection Reason'}
+                </label>
                 <textarea
                   rows={4}
                   value={rejectionReason}
                   onChange={e => setRejectionReason(e.target.value)}
-                  placeholder="e.g. Uploaded document is illegible, registration number mismatch, or 80G certificate expired."
+                  placeholder={actionMode === 'revoke'
+                    ? 'e.g. Fraudulent activity, false documentation, misuse of verified status.'
+                    : 'e.g. Uploaded document is illegible, registration number mismatch, or 80G certificate expired.'}
                   className="w-full rounded-xl border border-da-border bg-da-bg px-3.5 py-2.5 text-xs text-da-text focus:border-red-500 focus:outline-none"
                 />
               </div>
 
               <div className="flex justify-end gap-3 pt-2">
-                <Button variant="ghost" onClick={() => setRejectingTarget(null)}>
+                <Button variant="ghost" onClick={() => {
+                  setActionTarget(null)
+                  setActionMode(null)
+                }}>
                   Cancel
                 </Button>
                 <Button
                   variant="danger"
-                  loading={actioning === rejectingTarget.id}
-                  onClick={handleConfirmReject}
+                  loading={actioning === actionTarget.id}
+                  onClick={handleConfirmAction}
                 >
-                  Confirm Rejection
+                  {actionMode === 'revoke' ? 'Disable Authenticity' : 'Confirm Rejection'}
                 </Button>
               </div>
             </div>

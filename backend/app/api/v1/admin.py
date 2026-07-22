@@ -17,6 +17,7 @@ from uuid import UUID
 from fastapi import APIRouter, Depends, Request
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
+from sqlalchemy import or_
 
 from app.core.dependencies import require_admin
 from app.core.exceptions import NotFoundError
@@ -119,7 +120,32 @@ def list_ngos(
 ):
     query = db.query(NGOProfile)
     if status_filter:
-        query = query.filter(NGOProfile.verification_status == status_filter)
+        if status_filter == "verified":
+            query = query.filter(
+                or_(
+                    NGOProfile.verification_status == "verified",
+                    NGOProfile.is_verified.is_(True),
+                )
+            )
+        elif status_filter == "rejected":
+            query = query.filter(NGOProfile.verification_status == "rejected")
+        elif status_filter == "pending":
+            query = query.filter(
+                or_(
+                    NGOProfile.verification_status == "pending",
+                    NGOProfile.verification_status == "unsubmitted",
+                    NGOProfile.verification_status.is_(None),
+                )
+            )
+        elif status_filter == "unsubmitted":
+            query = query.filter(
+                or_(
+                    NGOProfile.verification_status == "unsubmitted",
+                    NGOProfile.verification_status.is_(None),
+                )
+            )
+        else:
+            query = query.filter(NGOProfile.verification_status == status_filter)
     else:
         # Default for /pending endpoint: pending or unverified
         query = query.order_by(NGOProfile.created_at.asc())
@@ -143,6 +169,7 @@ def verify_ngo(
     ngo = db.query(NGOProfile).filter(NGOProfile.id == ngo_id).first()
     if not ngo:
         raise NotFoundError("NGO profile")
+    was_verified = ngo.is_verified
 
     if payload.approved is True:
         ngo.is_verified = True
@@ -150,17 +177,30 @@ def verify_ngo(
         ngo.rejection_reason = None
         ngo.verified_by = current_user.id
         ngo.verified_at = datetime.now(timezone.utc)
+        ngo.user.is_active = True
+        ngo.user.is_verified = True
     else:
         ngo.is_verified = False
         ngo.verification_status = "rejected"
-        ngo.rejection_reason = payload.rejection_reason or "Document verification failed. Please re-submit valid documents."
+        ngo.rejection_reason = payload.rejection_reason or (
+            "Authenticity revoked due to policy violation or fraudulent activity."
+            if was_verified
+            else "Document verification failed. Please re-submit valid documents."
+        )
         ngo.verified_by = current_user.id
         ngo.verified_at = datetime.now(timezone.utc)
+        if was_verified:
+            ngo.user.is_active = False
+            ngo.user.is_verified = False
 
     log_action(
         db, AuditAction.UPDATE, "ngo_profile", ngo.id,
         actor_id=current_user.id,
-        new_data={"is_verified": payload.approved, "verification_status": ngo.verification_status},
+        new_data={
+            "is_verified": payload.approved,
+            "verification_status": ngo.verification_status,
+            "user_is_active": ngo.user.is_active,
+        },
         request=request,
     )
     db.commit()

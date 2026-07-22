@@ -13,6 +13,11 @@ export const adminApi = {
   setUserStatus: (id: string, is_active: boolean) =>
     apiClient.patch<APIResponse<User>>(`/admin/users/${id}/status`, { is_active }),
 
+  listNGOs: (page = 1, size = 20, status_filter?: string) =>
+    apiClient.get<PaginatedAPIResponse<NGOProfile>>('/admin/ngos', {
+      params: { page, size, status_filter },
+    }),
+
   pendingNGOs: (page = 1, size = 20, status_filter?: string) =>
     apiClient.get<PaginatedAPIResponse<NGOProfile>>('/admin/ngos/pending', {
       params: { page, size, status_filter },
