@@ -15,6 +15,8 @@ import { useToast } from '../../store/ToastProvider'
 import type { Match, MatchStatus } from '../../types/index'
 import { scoreToPercent, formatDate, getApiError } from '../../utils/index'
 
+import { NGOVerificationGuard } from '../../components/organisms/NGOVerificationGuard'
+
 const STATUS_OPTIONS = [
   { value: '', label: 'All statuses' },
   { value: 'proposed', label: 'Proposed' },
@@ -87,6 +89,7 @@ export function NGOMatchesPage() {
   return (
     <DashboardLayout>
       <div className="flex flex-col gap-6">
+        <NGOVerificationGuard />
         <PageHeader
           title="Match Inbox"
           subtitle={`${total} match${total !== 1 ? 'es' : ''}`}

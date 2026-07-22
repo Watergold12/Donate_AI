@@ -16,7 +16,7 @@ import { Badge } from '../../components/atoms/Badge'
 import { Spinner } from '../../components/atoms/Spinner'
 import { ngosApi } from '../../api/ngos'
 import { useToast } from '../../store/ToastProvider'
-import type { NGODemand, ItemCategory, DemandUrgency } from '../../types/index'
+import type { NGODemand, NGOProfile, ItemCategory, DemandUrgency } from '../../types/index'
 import { capitalize, formatDate, getApiError } from '../../utils/index'
 
 const CATEGORY_OPTIONS = [

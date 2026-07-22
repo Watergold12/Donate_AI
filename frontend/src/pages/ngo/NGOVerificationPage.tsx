@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, ChangeEvent, FormEvent } from 'react'
+import { useState, useEffect, ChangeEvent, FormEvent } from 'react'
 import { DashboardLayout } from '../../components/templates/DashboardLayout'
 import { PageHeader } from '../../components/molecules/PageHeader'
 import { Card } from '../../components/atoms/Card'
@@ -18,20 +18,27 @@ export function NGOVerificationPage() {
   const [dragActive, setDragActive] = useState(false)
   const toast = useToast()
 
-  const fetchProfile = useCallback(() => {
-    setLoading(true)
-    ngosApi.getProfile()
-      .then(r => setProfile(r.data.data))
-      .catch(() => toast.error('Failed to load NGO profile verification details'))
-      .finally(() => setLoading(false))
-  }, [toast])
-
   useEffect(() => {
-    const timer = window.setTimeout(() => {
-      void fetchProfile()
-    }, 0)
-    return () => window.clearTimeout(timer)
-  }, [fetchProfile])
+    let isMounted = true
+
+    ngosApi.getProfile()
+      .then(r => {
+        if (isMounted) setProfile(r.data.data)
+      })
+      .catch(err => {
+        if (isMounted) {
+          console.error('getProfile error:', err)
+          toast.error('Failed to load NGO profile verification details')
+        }
+      })
+      .finally(() => {
+        if (isMounted) setLoading(false)
+      })
+
+    return () => {
+      isMounted = false
+    }
+  }, [toast])
 
   const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {

@@ -10,6 +10,7 @@ import { pickupsApi } from '../../api/pickups'
 import type { Pickup, PickupStatus } from '../../types/index'
 import { formatDateTime, getApiError } from '../../utils/index'
 import { useToast } from '../../store/ToastProvider'
+import { NGOVerificationGuard } from '../../components/organisms/NGOVerificationGuard'
 
 const UPDATABLE_STATUSES: PickupStatus[] = ['scheduled', 'confirmed', 'in_transit', 'collected', 'delivered']
 const STATUS_OPTIONS: { value: PickupStatus; label: string }[] = [
@@ -59,6 +60,7 @@ export function NGOPickupsPage() {
   return (
     <DashboardLayout>
       <div className="flex flex-col gap-6">
+        <NGOVerificationGuard />
         <PageHeader title="Pickups" subtitle={`${total} pickup${total !== 1 ? 's' : ''}`} />
         <Card padding="none">
           {loading ? (
