@@ -110,20 +110,24 @@ def update_user_status(
 # ---------------------------------------------------------------------------
 
 @router.get("/ngos/pending", response_model=PaginatedAPIResponse[NGOProfileResponse])
-def list_pending_ngos(
+@router.get("/ngos", response_model=PaginatedAPIResponse[NGOProfileResponse])
+def list_ngos(
     params: Annotated[PaginationParams, Depends()],
     current_user: Annotated[User, Depends(require_admin)],
     db: Annotated[Session, Depends(get_db)],
+    status_filter: Optional[str] = None,
 ):
-    query = (
-        db.query(NGOProfile)
-        .filter(NGOProfile.is_verified.is_(False))
-        .order_by(NGOProfile.created_at.asc())
-    )
+    query = db.query(NGOProfile)
+    if status_filter:
+        query = query.filter(NGOProfile.verification_status == status_filter)
+    else:
+        # Default for /pending endpoint: pending or unverified
+        query = query.order_by(NGOProfile.created_at.asc())
+        
     items, total = paginate(query, params)
     return PaginatedAPIResponse(
         data=[NGOProfileResponse.model_validate(n) for n in items],
-        message="Pending NGOs retrieved",
+        message="NGO profiles retrieved",
         pagination=_pagination_meta(params.page, params.size, total),
     )
 
@@ -142,17 +146,21 @@ def verify_ngo(
 
     if payload.approved is True:
         ngo.is_verified = True
+        ngo.verification_status = "verified"
+        ngo.rejection_reason = None
         ngo.verified_by = current_user.id
         ngo.verified_at = datetime.now(timezone.utc)
     else:
         ngo.is_verified = False
-        ngo.verified_by = None
-        ngo.verified_at = None
+        ngo.verification_status = "rejected"
+        ngo.rejection_reason = payload.rejection_reason or "Document verification failed. Please re-submit valid documents."
+        ngo.verified_by = current_user.id
+        ngo.verified_at = datetime.now(timezone.utc)
 
     log_action(
         db, AuditAction.UPDATE, "ngo_profile", ngo.id,
         actor_id=current_user.id,
-        new_data={"is_verified": payload.approved},
+        new_data={"is_verified": payload.approved, "verification_status": ngo.verification_status},
         request=request,
     )
     db.commit()

@@ -13,13 +13,13 @@ export const adminApi = {
   setUserStatus: (id: string, is_active: boolean) =>
     apiClient.patch<APIResponse<User>>(`/admin/users/${id}/status`, { is_active }),
 
-  pendingNGOs: (page = 1, size = 20) =>
+  pendingNGOs: (page = 1, size = 20, status_filter?: string) =>
     apiClient.get<PaginatedAPIResponse<NGOProfile>>('/admin/ngos/pending', {
-      params: { page, size },
+      params: { page, size, status_filter },
     }),
 
-  verifyNGO: (id: string, approved: boolean) =>
-    apiClient.patch<APIResponse<NGOProfile>>(`/admin/ngos/${id}/verify`, { approved }),
+  verifyNGO: (id: string, approved: boolean, rejection_reason?: string) =>
+    apiClient.patch<APIResponse<NGOProfile>>(`/admin/ngos/${id}/verify`, { approved, rejection_reason }),
 
   analytics: () =>
     apiClient.get<APIResponse<AdminSummary>>('/admin/analytics'),

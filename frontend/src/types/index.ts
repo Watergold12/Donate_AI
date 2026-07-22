@@ -97,6 +97,8 @@ export interface Donation {
 }
 
 // ── NGO ────────────────────────────────────────────────────────────────────
+export type NGOVerificationStatus = 'unsubmitted' | 'pending' | 'verified' | 'rejected'
+
 export interface NGOProfile {
   id: string
   user_id: string
@@ -110,6 +112,10 @@ export interface NGOProfile {
   website: string | null
   description: string | null
   service_areas: string[] | null
+  verification_status?: NGOVerificationStatus
+  verification_doc_path?: string | null
+  rejection_reason?: string | null
+  verification_submitted_at?: string | null
   is_verified: boolean
   verified_at: string | null
   created_at?: string

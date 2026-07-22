@@ -71,4 +71,9 @@ export const ngosApi = {
 
   triggerMatching: () =>
     apiClient.post<APIResponse<null>>('/ngos/matches/trigger'),
+
+  uploadVerificationDocs: (formData: FormData) =>
+    apiClient.post<APIResponse<NGOProfile>>('/ngos/verification-documents', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    }),
 }

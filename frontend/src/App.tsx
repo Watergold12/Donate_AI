@@ -18,6 +18,7 @@ import { NGODemandsPage } from './pages/ngo/NGODemandsPage'
 import { NGOMatchesPage } from './pages/ngo/NGOMatchesPage'
 import { NGOPickupsPage } from './pages/ngo/NGOPickupsPage'
 import { NGOAnalyticsPage } from './pages/ngo/NGOAnalyticsPage'
+import { NGOVerificationPage } from './pages/ngo/NGOVerificationPage'
 import { AdminDashboardPage } from './pages/admin/AdminDashboardPage'
 import { AdminUsersPage } from './pages/admin/AdminUsersPage'
 import { AdminNGOsPage } from './pages/admin/AdminNGOsPage'
@@ -64,6 +65,7 @@ export default function App() {
 
         {/* NGO */}
         <Route path="/ngo" element={<RequireAuth role="ngo"><NGODashboardPage /></RequireAuth>} />
+        <Route path="/ngo/verification" element={<RequireAuth role="ngo"><NGOVerificationPage /></RequireAuth>} />
         <Route path="/ngo/demands" element={<RequireAuth role="ngo"><NGODemandsPage /></RequireAuth>} />
         <Route path="/ngo/matches" element={<RequireAuth role="ngo"><NGOMatchesPage /></RequireAuth>} />
         <Route path="/ngo/pickups" element={<RequireAuth role="ngo"><NGOPickupsPage /></RequireAuth>} />

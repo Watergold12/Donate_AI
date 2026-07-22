@@ -38,11 +38,13 @@ const schema = z.object({
   quantity_needed: z.number().int().min(1, 'At least 1'),
   urgency_level: z.string().min(1, 'Required'),
   description: z.string().optional(),
+  expires_at: z.string().optional(),
 })
 type FormData = z.infer<typeof schema>
 export function NGODemandsPage() {
   const [demands, setDemands] = useState<NGODemand[]>([])
   const [loading, setLoading] = useState(true)
+  const [ngoProfile, setNgoProfile] = useState<NGOProfile | null>(null)
   const [page, setPage] = useState(1)
   const [pages, setPages] = useState(1)
   const [total, setTotal] = useState(0)
@@ -78,28 +80,30 @@ export function NGODemandsPage() {
     return () => window.clearTimeout(timer)
   }, [load])
 
+  const handleAddDemandClick = () => {
+    if (ngoProfile && !ngoProfile.is_verified) {
+      toast.error('Your NGO profile is pending verification. Please upload verification documents to unlock demand creation.')
+      return
+    }
+    setShowModal(true)
+  }
+
   const onSubmit = async (data: FormData) => {
     setSubmitting(true)
     try {
       const res = await ngosApi.createDemand({
-        item_name: data.item_name,
         item_category: data.item_category as ItemCategory,
-        quantity_needed: data.quantity_needed,
+        item_name: data.item_name,
+        quantity_needed: Number(data.quantity_needed),
         urgency_level: data.urgency_level as DemandUrgency,
-        description: data.description,
+        description: data.description || undefined,
+        expires_at: data.expires_at || undefined,
       })
-      reset()
+      setDemands(prev => [res.data.data, ...prev])
+      setTotal(prev => prev + 1)
+      toast.success('Demand created successfully')
       setShowModal(false)
-      toast.success('Demand created')
-      if (res.data.data) {
-        setDemands(prev => [res.data.data, ...prev])
-        setTotal(prev => prev + 1)
-      }
-      if (page === 1) {
-        load()
-      } else {
-        setPage(1)
-      }
+      reset()
     } catch (err: unknown) {
       toast.error(getApiError(err))
     } finally {
@@ -107,21 +111,33 @@ export function NGODemandsPage() {
     }
   }
 
-  function deleteDemand(id: string) {
+  function handleDelete(id: string) {
     setDeleting(id)
     ngosApi.deleteDemand(id)
-      .then(() => { load(); toast.success('Demand deleted') })
-      .catch(() => toast.error('Failed to delete demand'))
+      .then(() => {
+        setDemands(prev => prev.filter(d => d.id !== id))
+        setTotal(prev => Math.max(0, prev - 1))
+        toast.info('Demand deactivated')
+      })
+      .catch(err => toast.error(getApiError(err)))
       .finally(() => setDeleting(null))
   }
 
   return (
     <DashboardLayout>
       <div className="flex flex-col gap-6">
+        <NGOVerificationGuard onStatusLoaded={setNgoProfile} />
         <PageHeader
           title="Demand Management"
           subtitle={`${total} active demand${total !== 1 ? 's' : ''}`}
-          actions={<Button onClick={() => setShowModal(true)}>+ Add Demand</Button>}
+          actions={
+            <Button
+              onClick={handleAddDemandClick}
+              disabled={ngoProfile ? !ngoProfile.is_verified : false}
+            >
+              + Add Demand
+            </Button>
+          }
         />
         <Card padding="none">
           {loading ? (
@@ -148,7 +164,7 @@ export function NGODemandsPage() {
                     </div>
                     <p className="text-xs text-da-muted">Added {formatDate(d.created_at)}</p>
                   </div>
-                  <Button size="sm" variant="danger" loading={deleting === d.id} onClick={() => deleteDemand(d.id)}>
+                  <Button size="sm" variant="danger" loading={deleting === d.id} onClick={() => handleDelete(d.id)}>
                     Delete
                   </Button>
                 </div>

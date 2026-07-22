@@ -130,8 +130,23 @@ def list_matches(db: Session, user: User, params: PaginationParams,
     return paginate(query, params)
 
 
+def submit_verification_documents(db: Session, user: User, doc_path: str, request=None) -> NGOProfile:
+    profile = _get_ngo_profile(db, user)
+    profile.verification_doc_path = doc_path
+    profile.verification_status = "pending"
+    profile.verification_submitted_at = datetime.now(timezone.utc)
+    profile.rejection_reason = None
+    log_action(db, AuditAction.UPDATE, "ngo_profile", profile.id, actor_id=user.id,
+               new_data={"verification_status": "pending", "doc_path": doc_path}, request=request)
+    db.commit()
+    db.refresh(profile)
+    return profile
+
+
 def accept_match(db: Session, user: User, match_id: UUID, request=None) -> Match:
     profile = _get_ngo_profile(db, user)
+    if not profile.is_verified:
+        raise BusinessLogicError("NGO must be verified by an administrator before accepting matches")
     match = db.query(Match).filter(
         Match.id == match_id, Match.ngo_id == profile.id
     ).first()

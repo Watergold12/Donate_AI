@@ -19,6 +19,7 @@ const donorNav: NavItem[] = [
 
 const ngoNav: NavItem[] = [
   { label: 'Dashboard', to: '/ngo',             icon: LayoutDashboard },
+  { label: 'Verification', to: '/ngo/verification', icon: CheckSquare },
   { label: 'Demands',   to: '/ngo/demands',     icon: ClipboardList },
   { label: 'Matches',   to: '/ngo/matches',     icon: Handshake },
   { label: 'Pickups',   to: '/ngo/pickups',     icon: MapPin },

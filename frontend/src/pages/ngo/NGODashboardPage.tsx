@@ -12,6 +12,8 @@ import { ngosApi } from '../../api/ngos'
 import type { NGOSummary, Match } from '../../types/index'
 import { scoreToPercent, formatDate } from '../../utils/index'
 
+import { NGOVerificationGuard } from '../../components/organisms/NGOVerificationGuard'
+
 export function NGODashboardPage() {
   const [summary, setSummary] = useState<NGOSummary | null>(null)
   const [matches, setMatches] = useState<Match[]>([])
@@ -60,6 +62,7 @@ export function NGODashboardPage() {
   return (
     <DashboardLayout>
       <div className="flex flex-col gap-6">
+        <NGOVerificationGuard />
         <PageHeader title="NGO Dashboard" subtitle="Manage demands and incoming matches" />
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5">
           <StatCard title="Total Demands"  value={s?.total_demands     ?? 0} icon={<span>📋</span>} />

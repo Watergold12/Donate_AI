@@ -9,12 +9,15 @@ PUT      /ngos/matches/{id}/reject
 GET      /ngos/analytics
 """
 import math
+import os
+import uuid
 from typing import Annotated, Optional
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, Request, status
+from fastapi import APIRouter, Depends, Request, status, UploadFile, File, HTTPException
 from sqlalchemy.orm import Session
 
+from app.config import settings
 from app.core.dependencies import require_ngo
 from app.database import get_db
 from app.models.enums import MatchStatus
@@ -55,6 +58,39 @@ def update_profile(
 ):
     profile = ngo_service.update_profile(db, current_user, payload, request)
     return APIResponse.ok(NGOProfileResponse.model_validate(profile), "Profile updated")
+
+
+@router.post("/verification-documents", response_model=APIResponse[NGOProfileResponse])
+async def upload_verification_documents(
+    request: Request,
+    file: UploadFile = File(...),
+    current_user: User = Depends(require_ngo),
+    db: Session = Depends(get_db),
+):
+    if not file.filename:
+        raise HTTPException(status_code=400, detail="No file provided")
+    
+    ext = os.path.splitext(file.filename)[1].lower()
+    allowed_exts = {".pdf", ".png", ".jpg", ".jpeg", ".webp", ".doc", ".docx"}
+    if ext not in allowed_exts:
+        raise HTTPException(status_code=400, detail=f"File format {ext} not allowed. Supported formats: PDF, PNG, JPG, DOC")
+
+    docs_dir = os.path.join(settings.media_path, "verification_docs")
+    os.makedirs(docs_dir, exist_ok=True)
+    
+    unique_filename = f"{uuid.uuid4().hex}{ext}"
+    file_path = os.path.join(docs_dir, unique_filename)
+    
+    content = await file.read()
+    if len(content) > settings.max_upload_size_bytes:
+        raise HTTPException(status_code=400, detail=f"File size exceeds maximum allowed size of {settings.max_upload_size_mb}MB")
+        
+    with open(file_path, "wb") as f:
+        f.write(content)
+        
+    rel_path = f"/media/verification_docs/{unique_filename}"
+    profile = ngo_service.submit_verification_documents(db, current_user, rel_path, request)
+    return APIResponse.ok(NGOProfileResponse.model_validate(profile), "Verification documents submitted successfully")
 
 
 @router.post("/demands", response_model=APIResponse[NGODemandResponse], status_code=status.HTTP_201_CREATED)
