@@ -217,7 +217,7 @@ export function AdminNGOsPage() {
         {/* ── Rejection Reason Modal ──────────────────────────────── */}
         {rejectingTarget && (
           <Modal
-            isOpen={true}
+            open={true}
             onClose={() => setRejectingTarget(null)}
             title={`Reject Verification: ${rejectingTarget.org_name}`}
           >

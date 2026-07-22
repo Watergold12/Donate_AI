@@ -206,16 +206,16 @@ export function SettingsPage() {
           </div>
           <div className="flex flex-col gap-1">
             <div className="flex items-center gap-2">
-              <h1 className="text-xl font-bold text-white">{user?.full_name}</h1>
+              <h1 className="text-xl font-bold text-da-text">{user?.full_name}</h1>
               <Badge variant={roleBadgeVariant}>{user?.role?.toUpperCase()}</Badge>
             </div>
-            <p className="text-sm text-[#A1A8B3]">{user?.email}</p>
-            <p className="text-sm text-[#6B7280]">{profileSummary}</p>
+            <p className="text-sm text-da-secondary">{user?.email}</p>
+            <p className="text-sm text-da-muted">{profileSummary}</p>
           </div>
         </div>
 
         {/* Tab bar */}
-        <div className="flex gap-1 rounded-xl border border-white/[0.08] bg-da-card p-1">
+        <div className="flex gap-1 rounded-xl border border-da-border bg-da-card p-1">
           {TAB_ITEMS.map(t => {
             const Icon = t.icon
             const active = tab === t.key
@@ -227,7 +227,7 @@ export function SettingsPage() {
                   'flex flex-1 items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-medium transition-all',
                   active
                     ? 'bg-[#1D8CF8] text-white shadow-md shadow-[#1D8CF8]/20'
-                    : 'text-[#A1A8B3] hover:bg-white/[0.04] hover:text-white',
+                    : 'text-da-secondary hover:bg-da-border hover:text-da-text',
                 ].join(' ')}
               >
                 <Icon className="h-4 w-4" />
@@ -241,9 +241,9 @@ export function SettingsPage() {
         {tab === 'account' && (
           <Card>
             <form onSubmit={handleAccount(saveAccount)} className="flex flex-col gap-5">
-              <div className="flex items-center gap-2 border-b border-white/[0.06] pb-4">
+              <div className="flex items-center gap-2 border-b border-da-border pb-4">
                 <UserIcon className="h-5 w-5 text-[#1D8CF8]" />
-                <h2 className="text-base font-semibold text-white">Account Information</h2>
+                <h2 className="text-base font-semibold text-da-text">Account Information</h2>
               </div>
 
               <div className="rounded-lg border border-da-border bg-da-bg/60 p-3 text-sm text-da-secondary">
@@ -295,9 +295,9 @@ export function SettingsPage() {
             ) : user?.role === 'donor' ? (
               /* ─── Donor Details ─────────────────────────── */
               <form onSubmit={handleDonor(saveDonor)} className="flex flex-col gap-5">
-                <div className="flex items-center gap-2 border-b border-white/[0.06] pb-4">
+                <div className="flex items-center gap-2 border-b border-da-border pb-4">
                   <MapPin className="h-5 w-5 text-[#1D8CF8]" />
-                  <h2 className="text-base font-semibold text-white">Address &amp; Contact</h2>
+                  <h2 className="text-base font-semibold text-da-text">Address &amp; Contact</h2>
                 </div>
 
                 <div className="rounded-lg border border-da-border bg-da-bg/60 p-3 text-sm text-da-secondary">
@@ -342,7 +342,7 @@ export function SettingsPage() {
                   />
                 </div>
 
-                <div className="flex justify-end border-t border-white/[0.06] pt-4">
+                <div className="flex justify-end border-t border-da-border pt-4">
                   <Button type="submit" loading={savingDonor}>
                     <Save className="h-4 w-4" />
                     Save Details
@@ -352,9 +352,9 @@ export function SettingsPage() {
             ) : user?.role === 'ngo' ? (
               /* ─── NGO Details ──────────────────────────── */
               <form onSubmit={handleNgo(saveNgo)} className="flex flex-col gap-5">
-                <div className="flex items-center gap-2 border-b border-white/[0.06] pb-4">
+                <div className="flex items-center gap-2 border-b border-da-border pb-4">
                   <Building2 className="h-5 w-5 text-[#1D8CF8]" />
-                  <h2 className="text-base font-semibold text-white">Organisation Details</h2>
+                  <h2 className="text-base font-semibold text-da-text">Organisation Details</h2>
                 </div>
 
                 <div className="rounded-lg border border-da-border bg-da-bg/60 p-3 text-sm text-da-secondary">
@@ -420,7 +420,7 @@ export function SettingsPage() {
                   {...regNgo('description')}
                 />
 
-                <div className="flex justify-end border-t border-white/[0.06] pt-4">
+                <div className="flex justify-end border-t border-da-border pt-4">
                   <Button type="submit" loading={savingNgo}>
                     <Save className="h-4 w-4" />
                     Save Details
@@ -430,7 +430,7 @@ export function SettingsPage() {
             ) : (
               /* ─── Admin — no profile to edit ───────────── */
               <div className="flex flex-col items-center gap-2 py-12 text-center">
-                <p className="text-sm text-[#A1A8B3]">Admin accounts do not have profile details to edit.</p>
+                <p className="text-sm text-da-secondary">Admin accounts do not have profile details to edit.</p>
               </div>
             )}
           </Card>
@@ -447,7 +447,7 @@ export function SettingsPage() {
             </div>
             <div className="flex flex-col">
               <span className="text-sm font-medium text-red-400">Sign Out</span>
-              <span className="text-xs text-[#6B7280]">End your session on this device</span>
+              <span className="text-xs text-da-muted">End your session on this device</span>
             </div>
           </button>
         </Card>

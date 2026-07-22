@@ -1,4 +1,5 @@
-import { useState, useEffect, ChangeEvent, FormEvent } from 'react'
+import { useState, useEffect } from 'react'
+import type { ChangeEvent, DragEvent, FormEvent } from 'react'
 import { DashboardLayout } from '../../components/templates/DashboardLayout'
 import { PageHeader } from '../../components/molecules/PageHeader'
 import { Card } from '../../components/atoms/Card'
@@ -46,7 +47,7 @@ export function NGOVerificationPage() {
     }
   }
 
-  const handleDrag = (e: React.DragEvent) => {
+  const handleDrag = (e: DragEvent<HTMLDivElement>) => {
     e.preventDefault()
     e.stopPropagation()
     if (e.type === 'dragenter' || e.type === 'dragover') {
@@ -56,7 +57,7 @@ export function NGOVerificationPage() {
     }
   }
 
-  const handleDrop = (e: React.DragEvent) => {
+  const handleDrop = (e: DragEvent<HTMLDivElement>) => {
     e.preventDefault()
     e.stopPropagation()
     setDragActive(false)
@@ -160,7 +161,7 @@ export function NGOVerificationPage() {
                 <div>
                   <p className="font-semibold">Application Requires Re-submission</p>
                   <p className="text-xs text-red-300 mt-1">
-                    <strong>Admin Reason:</strong> {profile.rejection_reason || 'Please upload updated registration documentation.'}
+                    <strong>Admin Reason:</strong> {profile?.rejection_reason || 'Please upload updated registration documentation.'}
                   </p>
                   <p className="text-xs text-red-300/80 mt-1">Please review the reason above and upload valid official documents below.</p>
                 </div>
