@@ -43,6 +43,40 @@ class Match(Base, TimestampMixin):
     def demand_item_name(self) -> Optional[str]:
         return self.ngo_demand.item_name if self.ngo_demand else None
 
+    @property
+    def score_breakdown(self) -> Optional[dict]:
+        if not self.donation or not self.ngo_demand or not self.ngo:
+            return None
+        from app.utils.matching_algorithm import build_score_breakdown, compute_score
+
+        donor_city = self.donation.donor.city if self.donation.donor else None
+        donor_state = self.donation.donor.state if self.donation.donor else None
+        score = compute_score(
+            [item for item in self.donation.items if item.is_confirmed],
+            self.ngo_demand,
+            self.ngo,
+            donor_city=donor_city,
+            donor_state=donor_state,
+        )
+        return build_score_breakdown(score)
+
+    @property
+    def match_explanation(self) -> Optional[list[str]]:
+        if not self.donation or not self.ngo_demand or not self.ngo:
+            return None
+        from app.utils.matching_algorithm import build_match_explanation, compute_score
+
+        donor_city = self.donation.donor.city if self.donation.donor else None
+        donor_state = self.donation.donor.state if self.donation.donor else None
+        score = compute_score(
+            [item for item in self.donation.items if item.is_confirmed],
+            self.ngo_demand,
+            self.ngo,
+            donor_city=donor_city,
+            donor_state=donor_state,
+        )
+        return build_match_explanation(score)
+
     __table_args__ = (
         Index("ix_matches_donation_id", "donation_id"),
         Index("ix_matches_ngo_id", "ngo_id"),

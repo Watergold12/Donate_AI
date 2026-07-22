@@ -1,18 +1,20 @@
 """
 Weighted rule-based scorer.
-Score = 0.30*item_type + 0.20*quantity + 0.15*priority + 0.15*distance + 0.20*urgency
+Score = 0.25*item_type + 0.20*quantity + 0.15*priority + 0.10*distance + 0.15*urgency + 0.15*semantic
 Replace this class with any BaseScorer subclass to use a different model.
 """
 from typing import Optional
 from app.matching.base import BaseScorer, ScorerInput, ScorerResult
 from app.models.enums import DemandUrgency
+from app.utils.matching_algorithm import semantic_match_score
 
 DEFAULT_WEIGHTS = {
-    "item_type": 0.30,
+    "item_type": 0.25,
     "quantity":  0.20,
     "priority":  0.15,
-    "distance":  0.15,
-    "urgency":   0.20,
+    "distance":  0.10,
+    "urgency":   0.15,
+    "semantic":  0.15,
 }
 
 URGENCY_SCORES = {
@@ -35,12 +37,14 @@ class WeightedScorer(BaseScorer):
         priority_s = self._priority(inp)
         dist_s     = self._distance(inp)
         urgency_s  = self._urgency(inp)
+        semantic_s = semantic_match_score(inp.donation_items, inp.demand)
         total = (
             self.weights["item_type"] * type_s +
             self.weights["quantity"]  * qty_s  +
             self.weights["priority"]  * priority_s +
             self.weights["distance"]  * dist_s +
-            self.weights["urgency"]   * urgency_s
+            self.weights["urgency"]   * urgency_s +
+            self.weights["semantic"]  * semantic_s
         )
         return ScorerResult(
             demand=inp.demand, ngo_profile=inp.ngo_profile,
@@ -50,7 +54,8 @@ class WeightedScorer(BaseScorer):
             urgency_score=urgency_s,
             breakdown={"weights": self.weights, "item_type": type_s,
                        "quantity": qty_s, "priority": priority_s,
-                       "distance": dist_s, "urgency": urgency_s},
+                       "distance": dist_s, "urgency": urgency_s,
+                       "semantic": semantic_s},
         )
 
     def _item_type(self, inp: ScorerInput) -> float:

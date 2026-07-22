@@ -140,6 +140,18 @@ export function NGOMatchesPage() {
                     {m.donation_notes && (
                       <p className="text-xs italic text-da-muted">"{m.donation_notes}"</p>
                     )}
+                    {m.match_explanation && m.match_explanation.length > 0 && (
+                      <div className="mt-2 rounded-lg border border-da-border bg-da-bg/70 p-3">
+                        <p className="text-[11px] font-semibold uppercase tracking-wide text-da-secondary">Why this matched</p>
+                        <ul className="mt-1.5 space-y-1">
+                          {m.match_explanation.slice(0, 3).map(reason => (
+                            <li key={reason} className="text-xs text-da-secondary">
+                              {reason}
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
                     <div className="mt-1 h-1.5 w-28 overflow-hidden rounded-full bg-da-border">
                       <div className="h-1.5 rounded-full bg-da-primary" style={{ width: scoreToPercent(m.score) }} />
                     </div>

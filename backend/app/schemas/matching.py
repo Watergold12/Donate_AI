@@ -1,6 +1,6 @@
 """Match schemas."""
 from datetime import datetime
-from typing import Optional
+from typing import Any, Optional
 from uuid import UUID
 from pydantic import BaseModel
 from app.models.enums import MatchStatus
@@ -21,6 +21,8 @@ class MatchResponse(BaseModel):
     donation_notes: Optional[str] = None
     items_summary: Optional[str] = None
     demand_item_name: Optional[str] = None
+    score_breakdown: Optional[dict[str, Any]] = None
+    match_explanation: Optional[list[str]] = None
 
 
 class MatchActionRequest(BaseModel):

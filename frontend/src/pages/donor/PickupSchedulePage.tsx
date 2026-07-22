@@ -129,6 +129,15 @@ export function PickupSchedulePage() {
                   <div className="flex flex-col gap-1">
                     <p className="text-sm font-medium text-da-text">NGO Match</p>
                     <p className="text-xs text-da-secondary">Match strength: {scoreToPercent(m.score)}</p>
+                    {m.match_explanation && m.match_explanation.length > 0 && (
+                      <ul className="mt-1 space-y-1">
+                        {m.match_explanation.slice(0, 2).map(reason => (
+                          <li key={reason} className="text-[11px] text-da-muted">
+                            {reason}
+                          </li>
+                        ))}
+                      </ul>
+                    )}
                     <p className="text-xs text-da-muted">Expires {formatDate(m.expires_at)}</p>
                   </div>
                   <div className="flex flex-col items-end gap-1">

@@ -149,6 +149,8 @@ export interface Match {
   donation_notes?: string | null
   items_summary?: string | null
   demand_item_name?: string | null
+  score_breakdown?: Record<string, unknown> | null
+  match_explanation?: string[] | null
 }
 
 // ── Pickup ─────────────────────────────────────────────────────────────────
