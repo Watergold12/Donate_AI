@@ -39,6 +39,7 @@ class DonationItem(Base, TimestampMixin):
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     donation_id = Column(UUID(as_uuid=True), ForeignKey("donations.id", ondelete="CASCADE"), nullable=False)
     item_name = Column(String(255), nullable=False)
+    description = Column(Text, nullable=True)
     category = Column(PgEnum(ItemCategory, name="item_category", create_type=False), nullable=False)
     quantity = Column(Integer, default=1, nullable=False)
     condition = Column(PgEnum(ItemCondition, name="item_condition", create_type=False), nullable=False, default=ItemCondition.good)

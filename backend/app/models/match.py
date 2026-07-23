@@ -66,7 +66,15 @@ class Match(Base, TimestampMixin):
     def items_summary(self) -> Optional[str]:
         if not self.donation or not self.donation.items:
             return None
-        return ", ".join(f"{i.quantity}x {i.item_name}" for i in self.donation.items if i.is_confirmed)
+        parts = []
+        for item in self.donation.items:
+            if not item.is_confirmed:
+                continue
+            label = f"{item.quantity}x {item.item_name}"
+            if item.description:
+                label += f" ({item.description})"
+            parts.append(label)
+        return ", ".join(parts)
 
     @property
     def demand_item_name(self) -> Optional[str]:

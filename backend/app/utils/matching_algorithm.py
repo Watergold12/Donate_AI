@@ -148,6 +148,8 @@ def _semantic_score(donation_items: List[DonationItem], demand: NGODemand) -> fl
         if not item.is_confirmed:
             continue
         donation_tokens |= _tokenize(item.item_name)
+        if item.description:
+            donation_tokens |= _tokenize(item.description)
         donation_tokens |= _category_tokens(item.category)
 
     demand_tokens = _tokenize(demand.item_name)
@@ -188,9 +190,10 @@ def _build_donation_semantic_text(donation_items: List[DonationItem]) -> str:
         if not item.is_confirmed:
             continue
         item_name = (item.item_name or "").strip()
+        item_description = (item.description or "").strip()
         category = item.category.value.replace("_", " ")
         if item_name:
-            parts.append(f"{item.quantity} {item_name} {category}")
+            parts.append(f"{item.quantity} {item_name} {category} {item_description}".strip())
     return " ; ".join(parts)
 
 

@@ -7,6 +7,7 @@ import type {
 
 interface AddItemPayload {
   item_name: string
+  description?: string
   category: ItemCategory
   quantity: number
   condition: ItemCondition
@@ -17,6 +18,7 @@ interface AddItemPayload {
 
 interface UpdateItemPayload {
   item_name?: string
+  description?: string
   category?: ItemCategory
   quantity?: number
   condition?: ItemCondition

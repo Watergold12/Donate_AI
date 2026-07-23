@@ -4,6 +4,7 @@ import { DashboardLayout } from '../../components/templates/DashboardLayout'
 import { PageHeader } from '../../components/molecules/PageHeader'
 import { Card } from '../../components/atoms/Card'
 import { Button } from '../../components/atoms/Button'
+import { Input } from '../../components/atoms/Input'
 import { Badge } from '../../components/atoms/Badge'
 import { Spinner } from '../../components/atoms/Spinner'
 import { detectionApi } from '../../api/detection'
@@ -14,6 +15,7 @@ import { capitalize, scoreToPercent, getApiError } from '../../utils/index'
 import { Camera, Upload, X, ZoomIn } from 'lucide-react'
 
 type Mode = 'idle' | 'camera' | 'preview'
+type ScanItem = DetectionResult & { description: string }
 
 export function CameraPage() {
   const navigate = useNavigate()
@@ -26,12 +28,12 @@ export function CameraPage() {
   // State
   const [mode, setMode]         = useState<Mode>('idle')
   const [preview, setPreview]   = useState<string | null>(null)
-  const [results, setResults]   = useState<DetectionResult[]>([])
+  const [results, setResults]   = useState<ScanItem[]>([])
   const [loading, setLoading]   = useState(false)
   const [error, setError]       = useState('')
   const [file, setFile]         = useState<File | null>(null)
   const [stream, setStream]     = useState<MediaStream | null>(null)
-  const [cart, setCart]         = useState<typeof results>([])
+  const [cart, setCart]         = useState<ScanItem[]>([])
   const [confirming, setConfirming] = useState(false)
   const toast = useToast()
   const detectedTotal = results.reduce((sum, item) => sum + (item.count || 1), 0)
@@ -106,7 +108,7 @@ export function CameraPage() {
     setError('')
     try {
       const res = await detectionApi.analyze(file)
-      setResults(res.data.data.items)
+      setResults(res.data.data.items.map(item => ({ ...item, description: '' })))
       const total = res.data.data.total_detected || res.data.data.items.reduce((sum, item) => sum + (item.count || 1), 0)
       toast.success(`Detected ${total} item(s)`)
     } catch {
@@ -286,6 +288,14 @@ export function CameraPage() {
                         </div>
                         <span className="text-xs text-da-muted">{scoreToPercent(r.confidence)}</span>
                       </div>
+                      <div className="mt-3">
+                        <Input
+                          label="Description"
+                          placeholder="e.g. maths book"
+                          value={r.description}
+                          onChange={e => setResults(prev => prev.map((item, idx) => idx === i ? { ...item, description: e.target.value } : item))}
+                        />
+                      </div>
                     </div>
                   ))}
                 </div>
@@ -298,10 +308,18 @@ export function CameraPage() {
                     size="sm"
                     className="w-full"
                     onClick={() => setCart(prev => {
-                      const merged = [...prev]
+                      const merged = prev.map(item => ({ ...item }))
                       results.forEach(r => {
                         const existing = merged.find(c => c.name === r.name)
-                        if (!existing) merged.push({ ...r })
+                        if (!existing) {
+                          merged.push({ ...r })
+                        } else {
+                          existing.description = r.description
+                          existing.count = r.count
+                          existing.category = r.category
+                          existing.confidence = r.confidence
+                          existing.bbox = r.bbox
+                        }
                       })
                       return merged
                     })}
@@ -316,7 +334,12 @@ export function CameraPage() {
                   <p className="text-xs font-medium text-da-secondary">Cart ({cart.length} items)</p>
                   {cart.map((c, i) => (
                     <div key={i} className="flex items-center justify-between rounded bg-da-bg px-2 py-1.5">
-                      <span className="text-xs text-da-text">{c.name} x{c.count}</span>
+                      <div className="flex flex-col">
+                        <span className="text-xs text-da-text">{c.name} x{c.count}</span>
+                        {c.description && (
+                          <span className="text-[11px] text-da-secondary">Description: {c.description}</span>
+                        )}
+                      </div>
                       <button
                         onClick={() => setCart(prev => prev.filter((_, idx) => idx !== i))}
                         className="text-xs text-red-400 hover:text-red-300"
@@ -337,6 +360,7 @@ export function CameraPage() {
                         for (const item of cart) {
                           await donationsApi.addItem(id, {
                             item_name: item.name,
+                            description: item.description || undefined,
                             category: item.category,
                             quantity: item.count || 1,
                             condition: 'good',

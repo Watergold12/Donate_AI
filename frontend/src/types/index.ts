@@ -74,6 +74,7 @@ export interface DonationItem {
   id: string
   donation_id: string
   item_name: string
+  description: string | null
   category: ItemCategory
   quantity: number
   condition: ItemCondition

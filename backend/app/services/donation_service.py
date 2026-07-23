@@ -174,6 +174,7 @@ def add_item(db: Session, user: User, donation_id: UUID,
     item = DonationItem(
         donation_id=donation.id,
         item_name=payload.item_name,
+        description=payload.description,
         category=payload.category,
         quantity=payload.quantity,
         condition=payload.condition,
@@ -186,7 +187,7 @@ def add_item(db: Session, user: User, donation_id: UUID,
     db.flush()
     donation.total_items += payload.quantity
     log_action(db, AuditAction.CREATE, "donation_item", item.id, actor_id=user.id,
-               new_data={"item_name": item.item_name, "category": item.category}, request=request)
+               new_data={"item_name": item.item_name, "category": item.category, "description": item.description}, request=request)
     db.commit()
     db.refresh(item)
     return item
@@ -209,6 +210,8 @@ def update_item(db: Session, user: User, donation_id: UUID, item_id: UUID,
     old_qty = item.quantity
     if payload.item_name is not None:
         item.item_name = payload.item_name
+    if payload.description is not None:
+        item.description = payload.description
     if payload.category is not None:
         item.category = payload.category
     if payload.quantity is not None:
@@ -219,7 +222,7 @@ def update_item(db: Session, user: User, donation_id: UUID, item_id: UUID,
     if payload.is_confirmed is not None:
         item.is_confirmed = payload.is_confirmed
     log_action(db, AuditAction.UPDATE, "donation_item", item.id, actor_id=user.id,
-               new_data={"item_name": item.item_name}, request=request)
+               new_data={"item_name": item.item_name, "description": item.description}, request=request)
     db.commit()
     db.refresh(item)
     return item

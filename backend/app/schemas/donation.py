@@ -8,6 +8,7 @@ from app.models.enums import DonationStatus, ItemCategory, ItemCondition
 
 class DonationItemCreate(BaseModel):
     item_name: str
+    description: Optional[str] = None
     category: ItemCategory
     quantity: int = 1
     condition: ItemCondition = ItemCondition.good
@@ -25,6 +26,7 @@ class DonationItemCreate(BaseModel):
 
 class DonationItemUpdate(BaseModel):
     item_name: Optional[str] = None
+    description: Optional[str] = None
     category: Optional[ItemCategory] = None
     quantity: Optional[int] = None
     condition: Optional[ItemCondition] = None
@@ -36,6 +38,7 @@ class DonationItemResponse(BaseModel):
     id: UUID
     donation_id: UUID
     item_name: str
+    description: Optional[str] = None
     category: ItemCategory
     quantity: int
     condition: ItemCondition

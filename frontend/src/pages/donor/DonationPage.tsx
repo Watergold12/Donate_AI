@@ -29,6 +29,7 @@ const CONDITION_OPTIONS = [
 ]
 const schema = z.object({
   item_name: z.string().min(1, 'Required'),
+  description: z.string().optional(),
   category: z.string().min(1, 'Required'),
   quantity: z.number().int().min(1, 'At least 1'),
   condition: z.string().min(1, 'Required'),
@@ -68,6 +69,7 @@ export function DonationPage() {
     try {
       const r = await donationsApi.addItem(donation.id, {
         item_name: data.item_name,
+        description: data.description || undefined,
         category: data.category as ItemCategory,
         quantity: data.quantity,
         condition: data.condition as ItemCondition,
@@ -148,6 +150,9 @@ export function DonationPage() {
                     <div key={item.id} className="flex items-center justify-between rounded-lg border border-da-border p-3">
                       <div className="flex flex-col gap-1">
                         <span className="text-sm font-medium text-da-text">{item.item_name}</span>
+                        {item.description && (
+                          <span className="text-xs text-da-secondary">Description: {item.description}</span>
+                        )}
                         <div className="flex gap-2">
                           <Badge variant="info">{capitalize(item.category)}</Badge>
                           <Badge variant="default">×{item.quantity}</Badge>
@@ -170,6 +175,7 @@ export function DonationPage() {
         <Modal open={showModal} onClose={() => { setShowModal(false); reset() }} title="Add Item">
           <form onSubmit={rhfSubmit(addItem)} className="flex flex-col gap-4" noValidate>
             <Input label="Item name" placeholder="e.g. Winter jacket" error={errors.item_name?.message} {...register('item_name')} />
+            <Textarea label="Description (optional)" placeholder="e.g. maths book" {...register('description')} />
             <Select label="Category" options={CATEGORY_OPTIONS} placeholder="Select category" error={errors.category?.message} {...register('category')} />
             <Input label="Quantity" type="number" min={1} error={errors.quantity?.message} {...register('quantity', { valueAsNumber: true })} />
             <Select label="Condition" options={CONDITION_OPTIONS} error={errors.condition?.message} {...register('condition')} />

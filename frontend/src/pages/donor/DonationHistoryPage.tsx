@@ -106,14 +106,19 @@ export function DonationHistoryPage() {
                       <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-da-secondary">Items</p>
                       <div className="flex flex-col gap-1">
                         {d.items.map(item => (
-                          <div key={item.id} className="flex items-center gap-2 text-sm text-da-text">
-                            <span className="font-medium">{item.item_name}</span>
-                            <span className="text-gray-400">·</span>
-                            <span>{capitalize(item.category)}</span>
-                            <span className="text-gray-400">·</span>
-                            <span>Qty {item.quantity}</span>
-                            <span className="text-gray-400">·</span>
-                            <span>{capitalize(item.condition)}</span>
+                          <div key={item.id} className="flex flex-col gap-0.5 text-sm text-da-text">
+                            <div className="flex items-center gap-2">
+                              <span className="font-medium">{item.item_name}</span>
+                              <span className="text-gray-400">·</span>
+                              <span>{capitalize(item.category)}</span>
+                              <span className="text-gray-400">·</span>
+                              <span>Qty {item.quantity}</span>
+                              <span className="text-gray-400">·</span>
+                              <span>{capitalize(item.condition)}</span>
+                            </div>
+                            {item.description && (
+                              <span className="text-xs text-da-secondary">Description: {item.description}</span>
+                            )}
                           </div>
                         ))}
                       </div>
