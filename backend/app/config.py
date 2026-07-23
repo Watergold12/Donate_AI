@@ -43,8 +43,8 @@ class Settings(BaseSettings):
 
     # AI Detection
     detection_confidence: float = 0.40
-    model_path: str = "./models/best.pt"
-    use_mock_detector: bool = True
+    model_path: str = "./models/yolov8n.pt"
+    use_mock_detector: bool = False
 
     # Matching Engine
     match_score_threshold: float = 0.50

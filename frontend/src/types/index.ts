@@ -194,6 +194,7 @@ export interface DetectionResult {
   name: string
   category: ItemCategory
   confidence: number
+  count: number
   bbox: BoundingBox | null
 }
 

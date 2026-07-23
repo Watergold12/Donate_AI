@@ -15,6 +15,7 @@ from sqlalchemy.orm import Session
 from app.config import settings
 from app.core.dependencies import get_current_active_user
 from app.database import get_db
+from app.ai.services.inference import run_inference
 from app.models.user import User
 from app.schemas.common import APIResponse
 from app.schemas.detection import BoundingBox, DetectionResponse, DetectionResult
@@ -62,20 +63,23 @@ async def analyze_image(
             detail="AI detector not initialized",
         )
 
-    raw_results = detector.detect(image_bytes)
+    raw_results = run_inference(detector, image_bytes).get("items", [])
 
-    # Map dataclass results to Pydantic response schemas
+    # Map dict results to Pydantic response schemas
     items = [
         DetectionResult(
-            name=r.name,
-            category=r.category,
-            confidence=r.confidence,
-            bbox=BoundingBox(x1=r.bbox.x1, y1=r.bbox.y1, x2=r.bbox.x2, y2=r.bbox.y2) if r.bbox else None,
+            name=r["name"],
+            category=r["category"],
+            confidence=r["confidence"],
+            count=r.get("count", 1),
+            bbox=BoundingBox(x1=r["bbox"]["x1"], y1=r["bbox"]["y1"], x2=r["bbox"]["x2"], y2=r["bbox"]["y2"]) if r.get("bbox") else None,
         )
         for r in raw_results
     ]
 
+    total_detected = sum(item.count for item in items) if items else 0
+
     return APIResponse.ok(
-        DetectionResponse(items=items, total_detected=len(items), image_path=f"/media/{filename}"),
-        f"Detected {len(items)} item(s)",
+        DetectionResponse(items=items, total_detected=total_detected, image_path=f"/media/{filename}"),
+        f"Detected {total_detected} item(s)",
     )

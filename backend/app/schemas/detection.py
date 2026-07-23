@@ -15,6 +15,7 @@ class DetectionResult(BaseModel):
     name: str
     category: ItemCategory
     confidence: float
+    count: int = 1
     bbox: Optional[BoundingBox] = None
 
 

@@ -1,19 +1,18 @@
 """
 YOLOv8 real detector implementation.
-Loads best.pt once at startup, runs inference per request.
-Aggregates detections by class — returns one result per unique object type
-with count and average confidence.
 
-DO NOT retrain. DO NOT modify the model. Load-only.
+Loads the default pretrained YOLO weights once at startup, runs inference per
+request, and aggregates detections by class. The later trained `best.pt` model
+can be swapped in through configuration without changing the workflow.
 """
 import io
 import logging
-from pathlib import Path
 from typing import List
 
 from PIL import Image
 
 from app.ai.interface import BaseDetector, BoundingBox, DetectionResult
+from app.config import settings
 from app.models.enums import ItemCategory
 
 logger = logging.getLogger(__name__)
@@ -42,6 +41,7 @@ _CATEGORY_MAP: dict[str, ItemCategory] = {
     "laptop":      ItemCategory.electronics,
     "computer":    ItemCategory.electronics,
     "phone":       ItemCategory.electronics,
+    "cell phone":  ItemCategory.electronics,
     "mobile":      ItemCategory.electronics,
     "tablet":      ItemCategory.electronics,
     "keyboard":    ItemCategory.electronics,
@@ -55,12 +55,17 @@ _CATEGORY_MAP: dict[str, ItemCategory] = {
     "cup":         ItemCategory.food,
     "bowl":        ItemCategory.food,
     "food":        ItemCategory.food,
+    "wine glass":  ItemCategory.food,
+    "fork":        ItemCategory.food,
+    "knife":       ItemCategory.food,
+    "spoon":       ItemCategory.food,
     # Furniture
     "chair":       ItemCategory.furniture,
     "couch":       ItemCategory.furniture,
     "sofa":        ItemCategory.furniture,
     "table":       ItemCategory.furniture,
     "bed":         ItemCategory.furniture,
+    "dining table": ItemCategory.furniture,
     "furniture":   ItemCategory.furniture,
     # Toys
     "teddy bear":  ItemCategory.toys,
@@ -83,38 +88,28 @@ class YOLODetector(BaseDetector):
     Wraps the ultralytics YOLO model for inference-only use.
     """
 
-    def __init__(self, model_path: str = "./models/best.pt") -> None:
+    def __init__(self, model_path: str = "yolov8n.pt") -> None:
         self._model_path = model_path
         self._model = None
         self._load()
 
     def _load(self) -> None:
         """Load the YOLO model from disk. Called once at startup."""
-        path = Path(self._model_path)
-        if not path.exists():
-            logger.warning(
-                "YOLOv8 model file not found at '%s'. "
-                "Detector will return empty results until the model is placed there.",
-                self._model_path,
-            )
-            return
         try:
             from ultralytics import YOLO  # type: ignore[import-untyped]
-            self._model = YOLO(str(path))
+            self._model = YOLO(self._model_path)
             logger.info("YOLOv8 model loaded from '%s'", self._model_path)
-        except ImportError:
-            logger.error(
-                "ultralytics package not installed. "
-                "Run: pip install ultralytics"
-            )
+        except ImportError as exc:
+            logger.error("ultralytics package not installed. Run: pip install ultralytics")
+            raise RuntimeError("ultralytics package not installed") from exc
         except Exception as exc:
-            logger.error("Failed to load YOLOv8 model: %s", exc)
+            logger.error("Failed to load YOLOv8 model '%s': %s", self._model_path, exc)
+            raise RuntimeError(f"Failed to load YOLOv8 model '{self._model_path}'") from exc
 
     def detect(self, image_bytes: bytes) -> List[DetectionResult]:
         """Run inference on image bytes. Returns aggregated detections."""
         if self._model is None:
-            logger.warning("YOLODetector.detect() called but model is not loaded.")
-            return []
+            raise RuntimeError("YOLODetector model is not loaded")
 
         # Decode image bytes to PIL Image
         try:
@@ -131,7 +126,7 @@ class YOLODetector(BaseDetector):
             return []
 
         # Aggregate detections by class name
-        # Key: lowercase class name → {count, confidence_sum, best_bbox, category}
+        # Key: lowercase class name -> {count, confidence_sum, best_bbox, category}
         aggregated: dict[str, dict] = {}
 
         for result in results:
@@ -142,6 +137,9 @@ class YOLODetector(BaseDetector):
                 conf     = float(box.conf[0])
                 name     = result.names.get(cls_id, f"object_{cls_id}")
                 key      = name.lower()
+
+                if conf < settings.detection_confidence:
+                    continue
 
                 if key not in aggregated:
                     aggregated[key] = {
@@ -173,6 +171,7 @@ class YOLODetector(BaseDetector):
                 name=data["display_name"],
                 category=data["category"],
                 confidence=round(avg_conf, 4),
+                count=data["count"],
                 bbox=data["best_bbox"],
             ))
 

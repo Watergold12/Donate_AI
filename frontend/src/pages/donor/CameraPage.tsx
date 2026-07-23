@@ -34,6 +34,7 @@ export function CameraPage() {
   const [cart, setCart]         = useState<typeof results>([])
   const [confirming, setConfirming] = useState(false)
   const toast = useToast()
+  const detectedTotal = results.reduce((sum, item) => sum + (item.count || 1), 0)
 
   // ── Camera helpers ─────────────────────────────────────────
   const startCamera = useCallback(async () => {
@@ -106,7 +107,8 @@ export function CameraPage() {
     try {
       const res = await detectionApi.analyze(file)
       setResults(res.data.data.items)
-      toast.success(`Detected ${res.data.data.items.length} item(s)`)
+      const total = res.data.data.total_detected || res.data.data.items.reduce((sum, item) => sum + (item.count || 1), 0)
+      toast.success(`Detected ${total} item(s)`)
     } catch {
       setError('Detection failed. Please try a different image.')
       toast.error('Detection failed')
@@ -255,7 +257,7 @@ export function CameraPage() {
             <Card className="flex flex-1 flex-col gap-3">
               <div className="flex items-center justify-between">
                 <h2 className="text-sm font-medium text-da-text">Detected items</h2>
-                <span className="text-xs text-da-muted">{results.length} item{results.length !== 1 ? 's' : ''}</span>
+                <span className="text-xs text-da-muted">{detectedTotal} item{detectedTotal !== 1 ? 's' : ''}</span>
               </div>
 
               {loading ? (
@@ -273,7 +275,7 @@ export function CameraPage() {
                     <div key={i} className="rounded-lg border border-da-border bg-da-bg p-3">
                       <div className="flex items-center justify-between">
                         <p className="text-sm font-medium text-da-text">{r.name}</p>
-                        <Badge variant="info">{capitalize(r.category)}</Badge>
+                        <Badge variant="info">{capitalize(r.category)} x{r.count}</Badge>
                       </div>
                       <div className="mt-2 flex items-center gap-2">
                         <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-da-border">
@@ -314,7 +316,7 @@ export function CameraPage() {
                   <p className="text-xs font-medium text-da-secondary">Cart ({cart.length} items)</p>
                   {cart.map((c, i) => (
                     <div key={i} className="flex items-center justify-between rounded bg-da-bg px-2 py-1.5">
-                      <span className="text-xs text-da-text">{c.name}</span>
+                      <span className="text-xs text-da-text">{c.name} x{c.count}</span>
                       <button
                         onClick={() => setCart(prev => prev.filter((_, idx) => idx !== i))}
                         className="text-xs text-red-400 hover:text-red-300"
@@ -336,7 +338,7 @@ export function CameraPage() {
                           await donationsApi.addItem(id, {
                             item_name: item.name,
                             category: item.category,
-                            quantity: 1,
+                            quantity: item.count || 1,
                             condition: 'good',
                             ai_detected: true,
                             confidence_score: item.confidence,

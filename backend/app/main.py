@@ -41,21 +41,25 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     os.makedirs(settings.media_path, exist_ok=True)
     logger.info("Media directory ready: %s", settings.media_path)
 
-    # Initialize AI detector and attach to app state
+    # Initialize AI detector and attach to app state.
+    # Default flow: try pretrained YOLO first, then fall back to the mock detector.
     if settings.use_mock_detector:
         from app.ai.mock_detector import MockDetector
         app.state.detector = MockDetector()
         logger.info("AI detector: MockDetector (use_mock_detector=true)")
     else:
-        # Real YOLOv8 detector — loaded once here, reused per request
         try:
             from app.ai.yolo_detector import YOLODetector
             app.state.detector = YOLODetector(model_path=settings.model_path)
             logger.info("AI detector: YOLODetector loaded from %s", settings.model_path)
         except Exception as exc:
-            logger.warning("YOLODetector failed to load (%s), falling back to MockDetector", exc)
+            logger.warning(
+                "YOLODetector failed to load (%s). Falling back to MockDetector.",
+                exc,
+            )
             from app.ai.mock_detector import MockDetector
             app.state.detector = MockDetector()
+            logger.info("AI detector: MockDetector fallback activated")
 
     # Initialize semantic embedding service and attach to app state
     from app.services.embedding_service import initialize_embedding_service

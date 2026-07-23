@@ -47,7 +47,7 @@ def run_inference(detector: BaseDetector, image_bytes: bytes) -> dict[str, Any]:
     for d in detections:
         item: dict[str, Any] = {
             "name":       d.name,
-            "count":      1,   # Already aggregated per class in YOLODetector
+            "count":      d.count,
             "confidence": d.confidence,
             "category":   str(d.category.value) if hasattr(d.category, "value") else str(d.category),
         }

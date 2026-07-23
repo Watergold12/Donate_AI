@@ -25,6 +25,7 @@ class DetectionResult:
     name: str                          # human-readable label, e.g. "shirt"
     category: ItemCategory             # mapped to system ItemCategory enum
     confidence: float                  # 0.0–1.0 YOLO confidence score
+    count: int = 1                     # estimated quantity for the grouped object
     bbox: Optional[BoundingBox] = None # bounding box coordinates (optional)
 
 
