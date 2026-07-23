@@ -14,6 +14,7 @@ from app.matching.weighted_scorer import WeightedScorer
 from app.models.donation import Donation, DonationItem
 from app.models.ngo import NGOProfile
 from app.models.ngo_demand import NGODemand
+from app.utils.matching_algorithm import MatchingScore, build_match_explanation
 
 logger = logging.getLogger(__name__)
 
@@ -39,7 +40,9 @@ class MatchCandidate:
     priority_score: float
     distance_score: float
     urgency_score: float
+    semantic_score: float
     score_breakdown: dict
+    match_explanation: list[str]
 
 
 class MatchingEngine:
@@ -128,7 +131,20 @@ class MatchingEngine:
                 priority_score=r.priority_score,
                 distance_score=r.distance_score,
                 urgency_score=r.urgency_score,
+                semantic_score=float(r.breakdown.get("semantic", 0.0)),
                 score_breakdown=r.breakdown,
+                match_explanation=build_match_explanation(
+                    MatchingScore(
+                        ngo_demand=r.demand,
+                        ngo_profile=r.ngo_profile,
+                        score=r.total_score,
+                        category_score=float(r.breakdown.get("item_type", 0.0)),
+                        quantity_score=r.quantity_score,
+                        urgency_score=r.urgency_score,
+                        geo_score=r.distance_score,
+                        semantic_score=float(r.breakdown.get("semantic", 0.0)),
+                    )
+                ),
             )
             for i, r in enumerate(top)
         ]

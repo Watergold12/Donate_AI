@@ -57,6 +57,18 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
             from app.ai.mock_detector import MockDetector
             app.state.detector = MockDetector()
 
+    # Initialize semantic embedding service and attach to app state
+    from app.services.embedding_service import initialize_embedding_service
+
+    app.state.embedding_service = initialize_embedding_service()
+    if app.state.embedding_service.is_ready:
+        logger.info("Semantic embedding service ready: %s", app.state.embedding_service.model_name)
+    else:
+        logger.warning(
+            "Semantic embedding service unavailable; using fallback semantic scoring (%s)",
+            app.state.embedding_service.load_error or "unknown error",
+        )
+
     logger.info("Application startup complete")
     yield
 

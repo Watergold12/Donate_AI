@@ -4,6 +4,7 @@ Matching algorithm — weighted scoring engine.
 Score = (0.35 × category) + (0.20 × quantity) + (0.20 × urgency) + (0.10 × geo) + (0.15 × semantic)
 Threshold: score >= 0.50 to be eligible. Top 3 matches proposed per donation.
 """
+import logging
 from dataclasses import dataclass
 from datetime import datetime, timezone
 import re
@@ -15,6 +16,8 @@ from app.models.donation import Donation, DonationItem
 from app.models.enums import DemandUrgency, ItemCategory
 from app.models.ngo import NGOProfile
 from app.models.ngo_demand import NGODemand
+
+logger = logging.getLogger(__name__)
 
 # ── Weights ─────────────────────────────────────────────────────────────────
 WEIGHTS = {
@@ -172,9 +175,77 @@ def _semantic_score(donation_items: List[DonationItem], demand: NGODemand) -> fl
     return round(min(1.0, max(token_score, 0.4 * category_boost, 0.85 * exact_name_boost)), 4)
 
 
+def _build_donation_semantic_text(donation_items: List[DonationItem]) -> str:
+    """
+    Create a compact donation text representation for embeddings.
+
+    We concatenate the confirmed item quantity, item name, and category so the
+    embedding model can see both the object being donated and its high-level
+    class in a single semantic sentence.
+    """
+    parts: list[str] = []
+    for item in donation_items:
+        if not item.is_confirmed:
+            continue
+        item_name = (item.item_name or "").strip()
+        category = item.category.value.replace("_", " ")
+        if item_name:
+            parts.append(f"{item.quantity} {item_name} {category}")
+    return " ; ".join(parts)
+
+
+def _build_demand_semantic_text(demand: NGODemand) -> str:
+    """
+    Create a compact NGO demand text representation for embeddings.
+
+    The demand text includes the item name, category, description, urgency,
+    and remaining quantity so the semantic model can compare intent rather
+    than only exact category matches.
+    """
+    pieces = [
+        demand.item_name or "",
+        demand.item_category.value.replace("_", " "),
+        demand.description or "",
+        demand.urgency_level.value,
+        f"needed {demand.quantity_needed - demand.quantity_fulfilled}",
+    ]
+    return " ".join(part for part in pieces if part).strip()
+
+
 def semantic_match_score(donation_items: List[DonationItem], demand: NGODemand) -> float:
-    """Public wrapper for the lightweight semantic similarity score."""
-    return _semantic_score(donation_items, demand)
+    """
+    Public semantic similarity score.
+
+    Tries the embedding service first. If the model is unavailable or anything
+    in the embedding pipeline fails, fall back to the existing rule-based
+    semantic heuristic so the matching workflow keeps running.
+    """
+    donation_text = _build_donation_semantic_text(donation_items)
+    demand_text = _build_demand_semantic_text(demand)
+
+    if not donation_text or not demand_text:
+        fallback_score = _semantic_score(donation_items, demand)
+        logger.debug("Semantic matcher used=fallback-empty score=%.4f", fallback_score)
+        return fallback_score
+
+    try:
+        from app.services.embedding_service import get_embedding_service
+
+        service = get_embedding_service()
+        if service is None or not service.is_ready:
+            fallback_score = _semantic_score(donation_items, demand)
+            logger.debug("Semantic matcher used=fallback-unavailable score=%.4f", fallback_score)
+            return fallback_score
+
+        similarity = service.cosine_similarity(donation_text, demand_text)
+        semantic_score = round(max(0.0, min(1.0, similarity)), 4)
+        logger.debug("Semantic matcher used=embedding score=%.4f", semantic_score)
+        return semantic_score
+    except Exception:
+        logger.exception("Embedding semantic scoring failed; using fallback semantic heuristic")
+        fallback_score = _semantic_score(donation_items, demand)
+        logger.debug("Semantic matcher used=fallback-error score=%.4f", fallback_score)
+        return fallback_score
 
 
 def compute_score(
@@ -189,7 +260,7 @@ def compute_score(
     qty   = _quantity_score(donation_items, demand)
     urg   = _urgency_score(demand)
     geo   = _geo_score(donor_city, donor_state, ngo_profile)
-    sem   = _semantic_score(donation_items, demand)
+    sem   = semantic_match_score(donation_items, demand)
 
     total = (
         WEIGHTS["category"] * cat +
@@ -197,6 +268,10 @@ def compute_score(
         WEIGHTS["urgency"] * urg +
         WEIGHTS["geo"] * geo +
         WEIGHTS["semantic"] * sem
+    )
+    logger.debug(
+        "Computed match score total=%.4f category=%.4f quantity=%.4f urgency=%.4f geo=%.4f semantic=%.4f",
+        total, cat, qty, urg, geo, sem,
     )
 
     return MatchingScore(
@@ -231,23 +306,26 @@ def build_match_explanation(score: MatchingScore) -> list[str]:
     if score.category_score >= 1.0:
         explanation.append(f"Category match: {score.ngo_demand.item_category.value.title()} items align with this NGO demand.")
     elif score.semantic_score >= 0.5:
-        explanation.append(
-            f"Semantic match: {score.ngo_demand.item_name} is closely related to the donated items."
-        )
+        explanation.append(f"Semantic match: {score.ngo_demand.item_name} is closely related to the donated items.")
 
-    explanation.append(
-        f"Quantity fit: {int(round(score.quantity_score * 100))}% of the required quantity is covered."
-    )
-    explanation.append(
-        f"Urgency level: This is a {score.ngo_demand.urgency_level.value} priority request."
-    )
+    if score.quantity_score >= 1.0:
+        explanation.append("Quantity matched: the donation can cover the requested quantity.")
+    else:
+        explanation.append(f"Quantity fit: {int(round(score.quantity_score * 100))}% of the required quantity is covered.")
+
+    if score.ngo_demand.urgency_level in (DemandUrgency.critical, DemandUrgency.high):
+        explanation.append(f"High priority: this is a {score.ngo_demand.urgency_level.value} urgency request.")
+    else:
+        explanation.append(f"Urgency level: this is a {score.ngo_demand.urgency_level.value} priority request.")
 
     if score.geo_score >= 1.0:
-        explanation.append("Location match: The NGO is in the same city / service area as the donor.")
+        explanation.append("Nearby NGO: the NGO is in the same city or service area as the donor.")
     elif score.geo_score >= 0.5:
-        explanation.append("Location match: The NGO is in the same state / service area as the donor.")
+        explanation.append("Nearby NGO: the NGO is in the same state or service area as the donor.")
     else:
-        explanation.append("Location match: The NGO is outside the donor's immediate area, but still eligible.")
+        explanation.append("Location match: the NGO is outside the donor's immediate area, but still eligible.")
+
+    explanation.append(f"Semantic similarity score: {score.semantic_score:.2f}.")
 
     return explanation
 

@@ -29,6 +29,35 @@ class Match(Base, TimestampMixin):
     ngo = relationship("NGOProfile", back_populates="matches")
     pickup = relationship("PickupRequest", back_populates="match", uselist=False)
 
+    def _matching_score(self):
+        """
+        Compute the derived match score once per instance.
+
+        The result is cached on the ORM instance so response serialization can
+        reuse the same semantic embedding result for the score breakdown and
+        the human-readable explanation without recomputing embeddings.
+        """
+        cached = getattr(self, "_matching_score_cache", None)
+        if cached is not None:
+            return cached
+
+        if not self.donation or not self.ngo_demand or not self.ngo:
+            return None
+
+        from app.utils.matching_algorithm import compute_score
+
+        donor_city = self.donation.donor.city if self.donation.donor else None
+        donor_state = self.donation.donor.state if self.donation.donor else None
+        score = compute_score(
+            [item for item in self.donation.items if item.is_confirmed],
+            self.ngo_demand,
+            self.ngo,
+            donor_city=donor_city,
+            donor_state=donor_state,
+        )
+        setattr(self, "_matching_score_cache", score)
+        return score
+
     @property
     def donation_notes(self) -> Optional[str]:
         return self.donation.notes if self.donation else None
@@ -45,36 +74,20 @@ class Match(Base, TimestampMixin):
 
     @property
     def score_breakdown(self) -> Optional[dict]:
-        if not self.donation or not self.ngo_demand or not self.ngo:
+        score = self._matching_score()
+        if score is None:
             return None
-        from app.utils.matching_algorithm import build_score_breakdown, compute_score
 
-        donor_city = self.donation.donor.city if self.donation.donor else None
-        donor_state = self.donation.donor.state if self.donation.donor else None
-        score = compute_score(
-            [item for item in self.donation.items if item.is_confirmed],
-            self.ngo_demand,
-            self.ngo,
-            donor_city=donor_city,
-            donor_state=donor_state,
-        )
+        from app.utils.matching_algorithm import build_score_breakdown
         return build_score_breakdown(score)
 
     @property
     def match_explanation(self) -> Optional[list[str]]:
-        if not self.donation or not self.ngo_demand or not self.ngo:
+        score = self._matching_score()
+        if score is None:
             return None
-        from app.utils.matching_algorithm import build_match_explanation, compute_score
 
-        donor_city = self.donation.donor.city if self.donation.donor else None
-        donor_state = self.donation.donor.state if self.donation.donor else None
-        score = compute_score(
-            [item for item in self.donation.items if item.is_confirmed],
-            self.ngo_demand,
-            self.ngo,
-            donor_city=donor_city,
-            donor_state=donor_state,
-        )
+        from app.utils.matching_algorithm import build_match_explanation
         return build_match_explanation(score)
 
     __table_args__ = (

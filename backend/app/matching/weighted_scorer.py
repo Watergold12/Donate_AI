@@ -3,10 +3,13 @@ Weighted rule-based scorer.
 Score = 0.25*item_type + 0.20*quantity + 0.15*priority + 0.10*distance + 0.15*urgency + 0.15*semantic
 Replace this class with any BaseScorer subclass to use a different model.
 """
+import logging
 from typing import Optional
 from app.matching.base import BaseScorer, ScorerInput, ScorerResult
 from app.models.enums import DemandUrgency
 from app.utils.matching_algorithm import semantic_match_score
+
+logger = logging.getLogger(__name__)
 
 DEFAULT_WEIGHTS = {
     "item_type": 0.25,
@@ -45,6 +48,10 @@ class WeightedScorer(BaseScorer):
             self.weights["distance"]  * dist_s +
             self.weights["urgency"]   * urgency_s +
             self.weights["semantic"]  * semantic_s
+        )
+        logger.debug(
+            "WeightedScorer total=%.4f item_type=%.4f quantity=%.4f priority=%.4f distance=%.4f urgency=%.4f semantic=%.4f",
+            round(total, 4), type_s, qty_s, priority_s, dist_s, urgency_s, semantic_s,
         )
         return ScorerResult(
             demand=inp.demand, ngo_profile=inp.ngo_profile,
