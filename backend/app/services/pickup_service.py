@@ -139,6 +139,29 @@ def update_status(db: Session, user: User, pickup_id: UUID,
         if donation:
             donation.status = DonationStatus.completed
             donation.completed_at = now
+        if pickup.match and pickup.match.status != MatchStatus.completed:
+            pickup.match.status = MatchStatus.completed
+        elif donation:
+            completed_match = next(
+                (m for m in donation.matches if m.status in (MatchStatus.accepted, MatchStatus.proposed)),
+                None,
+            )
+            if completed_match:
+                completed_match.status = MatchStatus.completed
+
+        fulfilled_demand = None
+        if pickup.match and pickup.match.ngo_demand:
+            fulfilled_demand = pickup.match.ngo_demand
+        elif donation:
+            fulfilled_match = next(
+                (m for m in donation.matches if m.ngo_demand and m.status == MatchStatus.completed),
+                None,
+            )
+            if fulfilled_match:
+                fulfilled_demand = fulfilled_match.ngo_demand
+        if fulfilled_demand:
+            fulfilled_demand.quantity_fulfilled = fulfilled_demand.quantity_needed
+            fulfilled_demand.is_active = False
 
     elif payload.status in (PickupStatus.failed, PickupStatus.cancelled):
         pickup.completed_at = now
