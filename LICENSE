@@ -1,0 +1,277 @@
+# VAA-CCL-1.0
+
+## Vishal AA Community & Commercial License
+
+### Version 1.0
+
+**Copyright © 2026 Vishal AA. All Rights Reserved.**
+
+---
+
+# Article 1 – Purpose
+
+The Vishal AA Community & Commercial License Version 1.0 ("VAA-CCL-1.0") is intended to encourage educational, charitable, research, and community-driven use of software while protecting the commercial rights of the Licensor.
+
+This License grants limited rights for approved non-commercial uses while reserving all commercial rights exclusively to the Licensor.
+
+---
+
+# Article 2 – Definitions
+
+For the purposes of this License:
+
+**Licensor** means **Vishal AA**, the sole copyright owner of the Software unless otherwise stated.
+
+**Software** means the source code, object code, documentation, configuration files, AI models, datasets owned by the Licensor, APIs, assets, scripts, libraries authored by the Licensor, and all accompanying materials distributed under this License.
+
+**Commercial Use** means any use intended to obtain a commercial advantage, monetary compensation, subscription revenue, licensing revenue, consulting fees, business benefit, organizational profit, or any direct or indirect financial gain.
+
+Commercial Use includes, but is not limited to:
+
+* Selling the Software
+* Selling services powered by the Software
+* Internal business operations
+* SaaS or hosted services
+* White-label solutions
+* Paid consulting using the Software
+* Commercial research performed on behalf of a paying client
+* Integration into commercial products
+
+**Educational Institution** means a legally recognized school, college, university, or accredited educational organization.
+
+**Registered NGO** means a legally recognized non-profit organization established primarily for charitable, humanitarian, educational, environmental, healthcare, disaster relief, or other public benefit purposes.
+
+**Researcher** means an individual conducting academic, scientific, or non-commercial research.
+
+**Contributor** means an individual who voluntarily contributes code, documentation, tests, bug fixes, translations, or other approved improvements directly to the Software repository.
+
+---
+
+# Article 3 – Ownership
+
+The Software remains the exclusive intellectual property of the Licensor.
+
+This License grants permission to use the Software only as expressly stated.
+
+Nothing contained in this License transfers ownership of the Software.
+
+All rights not expressly granted remain reserved.
+
+---
+
+# Article 4 – Community License
+
+The following users may use the Software free of charge:
+
+* Registered NGOs
+* Educational Institutions
+* Students
+* Academic Researchers
+* Approved Contributors
+* Individuals using the Software solely for personal learning
+
+Such users may:
+
+* Study the Software
+* Modify the Software
+* Deploy the Software solely for permitted purposes
+* Contribute improvements back to the project
+
+No Commercial Rights are granted under this Article.
+
+---
+
+# Article 5 – Commercial Rights
+
+All Commercial Rights are reserved exclusively by the Licensor.
+
+Commercial use is prohibited unless expressly authorized under a separate Commercial License Agreement.
+
+Any person or organization wishing to commercially use the Software must first obtain written authorization from the Licensor.
+
+---
+
+# Article 6 – Commercial Licensing
+
+Commercial Licenses may be issued solely at the discretion of the Licensor.
+
+Commercial Licenses may include, but are not limited to:
+
+* Royalty-based agreements
+* Monthly subscriptions
+* Annual subscriptions
+* Per-user licensing
+* Enterprise licensing
+* Lifetime licensing
+* Custom licensing agreements
+
+The pricing structure, duration, and scope of any Commercial License shall be determined solely by the Licensor.
+
+The Licensor reserves the unrestricted right to approve or refuse any Commercial License request without obligation to provide a reason.
+
+---
+
+# Article 7 – Written Authorization Requirement
+
+No Commercial Rights are granted unless the Licensee possesses a valid written Commercial License Agreement expressly authorized by the Licensor.
+
+Emails discussing possible licensing, verbal discussions, invoices, quotations, negotiations, purchase orders, or assumptions shall not constitute permission.
+
+Only a written Commercial License Agreement issued or expressly authorized by the Licensor grants Commercial Rights.
+
+Absent such written authorization, all Commercial Use is unauthorized.
+
+---
+
+# Article 8 – Commercial Evaluation
+
+Commercial organizations may evaluate the Software internally for up to **30 calendar days** solely for the purpose of deciding whether to obtain a Commercial License.
+
+During evaluation they shall not:
+
+* deploy the Software into production,
+* generate revenue using the Software,
+* provide services using the Software,
+* redistribute the Software,
+* sublicense the Software,
+* make the Software available to third parties.
+
+Continued use after the evaluation period requires a Commercial License.
+
+---
+
+# Article 9 – Restrictions
+
+Without prior written authorization from the Licensor, no person or organization may:
+
+* Sell the Software
+* Redistribute the Software for commercial purposes
+* Offer the Software as SaaS
+* Embed the Software into commercial products
+* White-label the Software
+* Remove copyright notices
+* Remove attribution
+* Claim ownership
+* Misrepresent authorship
+* Circumvent the commercial licensing requirements
+
+---
+
+# Article 10 – Redistribution
+
+Redistributions permitted under this License must:
+
+* retain this License,
+* retain copyright notices,
+* identify significant modifications,
+* preserve attribution to the Licensor.
+
+Redistribution shall not grant Commercial Rights to recipients.
+
+---
+
+# Article 11 – Contributions
+
+Contributors retain copyright ownership of their individual contributions.
+
+By voluntarily submitting a contribution, the Contributor grants the Licensor a perpetual, worldwide, irrevocable, royalty-free, non-exclusive license to use, modify, reproduce, distribute, sublicense, and commercially license that contribution as part of the Software.
+
+Submission of a contribution constitutes acceptance of these terms unless otherwise agreed in writing.
+
+---
+
+# Article 12 – Artificial Intelligence
+
+Unless separately authorized by the Licensor, the Software, its source code, models, prompts, datasets, or documentation may not be used to develop, train, commercialize, or improve commercial AI products or services.
+
+---
+
+# Article 13 – Trademarks
+
+This License grants no right to use the Licensor's name, trademarks, logos, branding, or project identity except for truthful attribution.
+
+---
+
+# Article 14 – Patent Rights
+
+This License grants no patent rights except those expressly stated within a separate written Commercial License Agreement.
+
+---
+
+# Article 15 – Warranty Disclaimer
+
+THE SOFTWARE IS PROVIDED "AS IS".
+
+THE LICENSOR DISCLAIMS ALL WARRANTIES, INCLUDING MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, TITLE, AND NON-INFRINGEMENT.
+
+---
+
+# Article 16 – Limitation of Liability
+
+TO THE MAXIMUM EXTENT PERMITTED BY LAW, THE LICENSOR SHALL NOT BE LIABLE FOR ANY DAMAGES ARISING FROM THE USE OR INABILITY TO USE THE SOFTWARE.
+
+---
+
+# Article 17 – Termination
+
+Violation of any provision of this License immediately terminates all rights granted herein.
+
+Upon termination, the violating party shall immediately cease use of the Software and destroy or permanently remove all copies under its control unless otherwise required by applicable law.
+
+---
+
+# Article 18 – Governing Law
+
+This License shall be governed by the laws of the Republic of India.
+
+Any dispute arising from this License shall be subject to the exclusive jurisdiction of the competent courts located in Coimbatore, Tamil Nadu, India.
+
+---
+
+# Article 19 – Severability
+
+If any provision of this License is held invalid or unenforceable, the remaining provisions shall remain in full force and effect.
+
+---
+
+# Article 20 – Entire Agreement
+
+This License constitutes the complete agreement governing the community use of the Software unless superseded by a written Commercial License Agreement executed by the Licensor.
+
+---
+
+# Article 21 – Future Versions
+
+The Licensor may publish future versions of VAA-CCL.
+
+Projects may specify the version under which they are licensed.
+
+Later versions shall not automatically apply unless the Licensor expressly states otherwise.
+
+---
+
+# Article 22 – Reservation of Rights
+
+All rights not expressly granted under this License are reserved exclusively by the Licensor.
+
+Possession of the Software does not imply permission to use it beyond the rights expressly granted herein.
+
+---
+
+# Commercial Licensing Contact
+
+Commercial License Requests
+
+**Licensor:** Vishal AA
+
+Commercial licensing terms shall be determined solely by the Licensor through a separate written Commercial License Agreement.
+
+---
+
+**License Name:** VAA-CCL-1.0
+
+**Full Name:** Vishal AA Community & Commercial License Version 1.0
+
+**Version:** 1.0
+
+**Copyright:** © 2026 Vishal AA. All Rights Reserved.

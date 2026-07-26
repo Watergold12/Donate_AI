@@ -1,0 +1,58 @@
+# NOTICE
+
+AI-Based Donation Management System for Intelligent Resource Matching and Distribution
+Copyright © 2026 Vishal AA. All Rights Reserved.
+
+This product is licensed under the Vishal AA Community & Commercial License Version 1.0 (VAA-CCL-1.0).
+Please see the LICENSE file for detailed terms and conditions.
+
+========================================================================
+Third-Party Software Attributions & Notices
+========================================================================
+
+This software incorporates and builds upon third-party libraries and frameworks:
+
+1. FastAPI
+   - Website: https://fastapi.tiangolo.com/
+   - License: MIT License
+   - Copyright (c) 2018 Sebastián Ramírez
+
+2. Ultralytics YOLOv8
+   - Website: https://docs.ultralytics.com/
+   - License: GNU AGPL-3.0 / Commercial License
+   - Copyright (c) 2023 Ultralytics Inc.
+
+3. Sentence-Transformers
+   - Website: https://www.sbert.net/
+   - License: Apache License 2.0
+   - Copyright (c) UKP Lab, TU Darmstadt
+
+4. React
+   - Website: https://react.dev/
+   - License: MIT License
+   - Copyright (c) Meta Platforms, Inc. and affiliates
+
+5. Vite
+   - Website: https://vite.dev/
+   - License: MIT License
+   - Copyright (c) 2019-present Evan You & Vite Contributors
+
+6. Tailwind CSS
+   - Website: https://tailwindcss.com/
+   - License: MIT License
+   - Copyright (c) Tailwind Labs, Inc.
+
+7. Lucide React
+   - Website: https://lucide.dev/
+   - License: ISC License
+   - Copyright (c) Lucide Contributors
+
+8. SQLAlchemy & Alembic
+   - Website: https://www.sqlalchemy.org/
+   - License: MIT License
+   - Copyright (c) 2005-2026 SQLAlchemy authors
+
+9. Pydantic
+   - Website: https://docs.pydantic.dev/
+   - License: MIT License
+   - Copyright (c) 2017 to present Samuel Colvin & Pydantic contributors
