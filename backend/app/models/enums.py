@@ -78,6 +78,13 @@ class NotificationType(str, enum.Enum):
     system = "system"
 
 
+class NotificationChannel(str, enum.Enum):
+    in_app = "in_app"
+    email = "email"
+    sms = "sms"
+    whatsapp = "whatsapp"
+
+
 class AuditAction(str, enum.Enum):
     CREATE = "CREATE"
     UPDATE = "UPDATE"

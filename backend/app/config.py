@@ -51,6 +51,20 @@ class Settings(BaseSettings):
     match_top_n: int = 3
     match_expiry_hours: int = 48
 
+    # Notifications
+    notification_email_enabled: bool = False
+    notification_sms_enabled: bool = False
+    notification_whatsapp_enabled: bool = False
+    notification_smtp_host: str = ""
+    notification_smtp_port: int = 587
+    notification_smtp_username: str = ""
+    notification_smtp_password: str = ""
+    notification_smtp_from_email: str = ""
+    notification_smtp_use_tls: bool = True
+    notification_sms_webhook_url: str = ""
+    notification_whatsapp_webhook_url: str = ""
+    notification_delivery_timeout_seconds: int = 10
+
     def model_post_init(self, __context) -> None:
         """Warn on dangerous production config."""
         if self.environment == "production" and "*" in self.allowed_origins:
