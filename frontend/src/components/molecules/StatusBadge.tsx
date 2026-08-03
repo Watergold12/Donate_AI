@@ -10,6 +10,8 @@ const statusConfig: Record<string, { label: string; variant: 'default' | 'succes
   pending_match:    { label: 'Finding Match',      variant: 'purple' },
   matched:          { label: 'Matched',            variant: 'purple' },
   accepted:         { label: 'Accepted',           variant: 'success' },
+  packaging_notified: { label: 'Packaging Ready',  variant: 'info' },
+  acknowledged:     { label: 'Acknowledged',       variant: 'success' },
   pickup_scheduled: { label: 'Pickup Scheduled',   variant: 'warning' },
   collected:        { label: 'Collected',          variant: 'warning' },
   delivered:        { label: 'Delivered',          variant: 'success' },

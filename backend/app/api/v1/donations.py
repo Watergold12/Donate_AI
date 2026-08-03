@@ -22,6 +22,7 @@ from app.schemas.common import APIResponse
 from app.schemas.donation import (
     DonationCreate, DonationResponse, DonationUpdate,
     DonationItemCreate, DonationItemResponse, DonationItemUpdate,
+    PackagingChecklistResponse,
 )
 from app.schemas.matching import MatchResponse
 from app.services import donation_service
@@ -134,3 +135,25 @@ def get_matches(
 ):
     matches = donation_service.get_donation_matches(db, current_user, donation_id)
     return APIResponse.ok([MatchResponse.model_validate(m) for m in matches])
+
+
+@router.post("/{donation_id}/packaging-checklist", response_model=APIResponse[PackagingChecklistResponse])
+def get_packaging_checklist(
+    donation_id: UUID,
+    request: Request,
+    current_user: Annotated[User, Depends(require_donor)],
+    db: Annotated[Session, Depends(get_db)],
+):
+    checklist = donation_service.prepare_packaging_checklist(db, current_user, donation_id, request)
+    return APIResponse.ok(checklist, "Packaging checklist prepared")
+
+
+@router.post("/{donation_id}/packaging-checklist/acknowledge", response_model=APIResponse[DonationResponse])
+def acknowledge_packaging_checklist(
+    donation_id: UUID,
+    request: Request,
+    current_user: Annotated[User, Depends(require_donor)],
+    db: Annotated[Session, Depends(get_db)],
+):
+    donation = donation_service.acknowledge_packaging(db, current_user, donation_id, request)
+    return APIResponse.ok(DonationResponse.model_validate(donation), "Packaging checklist acknowledged")

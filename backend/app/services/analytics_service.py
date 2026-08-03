@@ -26,7 +26,10 @@ def get_summary(db: Session, user: User) -> dict:
             return {"total_donations": 0, "completed_donations": 0, "pending_donations": 0, "total_items_donated": 0}
         total = db.query(Donation).filter(Donation.donor_id == donor.id, Donation.deleted_at.is_(None)).count()
         completed = db.query(Donation).filter(Donation.donor_id == donor.id, Donation.status == DonationStatus.completed).count()
-        pending = db.query(Donation).filter(Donation.donor_id == donor.id, Donation.status.in_([DonationStatus.draft, DonationStatus.pending_match, DonationStatus.matched])).count()
+        pending = db.query(Donation).filter(
+            Donation.donor_id == donor.id,
+            Donation.status.notin_([DonationStatus.completed, DonationStatus.cancelled]),
+        ).count()
         total_items = db.query(func.sum(DonationItem.quantity)).join(Donation).filter(Donation.donor_id == donor.id, DonationItem.is_confirmed.is_(True)).scalar() or 0
         return {"total_donations": total, "completed_donations": completed, "pending_donations": pending, "total_items_donated": int(total_items)}
 

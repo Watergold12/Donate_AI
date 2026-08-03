@@ -1,4 +1,4 @@
-package com.example.mobile_frontend
+package com.donateai.mobilefrontend
 
 import io.flutter.embedding.android.FlutterActivity
 

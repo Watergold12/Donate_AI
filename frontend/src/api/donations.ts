@@ -3,6 +3,7 @@ import type {
   APIResponse, PaginatedAPIResponse,
   Donation, DonationItem, Match,
   ItemCategory, ItemCondition, DonationStatus,
+  PackagingChecklist,
 } from '../types/index'
 
 interface AddItemPayload {
@@ -52,6 +53,12 @@ export const donationsApi = {
 
   getMatches: (id: string) =>
     apiClient.get<APIResponse<Match[]>>(`/donations/${id}/match`),
+
+  startPackagingChecklist: (id: string) =>
+    apiClient.post<APIResponse<PackagingChecklist>>(`/donations/${id}/packaging-checklist`),
+
+  acknowledgePackagingChecklist: (id: string) =>
+    apiClient.post<APIResponse<Donation>>(`/donations/${id}/packaging-checklist/acknowledge`),
 
   listMine: (page = 1, size = 20, status?: DonationStatus) =>
     apiClient.get<PaginatedAPIResponse<Donation>>('/donors/donations', {

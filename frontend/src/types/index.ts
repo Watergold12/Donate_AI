@@ -5,6 +5,7 @@ export type ItemCondition = 'new' | 'good' | 'fair' | 'poor'
 export type DonationStatus =
   | 'draft' | 'pending' | 'detected'
   | 'pending_match' | 'matched' | 'accepted'
+  | 'packaging_notified' | 'acknowledged'
   | 'pickup_scheduled' | 'collected' | 'delivered'
   | 'scheduled' | 'completed' | 'cancelled'
 export type DemandUrgency = 'low' | 'medium' | 'high' | 'critical'
@@ -95,6 +96,15 @@ export interface Donation {
   created_at: string
   updated_at: string
   items: DonationItem[]
+}
+
+export interface PackagingChecklist {
+  donation_id: string
+  status: DonationStatus
+  acknowledged: boolean
+  summary: string
+  general_steps: string[]
+  item_guidance: string[]
 }
 
 // ── NGO ────────────────────────────────────────────────────────────────────

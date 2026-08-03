@@ -68,3 +68,12 @@ class DonationResponse(BaseModel):
     created_at: datetime
     updated_at: datetime
     items: List[DonationItemResponse] = []
+
+
+class PackagingChecklistResponse(BaseModel):
+    donation_id: UUID
+    status: DonationStatus
+    acknowledged: bool
+    summary: str
+    general_steps: List[str]
+    item_guidance: List[str]

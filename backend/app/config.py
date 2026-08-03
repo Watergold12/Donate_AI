@@ -36,6 +36,7 @@ class Settings(BaseSettings):
 
     # CORS
     allowed_origins: str = "http://localhost:5173,http://localhost:3000"
+    allowed_origin_regex: str = r"^https?://(localhost|127\.0\.0\.1)(:\d+)?$"
 
     # File Storage
     media_path: str = "./media"
@@ -82,6 +83,11 @@ class Settings(BaseSettings):
     def allowed_origins_list(self) -> List[str]:
         """Parse comma-separated origins into a list."""
         return [origin.strip() for origin in self.allowed_origins.split(",")]
+
+    @property
+    def cors_origin_regex(self) -> str:
+        """Regex allowing local dev origins on any ephemeral port."""
+        return self.allowed_origin_regex
 
     @property
     def max_upload_size_bytes(self) -> int:

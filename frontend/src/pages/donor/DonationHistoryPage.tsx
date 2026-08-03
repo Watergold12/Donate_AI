@@ -17,6 +17,8 @@ const STATUS_OPTIONS = [
   { value: 'draft', label: 'Draft' },
   { value: 'pending_match', label: 'Pending Match' },
   { value: 'matched', label: 'Matched' },
+  { value: 'packaging_notified', label: 'Packaging Ready' },
+  { value: 'acknowledged', label: 'Acknowledged' },
   { value: 'scheduled', label: 'Scheduled' },
   { value: 'completed', label: 'Completed' },
   { value: 'cancelled', label: 'Cancelled' },

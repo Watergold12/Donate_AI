@@ -8,7 +8,7 @@ import { Spinner } from '../../components/atoms/Spinner'
 import { EmptyState } from '../../components/molecules/EmptyState'
 import { donationsApi } from '../../api/donations'
 import { pickupsApi } from '../../api/pickups'
-import type { Match } from '../../types/index'
+import type { Match, PackagingChecklist } from '../../types/index'
 import { scoreToPercent, formatDate, getApiError } from '../../utils/index'
 import { useAuthContext } from '../../store/authStore'
 import { useToast } from '../../store/ToastProvider'
@@ -23,12 +23,14 @@ export function PickupSchedulePage() {
   const [matches, setMatches]       = useState<Match[]>([])
   const [loading, setLoading]       = useState(true)
   const [scheduling, setScheduling] = useState(false)
+  const [acknowledging, setAcknowledging] = useState(false)
   const [error, setError]           = useState('')
   const [selectedMatch, setSelectedMatch] = useState<string | null>(null)
   const [address, setAddress]       = useState(user?.full_name ? '' : '')
   const [city, setCity]             = useState('')
   const [phone, setPhone]           = useState('')
   const [scheduledAt, setScheduledAt] = useState('')
+  const [packagingChecklist, setPackagingChecklist] = useState<PackagingChecklist | null>(null)
 
   useEffect(() => {
     if (!donationId) return
@@ -36,9 +38,32 @@ export function PickupSchedulePage() {
       .then(r => setMatches(r.data.data))
       .catch(() => setError('Could not load matches. The matching engine may still be processing.'))
       .finally(() => setLoading(false))
+    donationsApi.startPackagingChecklist(donationId)
+      .then(r => setPackagingChecklist(r.data.data))
+      .catch(() => null)
   }, [donationId])
 
+  const acknowledgePackaging = async () => {
+    setAcknowledging(true)
+    setError('')
+    try {
+      const res = await donationsApi.acknowledgePackagingChecklist(donationId)
+      setPackagingChecklist(prev => prev ? { ...prev, acknowledged: true, status: res.data.data.status } : prev)
+      toast.success('Packaging checklist acknowledged')
+    } catch (err: unknown) {
+      const msg = getApiError(err)
+      setError(msg)
+      toast.error(msg)
+    } finally {
+      setAcknowledging(false)
+    }
+  }
+
   const schedulePickup = async () => {
+    if (!packagingChecklist?.acknowledged) {
+      setError('Please acknowledge the packaging checklist before scheduling pickup.')
+      return
+    }
     if (!address || !city || !scheduledAt) {
       setError('Please fill in all pickup details.')
       return
@@ -157,6 +182,57 @@ export function PickupSchedulePage() {
           )}
         </Card>
 
+        <Card>
+          <div className="flex items-center justify-between gap-3">
+            <div>
+              <h2 className="text-sm font-medium text-da-secondary">Packaging Checklist</h2>
+              <p className="text-xs text-da-muted">
+                Review the packing guidance before confirming pickup.
+              </p>
+            </div>
+            <span className="text-xs font-medium text-da-muted">
+              {packagingChecklist?.acknowledged ? 'Acknowledged' : 'Awaiting acknowledgement'}
+            </span>
+          </div>
+          {packagingChecklist ? (
+            <div className="mt-4 flex flex-col gap-4">
+              <p className="text-sm text-da-text">{packagingChecklist.summary}</p>
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div>
+                  <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-da-secondary">General steps</p>
+                  <ul className="space-y-2 text-sm text-da-text">
+                    {packagingChecklist.general_steps.map(step => (
+                      <li key={step} className="rounded-lg border border-da-border bg-da-bg px-3 py-2">{step}</li>
+                    ))}
+                  </ul>
+                </div>
+                <div>
+                  <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-da-secondary">Item guidance</p>
+                  <ul className="space-y-2 text-sm text-da-text">
+                    {packagingChecklist.item_guidance.map(step => (
+                      <li key={step} className="rounded-lg border border-da-border bg-da-bg px-3 py-2">{step}</li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+              <div className="flex gap-3">
+                <Button
+                  variant={packagingChecklist.acknowledged ? 'ghost' : 'outline'}
+                  onClick={acknowledgePackaging}
+                  loading={acknowledging}
+                  disabled={packagingChecklist.acknowledged}
+                >
+                  {packagingChecklist.acknowledged ? 'Packaging acknowledged' : 'Acknowledge packaging checklist'}
+                </Button>
+              </div>
+            </div>
+          ) : (
+            <div className="mt-4 rounded-lg border border-dashed border-da-border px-4 py-6 text-sm text-da-muted">
+              Packaging checklist will appear once your match is ready.
+            </div>
+          )}
+        </Card>
+
         {/* Pickup details */}
         <Card className="flex flex-col gap-4">
           <h2 className="text-sm font-medium text-da-secondary">Pickup Details</h2>
@@ -208,7 +284,7 @@ export function PickupSchedulePage() {
           <div className="flex gap-3 pt-2">
             <Button
               loading={scheduling}
-              disabled={!address || !city || !scheduledAt}
+              disabled={!address || !city || !scheduledAt || !packagingChecklist?.acknowledged}
               onClick={schedulePickup}
               className="flex-1"
             >

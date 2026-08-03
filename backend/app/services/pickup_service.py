@@ -65,8 +65,15 @@ def create_pickup(db: Session, user: User, payload: PickupCreate, request=None) 
 
     # Update donation status
     donation = db.query(Donation).filter(Donation.id == payload.donation_id).first()
-    if donation and donation.status == DonationStatus.matched:
-        donation.status = DonationStatus.scheduled
+    if donation:
+        if donation.status not in (
+            DonationStatus.acknowledged,
+            DonationStatus.packaging_notified,
+            DonationStatus.scheduled,
+            DonationStatus.pickup_scheduled,
+        ):
+            raise BusinessLogicError("Packaging checklist must be acknowledged before scheduling pickup")
+        donation.status = DonationStatus.pickup_scheduled
 
     db.flush()
     log_action(db, AuditAction.CREATE, "pickup", pickup.id, actor_id=user.id,

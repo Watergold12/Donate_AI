@@ -8,7 +8,11 @@ GET    /api/v1/donors/donations              — list
 GET    /api/v1/donors/history                — history
 """
 import pytest
+from datetime import datetime, timedelta, timezone
 from fastapi.testclient import TestClient
+
+from app.models.match import Match
+from app.models.ngo import NGOProfile
 
 
 def auth(token: str) -> dict:
@@ -33,6 +37,20 @@ def add_item(client: TestClient, token: str, donation_id: str, **kwargs) -> dict
     r = client.post(f"/api/v1/donations/{donation_id}/items", json=payload, headers=auth(token))
     assert r.status_code == 201, f"Add item failed: {r.text}"
     return r.json()["data"]
+
+
+def verify_ngo(client: TestClient, admin_token: str, db) -> NGOProfile:
+    ngo = db.query(NGOProfile).filter(NGOProfile.registration_number == "NGO-TEST-001").first()
+    assert ngo is not None
+    if not ngo.is_verified:
+        r = client.patch(
+            f"/api/v1/admin/ngos/{ngo.id}/verify",
+            json={"approved": True},
+            headers=auth(admin_token),
+        )
+        assert r.status_code == 200, r.text
+    db.refresh(ngo)
+    return ngo
 
 
 # ── Create ────────────────────────────────────────────────────────────────
@@ -179,3 +197,69 @@ class TestListDonations:
     def test_unauthenticated_list_rejected(self, client):
         r = client.get("/api/v1/donors/donations")
         assert r.status_code == 401
+
+
+class TestPackagingChecklist:
+    def test_packaging_checklist_acknowledge_and_pickup_flow(self, client, donor_token, ngo_token, admin_token, db):
+        ngo = verify_ngo(client, admin_token, db)
+
+        demand_resp = client.post(
+            "/api/v1/ngos/demands",
+            json={
+                "item_category": "clothing",
+                "item_name": "Winter Jackets",
+                "quantity_needed": 10,
+                "urgency_level": "high",
+            },
+            headers=auth(ngo_token),
+        )
+        assert demand_resp.status_code == 201, demand_resp.text
+
+        donation = create_donation(client, donor_token, notes="Packaging test")
+        add_item(client, donor_token, donation["id"], item_name="Winter Jacket", quantity=4)
+        submit_resp = client.post(f"/api/v1/donations/{donation['id']}/submit", headers=auth(donor_token))
+        assert submit_resp.status_code == 200, submit_resp.text
+
+        match = db.query(Match).filter(Match.donation_id == donation["id"]).first()
+        assert match is not None
+
+        accept_resp = client.put(
+            f"/api/v1/ngos/matches/{match.id}/accept",
+            headers=auth(ngo_token),
+        )
+        assert accept_resp.status_code == 200, accept_resp.text
+
+        checklist_resp = client.post(
+            f"/api/v1/donations/{donation['id']}/packaging-checklist",
+            headers=auth(donor_token),
+        )
+        assert checklist_resp.status_code == 200, checklist_resp.text
+        checklist = checklist_resp.json()["data"]
+        assert checklist["status"] == "packaging_notified"
+        assert checklist["acknowledged"] is False
+        assert len(checklist["general_steps"]) > 0
+        assert len(checklist["item_guidance"]) > 0
+
+        ack_resp = client.post(
+            f"/api/v1/donations/{donation['id']}/packaging-checklist/acknowledge",
+            headers=auth(donor_token),
+        )
+        assert ack_resp.status_code == 200, ack_resp.text
+        assert ack_resp.json()["data"]["status"] == "acknowledged"
+
+        pickup_resp = client.post(
+            "/api/v1/pickups",
+            json={
+                "donation_id": donation["id"],
+                "ngo_id": str(ngo.id),
+                "match_id": str(match.id),
+                "scheduled_at": (datetime.now(timezone.utc) + timedelta(days=1)).isoformat(),
+                "pickup_address": "123 Test Street",
+                "pickup_city": "Bangalore",
+                "contact_phone": "+919999999999",
+                "notes": "Leave at reception",
+            },
+            headers=auth(ngo_token),
+        )
+        assert pickup_resp.status_code == 201, pickup_resp.text
+        assert pickup_resp.json()["data"]["status"] == "scheduled"

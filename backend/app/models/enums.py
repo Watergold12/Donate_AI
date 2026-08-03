@@ -32,6 +32,8 @@ class DonationStatus(str, enum.Enum):
     pending_match     = "pending_match"    # submitted to matching engine
     matched           = "matched"          # NGO match proposed
     accepted          = "accepted"         # NGO accepted the match
+    packaging_notified = "packaging_notified"  # donor has packaging checklist
+    acknowledged      = "acknowledged"     # donor acknowledged packaging prep
     pickup_scheduled  = "pickup_scheduled" # pickup date confirmed
     collected         = "collected"        # items picked up from donor
     delivered         = "delivered"        # items delivered to NGO

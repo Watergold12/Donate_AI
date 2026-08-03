@@ -15,7 +15,10 @@ from app.models.donor import DonorProfile
 from app.models.enums import AuditAction, DonationStatus
 from app.models.match import Match
 from app.models.user import User
-from app.schemas.donation import DonationCreate, DonationItemCreate, DonationItemUpdate, DonationUpdate
+from app.schemas.donation import (
+    DonationCreate, DonationItemCreate, DonationItemUpdate, DonationUpdate,
+    PackagingChecklistResponse,
+)
 from app.utils.audit import log_action
 from app.utils.pagination import PaginationParams, paginate
 
@@ -29,6 +32,8 @@ VALID_TRANSITIONS = {
     DonationStatus.pending_match:    [DonationStatus.matched, DonationStatus.cancelled],
     DonationStatus.matched:          [DonationStatus.accepted, DonationStatus.scheduled, DonationStatus.cancelled],
     DonationStatus.accepted:         [DonationStatus.pickup_scheduled, DonationStatus.cancelled],
+    DonationStatus.packaging_notified: [DonationStatus.acknowledged, DonationStatus.cancelled],
+    DonationStatus.acknowledged:     [DonationStatus.pickup_scheduled, DonationStatus.cancelled],
     DonationStatus.pickup_scheduled: [DonationStatus.collected, DonationStatus.cancelled],
     DonationStatus.collected:        [DonationStatus.delivered],
     DonationStatus.delivered:        [DonationStatus.completed],
@@ -36,6 +41,33 @@ VALID_TRANSITIONS = {
     DonationStatus.completed:        [],
     DonationStatus.cancelled:        [],
 }
+
+PACKAGING_GENERAL_STEPS = [
+    "Sort items by category and keep similar items together.",
+    "Seal each bag or box so items stay clean and protected during transport.",
+    "Label packages clearly with the item category and quantity.",
+    "Keep fragile or electronic items padded and separated from heavy items.",
+]
+
+
+def _packaging_hint_for_item(item: DonationItem) -> str:
+    item_name = item.description.strip() if item.description else item.item_name
+    category = item.category.value
+    if category == "clothing":
+        return f"{item.quantity} x {item.item_name}: fold neatly, bag together, and keep dry."
+    if category == "books":
+        return f"{item.quantity} x {item.item_name}: stack flat and keep away from moisture."
+    if category == "electronics":
+        return f"{item.quantity} x {item.item_name}: wrap individually with padding and keep accessories together."
+    if category == "food":
+        return f"{item.quantity} x {item.item_name}: keep sealed and check expiry dates before pickup."
+    if category == "medical":
+        return f"{item.quantity} x {item.item_name}: keep sealed, clean, and clearly labelled."
+    if category == "furniture":
+        return f"{item.quantity} x {item.item_name}: disassemble if needed and protect corners and edges."
+    if category == "toys":
+        return f"{item.quantity} x {item.item_name}: group by type and pack smaller pieces in a separate bag."
+    return f"{item.quantity} x {item_name}: pack securely and label the box clearly."
 
 
 def _get_donor_profile(db: Session, user: User) -> DonorProfile:
@@ -256,3 +288,89 @@ def get_donation_matches(db: Session, user: User, donation_id: UUID) -> List[Mat
     donor = _get_donor_profile(db, user)
     _assert_owns_donation(donation, donor)
     return db.query(Match).filter(Match.donation_id == donation_id).all()
+
+
+def prepare_packaging_checklist(db: Session, user: User, donation_id: UUID, request=None) -> PackagingChecklistResponse:
+    """
+    Start the packaging stage and return a checklist tailored to the donation items.
+
+    This marks the donation as packaging_notified the first time the donor opens
+    the packaging flow so the dashboard can show that the checklist is active.
+    """
+    donation = _get_donation_or_404(db, donation_id)
+    donor = _get_donor_profile(db, user)
+    _assert_owns_donation(donation, donor)
+    if donation.status not in (
+        DonationStatus.matched,
+        DonationStatus.accepted,
+        DonationStatus.packaging_notified,
+        DonationStatus.acknowledged,
+        DonationStatus.pickup_scheduled,
+        DonationStatus.scheduled,
+    ):
+        raise BusinessLogicError("Packaging checklist is available after a match is accepted")
+
+    old_status = donation.status
+    if donation.status in (DonationStatus.matched, DonationStatus.accepted):
+        donation.status = DonationStatus.packaging_notified
+
+    confirmed_items = [item for item in donation.items if item.is_confirmed]
+    if not confirmed_items:
+        raise BusinessLogicError("Packaging checklist requires at least one confirmed item")
+
+    item_guidance = [_packaging_hint_for_item(item) for item in confirmed_items]
+    summary = f"Prepare {len(confirmed_items)} confirmed item group(s) for pickup."
+
+    log_action(
+        db,
+        AuditAction.UPDATE,
+        "donation",
+        donation.id,
+        actor_id=user.id,
+        old_data={"status": old_status},
+        new_data={"status": donation.status, "packaging": "started"},
+        request=request,
+    )
+    db.commit()
+    db.refresh(donation)
+
+    return PackagingChecklistResponse(
+        donation_id=donation.id,
+        status=donation.status,
+        acknowledged=donation.status == DonationStatus.acknowledged,
+        summary=summary,
+        general_steps=PACKAGING_GENERAL_STEPS,
+        item_guidance=item_guidance,
+    )
+
+
+def acknowledge_packaging(db: Session, user: User, donation_id: UUID, request=None) -> Donation:
+    """
+    Mark the packaging checklist as acknowledged by the donor.
+
+    The donation must already be in the packaging flow.
+    """
+    donation = _get_donation_or_404(db, donation_id)
+    donor = _get_donor_profile(db, user)
+    _assert_owns_donation(donation, donor)
+    if donation.status not in (
+        DonationStatus.packaging_notified,
+        DonationStatus.acknowledged,
+    ):
+        raise BusinessLogicError("Packaging checklist has not been started yet")
+
+    old_status = donation.status
+    _transition_status(donation, DonationStatus.acknowledged)
+    log_action(
+        db,
+        AuditAction.UPDATE,
+        "donation",
+        donation.id,
+        actor_id=user.id,
+        old_data={"status": old_status},
+        new_data={"status": "acknowledged"},
+        request=request,
+    )
+    db.commit()
+    db.refresh(donation)
+    return donation
