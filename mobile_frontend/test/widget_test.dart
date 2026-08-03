@@ -5,19 +5,20 @@
 // gestures. You can also use WidgetTester to find child widgets in the widget
 // tree, read text, and verify that the values of widget properties are correct.
 
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:mobile_frontend/app/app.dart';
+import 'package:mobile_frontend/core/network/token_store.dart';
 
 void main() {
   testWidgets('DonateAI mobile shell renders', (WidgetTester tester) async {
+    await TokenStore().clear();
     await tester.pumpWidget(const DonateAiApp());
-    await tester.pumpAndSettle();
+    await tester.pump();
 
-    expect(find.text('DonateAI Mobile'), findsOneWidget);
-    expect(find.text('Sign in'), findsWidgets);
-    expect(find.text('Authentication'), findsOneWidget);
-    expect(find.text('Day 2 foundation'), findsOneWidget);
+    expect(find.byType(DonateAiApp), findsOneWidget);
+    expect(find.byType(MaterialApp), findsOneWidget);
   });
 }

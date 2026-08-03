@@ -1,17 +1,25 @@
-# mobile_frontend
+# DonateAI Mobile
 
-A new Flutter project.
+This folder contains the mobile app for DonateAI.
 
-## Getting Started
+## Platform Scope
 
-This project is a starting point for a Flutter application.
+This project is mobile-first and should be run on Android devices or Android emulators.
 
-A few resources to get you started if this is your first Flutter project:
+Desktop and web Flutter targets are disabled locally so the app stays focused on mobile development.
 
-- [Learn Flutter](https://docs.flutter.dev/get-started/learn-flutter)
-- [Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Flutter learning resources](https://docs.flutter.dev/reference/learning-resources)
+## Run on Android
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+1. Open an Android emulator or connect an Android device.
+2. Run:
+
+```bash
+flutter devices
+flutter run -d <android-device-id>
+```
+
+If you want Android Studio to launch the app, make sure the selected device is an Android emulator or Android phone, not Windows.
+
+## Project Goal
+
+The app is being built as the mobile counterpart to the DonateAI platform, with donor and NGO flows only.
