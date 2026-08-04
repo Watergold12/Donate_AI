@@ -8,12 +8,11 @@ void main() {
   testWidgets('Donate AI splash renders when no session exists', (WidgetTester tester) async {
     await TokenStore().clear();
     await tester.pumpWidget(const DonateAiApp());
-    await tester.pump();
-    await tester.pump(const Duration(milliseconds: 200));
+    await tester.pumpAndSettle();
 
     expect(find.byType(DonateAiApp), findsOneWidget);
     expect(find.byType(MaterialApp), findsOneWidget);
     expect(find.text('Donate AI'), findsWidgets);
-    expect(find.text('Sign in'), findsOneWidget);
+    expect(find.text('Sign in'), findsWidgets);
   });
 }

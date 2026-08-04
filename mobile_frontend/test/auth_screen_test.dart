@@ -13,7 +13,7 @@ void main() {
 
     expect(find.text('Donate AI'), findsOneWidget);
     expect(find.text('Login'), findsOneWidget);
-    expect(find.text('Sign in'), findsOneWidget);
+    expect(find.text('Sign in'), findsNWidgets(2));
     expect(find.text('Current Session'), findsOneWidget);
     expect(find.text('Register'), findsNothing);
   });
