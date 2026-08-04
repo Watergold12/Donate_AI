@@ -1,10 +1,16 @@
 import 'package:flutter/material.dart';
 
+import 'package:mobile_frontend/app/app.dart';
 import 'package:mobile_frontend/core/network/api_client.dart';
 import 'package:mobile_frontend/core/network/api_exception.dart';
 import 'package:mobile_frontend/core/network/token_store.dart';
 import 'package:mobile_frontend/core/theme/app_colors.dart';
 import 'package:mobile_frontend/features/auth/data/auth_service.dart';
+import 'package:mobile_frontend/features/donor/data/services/donor_service.dart';
+import 'package:mobile_frontend/features/donor/presentation/widgets/donor_matches_tab.dart';
+import 'package:mobile_frontend/features/donor/presentation/widgets/donor_profile_tab.dart';
+import 'package:mobile_frontend/features/donor/presentation/widgets/pickup_tracker_tab.dart';
+import 'package:mobile_frontend/features/donor/presentation/widgets/scan_catalog_tab.dart';
 
 class DonorDashboardScreen extends StatefulWidget {
   const DonorDashboardScreen({super.key});
@@ -16,6 +22,7 @@ class DonorDashboardScreen extends StatefulWidget {
 class _DonorDashboardScreenState extends State<DonorDashboardScreen> {
   late final ApiClient _apiClient;
   late final AuthService _authService;
+  late final DonorService _donorService;
   late Future<Map<String, dynamic>> _summaryFuture;
   late Future<StoredSession?> _sessionFuture;
   int _selectedIndex = 0;
@@ -26,12 +33,14 @@ class _DonorDashboardScreenState extends State<DonorDashboardScreen> {
     super.initState();
     _apiClient = ApiClient();
     _authService = AuthService(client: _apiClient);
+    _donorService = DonorService(client: _apiClient);
     _summaryFuture = _loadSummary();
     _sessionFuture = _apiClient.readSession();
   }
 
   @override
   void dispose() {
+    _donorService.close();
     _apiClient.close();
     super.dispose();
   }
@@ -72,6 +81,9 @@ class _DonorDashboardScreenState extends State<DonorDashboardScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final appState = DonateAiApp.of(context);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Donate AI'),
@@ -99,44 +111,28 @@ class _DonorDashboardScreenState extends State<DonorDashboardScreen> {
               sessionFuture: _sessionFuture,
               summaryFuture: _summaryFuture,
             ),
-            _ActionTab(
-              title: 'Scan and catalog',
-              subtitle: 'AI item scanning and inventory cataloging.',
-              accent: AppColors.primaryDark,
-              cards: const [
-                _ActionCardData('Capture item photo', 'Scan items using device camera or gallery.'),
-                _ActionCardData('Extract AI details', 'Auto-detect item category, condition, and specs.'),
-                _ActionCardData('Review cataloged items', 'Check pending scanned items before submitting.'),
-                _ActionCardData('Add to donation queue', 'Submit cataloged items to donation list.'),
-              ],
+            ScanCatalogTab(
+              donorService: _donorService,
+              onDonationSubmitted: () {
+                setState(() {
+                  _selectedIndex = 2; // Jump to Matches tab after submission
+                });
+              },
             ),
-            _ActionTab(
-              title: 'Matches',
-              subtitle: 'Review intelligent AI match recommendations.',
-              accent: AppColors.primaryDark,
-              cards: const [
-                _ActionCardData('View top NGO matches', 'See NGOs requesting items matching your donation.'),
-                _ActionCardData('Check match breakdown', 'Review similarity score and allocation fit.'),
-                _ActionCardData('Accept match proposal', 'Confirm NGO match to schedule pickup.'),
-                _ActionCardData('Match history', 'Review previous successful resource matches.'),
-              ],
+            DonorMatchesTab(
+              donorService: _donorService,
             ),
-            _ActionTab(
-              title: 'Tracker',
-              subtitle: 'Track scheduled pickups and delivery status.',
-              accent: AppColors.primaryDark,
-              cards: const [
-                _ActionCardData('Active pickup schedule', 'Monitor current driver pickup windows.'),
-                _ActionCardData('Driver & route info', 'View assigned courier details and vehicle info.'),
-                _ActionCardData('Real-time updates', 'Track status changes from pending to fulfilled.'),
-                _ActionCardData('Completed pickups', 'Review history of collected donations.'),
-              ],
+            PickupTrackerTab(
+              donorService: _donorService,
             ),
-            _AccountTab(
-              sessionFuture: _sessionFuture,
+            DonorProfileTab(
+              donorService: _donorService,
               onLogout: _busy ? null : _logout,
               logoutLabel: _busy ? 'Signing out...' : 'Sign out',
-              roleLabel: 'donor',
+              isDarkMode: isDark,
+              onToggleTheme: (val) {
+                appState?.toggleTheme(val);
+              },
             ),
           ],
         ),
@@ -244,115 +240,7 @@ class _OverviewTab extends StatelessWidget {
   }
 }
 
-class _ActionTab extends StatelessWidget {
-  const _ActionTab({
-    required this.title,
-    required this.subtitle,
-    required this.accent,
-    required this.cards,
-  });
 
-  final String title;
-  final String subtitle;
-  final Color accent;
-  final List<_ActionCardData> cards;
-
-  @override
-  Widget build(BuildContext context) {
-    return ListView(
-      padding: const EdgeInsets.all(20),
-      children: [
-        _HeroBanner(
-          title: title,
-          subtitle: subtitle,
-          accent: accent,
-        ),
-        const SizedBox(height: 16),
-        _ActionList(
-          title: 'Quick actions',
-          actions: cards.map((card) => card.title).toList(),
-        ),
-        const SizedBox(height: 16),
-        _ActionList(
-          title: 'What this page covers',
-          actions: cards.map((card) => card.subtitle).toList(),
-        ),
-      ],
-    );
-  }
-}
-
-class _AccountTab extends StatelessWidget {
-  const _AccountTab({
-    required this.sessionFuture,
-    required this.onLogout,
-    required this.logoutLabel,
-    required this.roleLabel,
-  });
-
-  final Future<StoredSession?> sessionFuture;
-  final VoidCallback? onLogout;
-  final String logoutLabel;
-  final String roleLabel;
-
-  @override
-  Widget build(BuildContext context) {
-    return ListView(
-      padding: const EdgeInsets.all(20),
-      children: [
-        const _HeroBanner(
-          title: 'Account',
-          subtitle: 'Manage your signed-in session and account access.',
-          accent: AppColors.primaryDark,
-        ),
-        const SizedBox(height: 16),
-        FutureBuilder<StoredSession?>(
-          future: sessionFuture,
-          builder: (context, snapshot) {
-            final session = snapshot.data;
-            return _InfoCard(
-              title: 'Current role',
-              value: session?.role ?? roleLabel,
-              subtitle: 'Your mobile session stays on this device until you log out.',
-            );
-          },
-        ),
-        const SizedBox(height: 16),
-        Card(
-          child: Padding(
-            padding: const EdgeInsets.all(20),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text('Session actions', style: Theme.of(context).textTheme.titleLarge),
-                const SizedBox(height: 12),
-                Text(
-                  'Sign out when you are done so the next user has to authenticate again.',
-                  style: Theme.of(context).textTheme.bodyMedium,
-                ),
-                const SizedBox(height: 16),
-                Align(
-                  alignment: Alignment.centerRight,
-                  child: OutlinedButton(
-                    onPressed: onLogout,
-                    child: Text(logoutLabel),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-class _ActionCardData {
-  const _ActionCardData(this.title, this.subtitle);
-
-  final String title;
-  final String subtitle;
-}
 
 class _HeroBanner extends StatelessWidget {
   const _HeroBanner({

@@ -7,8 +7,26 @@ import '../features/donor/presentation/screens/donor_dashboard_screen.dart';
 import '../features/home/presentation/screens/mobile_home_screen.dart';
 import '../features/ngo/presentation/screens/ngo_dashboard_screen.dart';
 
-class DonateAiApp extends StatelessWidget {
+class DonateAiApp extends StatefulWidget {
   const DonateAiApp({super.key});
+
+  static DonateAiAppState? of(BuildContext context) =>
+      context.findAncestorStateOfType<DonateAiAppState>();
+
+  @override
+  State<DonateAiApp> createState() => DonateAiAppState();
+}
+
+class DonateAiAppState extends State<DonateAiApp> {
+  ThemeMode _themeMode = ThemeMode.system;
+
+  ThemeMode get themeMode => _themeMode;
+
+  void toggleTheme(bool isDark) {
+    setState(() {
+      _themeMode = isDark ? ThemeMode.dark : ThemeMode.light;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -17,7 +35,7 @@ class DonateAiApp extends StatelessWidget {
       title: 'Donate AI',
       theme: AppTheme.light,
       darkTheme: AppTheme.dark,
-      themeMode: ThemeMode.system,
+      themeMode: _themeMode,
       home: const _StartupGate(),
       routes: {
         '/auth': (_) => const AuthScreen(),
