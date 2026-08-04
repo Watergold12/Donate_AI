@@ -14,25 +14,33 @@ class PickupTrackerTab extends StatefulWidget {
 
 class _PickupTrackerTabState extends State<PickupTrackerTab> {
   late Future<List<PickupRecord>> _pickupsFuture;
+  late Future<List<DonationRecord>> _donationsFuture;
   String _filter = 'all';
 
   @override
   void initState() {
     super.initState();
+    _loadData();
+  }
+
+  void _loadData() {
     _pickupsFuture = widget.donorService.getPickups();
+    _donationsFuture = widget.donorService.getRecentDonations();
   }
 
   Future<void> _refresh() async {
     setState(() {
-      _pickupsFuture = widget.donorService.getPickups();
+      _loadData();
     });
   }
 
   Color _getStatusColor(String status) {
     switch (status.toLowerCase()) {
       case 'in_transit':
+      case 'collected':
         return AppColors.warning;
       case 'completed':
+      case 'delivered':
         return AppColors.success;
       case 'scheduled':
       default:
@@ -44,12 +52,151 @@ class _PickupTrackerTabState extends State<PickupTrackerTab> {
     switch (status.toLowerCase()) {
       case 'in_transit':
         return 'In Transit';
+      case 'collected':
+        return 'Collected';
       case 'completed':
+      case 'delivered':
         return 'Completed';
       case 'scheduled':
       default:
         return 'Scheduled';
     }
+  }
+
+  void _showScheduleModal(BuildContext context, List<DonationRecord> donations) {
+    final schedulable = donations.where((d) {
+      return !['completed', 'cancelled', 'pickup_scheduled', 'collected', 'delivered'].contains(d.status.toLowerCase());
+    }).toList();
+
+    if (schedulable.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('No active donations waiting for pickup scheduling.')),
+      );
+      return;
+    }
+
+    String selectedDonationId = schedulable.first.id;
+    final dateController = TextEditingController(text: DateTime.now().add(const Duration(days: 1)).toString().split(' ')[0]);
+    String timeSlot = '09:00 - 12:00';
+    final addressController = TextEditingController();
+    final notesController = TextEditingController();
+    bool isSaving = false;
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (ctx) {
+        return StatefulBuilder(
+          builder: (modalCtx, setModalState) {
+            return Padding(
+              padding: EdgeInsets.only(
+                top: 20,
+                left: 20,
+                right: 20,
+                bottom: MediaQuery.of(modalCtx).viewInsets.bottom + 20,
+              ),
+              child: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('Schedule Pickup', style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
+                    const SizedBox(height: 12),
+                    DropdownButtonFormField<String>(
+                      initialValue: selectedDonationId,
+                      decoration: const InputDecoration(labelText: 'Select Donation'),
+                      items: schedulable.map((d) {
+                        return DropdownMenuItem(
+                          value: d.id,
+                          child: Text('${d.totalItems} item(s) (${d.status})'),
+                        );
+                      }).toList(),
+                      onChanged: (val) {
+                        if (val != null) setModalState(() => selectedDonationId = val);
+                      },
+                    ),
+                    const SizedBox(height: 12),
+                    TextField(
+                      controller: dateController,
+                      decoration: const InputDecoration(
+                        labelText: 'Scheduled Date (YYYY-MM-DD)',
+                        prefixIcon: Icon(Icons.calendar_today),
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    DropdownButtonFormField<String>(
+                      initialValue: timeSlot,
+                      decoration: const InputDecoration(labelText: 'Time Slot'),
+                      items: const [
+                        DropdownMenuItem(value: '09:00 - 12:00', child: Text('Morning (09:00 - 12:00)')),
+                        DropdownMenuItem(value: '12:00 - 15:00', child: Text('Afternoon (12:00 - 15:00)')),
+                        DropdownMenuItem(value: '15:00 - 18:00', child: Text('Evening (15:00 - 18:00)')),
+                      ],
+                      onChanged: (val) {
+                        if (val != null) setModalState(() => timeSlot = val);
+                      },
+                    ),
+                    const SizedBox(height: 12),
+                    TextField(
+                      controller: addressController,
+                      decoration: const InputDecoration(
+                        labelText: 'Pickup Address',
+                        prefixIcon: Icon(Icons.location_on_outlined),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppColors.primary,
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(vertical: 14),
+                        ),
+                        onPressed: isSaving
+                            ? null
+                            : () async {
+                                if (addressController.text.trim().isEmpty) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(content: Text('Please enter a pickup address.')),
+                                  );
+                                  return;
+                                }
+
+                                setModalState(() => isSaving = true);
+                                final ok = await widget.donorService.schedulePickup(
+                                  donationId: selectedDonationId,
+                                  scheduledDate: dateController.text.trim(),
+                                  timeSlot: timeSlot,
+                                  address: addressController.text.trim(),
+                                  notes: notesController.text.trim(),
+                                );
+                                if (!modalCtx.mounted) return;
+                                Navigator.pop(modalCtx);
+                                if (ok && mounted) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(
+                                      content: Text('Pickup scheduled successfully!'),
+                                      backgroundColor: AppColors.success,
+                                    ),
+                                  );
+                                  _refresh();
+                                }
+                              },
+                        child: Text(isSaving ? 'Scheduling...' : 'Confirm Pickup Schedule'),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          },
+        );
+      },
+    );
   }
 
   @override
@@ -59,15 +206,17 @@ class _PickupTrackerTabState extends State<PickupTrackerTab> {
 
     return RefreshIndicator(
       onRefresh: _refresh,
-      child: FutureBuilder<List<PickupRecord>>(
-        future: _pickupsFuture,
+      child: FutureBuilder<List<dynamic>>(
+        future: Future.wait([_pickupsFuture, _donationsFuture]),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
           }
 
-          final allPickups = snapshot.data ?? [];
-          final filteredPickups = allPickups.where((p) {
+          final pickups = (snapshot.data?[0] as List<PickupRecord>?) ?? [];
+          final donations = (snapshot.data?[1] as List<DonationRecord>?) ?? [];
+
+          final filteredPickups = pickups.where((p) {
             if (_filter == 'all') return true;
             return p.status.toLowerCase() == _filter;
           }).toList();
@@ -75,17 +224,39 @@ class _PickupTrackerTabState extends State<PickupTrackerTab> {
           return ListView(
             padding: const EdgeInsets.all(20),
             children: [
-              // Title Banner
-              Text(
-                'Pickup & Logistics Tracker',
-                style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 4),
-              Text(
-                'Track courier assignment, arrival time slots, and real-time pickup status.',
-                style: theme.textTheme.bodyMedium?.copyWith(
-                  color: isDark ? AppColors.darkMutedText : AppColors.lightMutedText,
-                ),
+              // Header Card
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Pickup Tracker',
+                          style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+                        ),
+                        Text(
+                          'Track courier assignment and scheduled pickup windows.',
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color: isDark ? AppColors.darkMutedText : AppColors.lightMutedText,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  ElevatedButton.icon(
+                    onPressed: () => _showScheduleModal(context, donations),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.primary,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                    ),
+                    icon: const Icon(Icons.add, size: 18),
+                    label: const Text('Schedule'),
+                  ),
+                ],
               ),
 
               const SizedBox(height: 16),
@@ -95,9 +266,9 @@ class _PickupTrackerTabState extends State<PickupTrackerTab> {
                 children: [
                   _buildFilterChip('All', 'all'),
                   const SizedBox(width: 8),
-                  _buildFilterChip('Active', 'in_transit'),
-                  const SizedBox(width: 8),
                   _buildFilterChip('Scheduled', 'scheduled'),
+                  const SizedBox(width: 8),
+                  _buildFilterChip('In Transit', 'in_transit'),
                   const SizedBox(width: 8),
                   _buildFilterChip('Completed', 'completed'),
                 ],
@@ -109,11 +280,25 @@ class _PickupTrackerTabState extends State<PickupTrackerTab> {
                 Container(
                   padding: const EdgeInsets.all(32),
                   alignment: Alignment.center,
-                  child: const Column(
+                  decoration: BoxDecoration(
+                    color: isDark ? AppColors.darkSurface : Colors.white,
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: Column(
                     children: [
-                      Icon(Icons.local_shipping_outlined, size: 48, color: AppColors.lightMutedText),
-                      SizedBox(height: 8),
-                      Text('No pickups found for selected status.'),
+                      const Icon(Icons.local_shipping_outlined, size: 48, color: AppColors.lightMutedText),
+                      const SizedBox(height: 8),
+                      Text(
+                        'No pickups found',
+                        style: theme.textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.w600),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        'Tap + Schedule to create a pickup window for your donation.',
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: isDark ? AppColors.darkMutedText : AppColors.lightMutedText,
+                        ),
+                      ),
                     ],
                   ),
                 )
@@ -133,7 +318,7 @@ class _PickupTrackerTabState extends State<PickupTrackerTab> {
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               Text(
-                                'Pickup #${pickup.id}',
+                                'Pickup #${pickup.id.isNotEmpty ? pickup.id.substring(0, 8) : '001'}',
                                 style: theme.textTheme.titleSmall?.copyWith(
                                   fontWeight: FontWeight.bold,
                                   color: AppColors.lightMutedText,
@@ -142,7 +327,7 @@ class _PickupTrackerTabState extends State<PickupTrackerTab> {
                               Container(
                                 padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                                 decoration: BoxDecoration(
-                                  color: color.withOpacity(0.15),
+                                  color: color.withValues(alpha: 0.15),
                                   borderRadius: BorderRadius.circular(20),
                                 ),
                                 child: Text(
@@ -202,9 +387,9 @@ class _PickupTrackerTabState extends State<PickupTrackerTab> {
                             child: Row(
                               children: [
                                 CircleAvatar(
-                                  backgroundColor: AppColors.primary.withOpacity(0.15),
-                                  radius: 20,
-                                  child: const Icon(Icons.person, color: AppColors.primary),
+                                  backgroundColor: AppColors.primary.withValues(alpha: 0.15),
+                                  radius: 18,
+                                  child: const Icon(Icons.person, color: AppColors.primary, size: 20),
                                 ),
                                 const SizedBox(width: 12),
                                 Expanded(
@@ -235,15 +420,6 @@ class _PickupTrackerTabState extends State<PickupTrackerTab> {
                                   },
                                 ),
                               ],
-                            ),
-                          ),
-
-                          const SizedBox(height: 12),
-
-                          Text(
-                            'Items for pickup: ${pickup.itemNames.join(', ')}',
-                            style: theme.textTheme.bodySmall?.copyWith(
-                              fontStyle: FontStyle.italic,
                             ),
                           ),
                         ],

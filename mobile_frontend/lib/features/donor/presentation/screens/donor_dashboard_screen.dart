@@ -6,6 +6,7 @@ import 'package:mobile_frontend/core/network/api_exception.dart';
 import 'package:mobile_frontend/core/network/token_store.dart';
 import 'package:mobile_frontend/core/theme/app_colors.dart';
 import 'package:mobile_frontend/features/auth/data/auth_service.dart';
+import 'package:mobile_frontend/features/donor/data/models/donor_models.dart';
 import 'package:mobile_frontend/features/donor/data/services/donor_service.dart';
 import 'package:mobile_frontend/features/donor/presentation/widgets/donor_matches_tab.dart';
 import 'package:mobile_frontend/features/donor/presentation/widgets/donor_profile_tab.dart';
@@ -105,11 +106,15 @@ class _DonorDashboardScreenState extends State<DonorDashboardScreen> {
           index: _selectedIndex,
           children: [
             _OverviewTab(
-              title: 'Donor workspace',
-              subtitle: 'Track donations, pickups, and impact from your phone.',
-              accent: AppColors.primary,
+              donorService: _donorService,
               sessionFuture: _sessionFuture,
               summaryFuture: _summaryFuture,
+              onNavigateToScan: () {
+                setState(() => _selectedIndex = 1);
+              },
+              onNavigateToTracker: () {
+                setState(() => _selectedIndex = 3);
+              },
             ),
             ScanCatalogTab(
               donorService: _donorService,
@@ -178,263 +183,303 @@ class _DonorDashboardScreenState extends State<DonorDashboardScreen> {
 
 class _OverviewTab extends StatelessWidget {
   const _OverviewTab({
-    required this.title,
-    required this.subtitle,
-    required this.accent,
+    required this.donorService,
     required this.sessionFuture,
     required this.summaryFuture,
+    required this.onNavigateToScan,
+    required this.onNavigateToTracker,
   });
 
-  final String title;
-  final String subtitle;
-  final Color accent;
+  final DonorService donorService;
   final Future<StoredSession?> sessionFuture;
   final Future<Map<String, dynamic>> summaryFuture;
+  final VoidCallback onNavigateToScan;
+  final VoidCallback onNavigateToTracker;
+
+  Color _getStatusColor(String status) {
+    switch (status.toLowerCase()) {
+      case 'completed':
+      case 'delivered':
+        return AppColors.success;
+      case 'matched':
+      case 'pickup_scheduled':
+      case 'in_transit':
+        return AppColors.warning;
+      case 'cancelled':
+        return AppColors.error;
+      case 'draft':
+      case 'pending_match':
+      default:
+        return AppColors.primary;
+    }
+  }
+
+  String _formatStatusLabel(String status) {
+    switch (status.toLowerCase()) {
+      case 'pending_match':
+        return 'Pending Match';
+      case 'packaging_notified':
+        return 'Packaging Ready';
+      case 'pickup_scheduled':
+        return 'Pickup Scheduled';
+      case 'completed':
+        return 'Completed';
+      case 'cancelled':
+        return 'Cancelled';
+      default:
+        return status.replaceAll('_', ' ').toUpperCase();
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    return ListView(
-      padding: const EdgeInsets.all(20),
-      children: [
-        _HeroBanner(
-          title: title,
-          subtitle: subtitle,
-          accent: accent,
-        ),
-        const SizedBox(height: 16),
-        FutureBuilder<StoredSession?>(
-          future: sessionFuture,
-          builder: (context, snapshot) {
-            final role = snapshot.data?.role ?? 'donor';
-            return _InfoCard(
-              title: 'Signed in as',
-              value: role,
-              subtitle: 'Your saved session is active on this device.',
-            );
-          },
-        ),
-        const SizedBox(height: 16),
-        FutureBuilder<Map<String, dynamic>>(
-          future: summaryFuture,
-          builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return const _LoadingCard(label: 'Loading donor summary...');
-            }
-            if (snapshot.hasError) {
-              return _ErrorCard(message: 'Could not load donor summary: ${snapshot.error}');
-            }
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
 
-            final summary = snapshot.data ?? const {};
-            return _StatsGrid(
-              cards: [
-                _StatSpec('Total donations', '${summary['total_donations'] ?? 0}'),
-                _StatSpec('Completed', '${summary['completed_donations'] ?? 0}'),
-                _StatSpec('In progress', '${summary['pending_donations'] ?? 0}'),
-                _StatSpec('Items donated', '${summary['total_items_donated'] ?? 0}'),
+    return FutureBuilder<StoredSession?>(
+      future: sessionFuture,
+      builder: (context, sessionSnap) {
+        return FutureBuilder<Map<String, dynamic>>(
+          future: summaryFuture,
+          builder: (context, summarySnap) {
+            final summary = summarySnap.data ?? {};
+            final totalDonations = (summary['total_donations'] as num?)?.toInt() ?? 0;
+            final completedDonations = (summary['completed_donations'] as num?)?.toInt() ?? 0;
+            final accuracy = totalDonations > 0 ? '${((completedDonations / totalDonations) * 100).round()}%' : '—';
+
+            return ListView(
+              padding: const EdgeInsets.all(20),
+              children: [
+                // Welcome header
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Welcome back',
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color: isDark ? AppColors.darkMutedText : AppColors.lightMutedText,
+                          ),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          'Hi Donor',
+                          style: theme.textTheme.headlineMedium?.copyWith(
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ],
+                    ),
+                    ElevatedButton.icon(
+                      onPressed: onNavigateToScan,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.primary,
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      ),
+                      icon: const Icon(Icons.add, size: 18),
+                      label: const Text('+ Donate item'),
+                    ),
+                  ],
+                ),
+
+                const SizedBox(height: 20),
+
+                // Stat Cards Grid
+                Row(
+                  children: [
+                    Expanded(
+                      child: _buildStatCard(
+                        context: context,
+                        value: '$totalDonations',
+                        label: 'Donations',
+                        valueColor: theme.colorScheme.onSurface,
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: _buildStatCard(
+                        context: context,
+                        value: '$completedDonations',
+                        label: 'NGOs helped',
+                        valueColor: theme.colorScheme.onSurface,
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: _buildStatCard(
+                        context: context,
+                        value: accuracy,
+                        label: 'Match accuracy',
+                        valueColor: AppColors.primary,
+                      ),
+                    ),
+                  ],
+                ),
+
+                const SizedBox(height: 24),
+
+                // Recent Activity Section
+                Text(
+                  'Recent Activity',
+                  style: theme.textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 10),
+
+                FutureBuilder<List<DonationRecord>>(
+                  future: donorService.getRecentDonations(size: 5),
+                  builder: (context, donationsSnap) {
+                    if (donationsSnap.connectionState == ConnectionState.waiting) {
+                      return const Center(
+                        child: Padding(
+                          padding: EdgeInsets.all(24),
+                          child: CircularProgressIndicator(),
+                        ),
+                      );
+                    }
+
+                    final donations = donationsSnap.data ?? [];
+
+                    if (donations.isEmpty) {
+                      return Card(
+                        child: Padding(
+                          padding: const EdgeInsets.all(28),
+                          child: Column(
+                            children: [
+                              const Icon(Icons.volunteer_activism_outlined, size: 40, color: AppColors.lightMutedText),
+                              const SizedBox(height: 8),
+                              Text(
+                                'No donations yet',
+                                style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold),
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                'Start making a difference by creating your first donation',
+                                textAlign: TextAlign.center,
+                                style: theme.textTheme.bodySmall?.copyWith(
+                                  color: isDark ? AppColors.darkMutedText : AppColors.lightMutedText,
+                                ),
+                              ),
+                              const SizedBox(height: 14),
+                              ElevatedButton(
+                                onPressed: onNavigateToScan,
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: AppColors.primary,
+                                  foregroundColor: Colors.white,
+                                ),
+                                child: const Text('Create Donation'),
+                              ),
+                            ],
+                          ),
+                        ),
+                      );
+                    }
+
+                    return Card(
+                      child: ListView.separated(
+                        shrinkWrap: true,
+                        physics: const NeverScrollableScrollPhysics(),
+                        itemCount: donations.length,
+                        separatorBuilder: (_, _) => const Divider(height: 1),
+                        itemBuilder: (context, index) {
+                          final donation = donations[index];
+                          final statusColor = _getStatusColor(donation.status);
+                          final statusLabel = _formatStatusLabel(donation.status);
+                          final canSchedule = !['completed', 'cancelled', 'pickup_scheduled', 'collected', 'delivered'].contains(donation.status.toLowerCase());
+
+                          return ListTile(
+                            title: Text(
+                              donation.notes != null && donation.notes!.isNotEmpty
+                                  ? donation.notes!
+                                  : '${donation.totalItems} item(s) donated',
+                              style: theme.textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.bold),
+                            ),
+                            subtitle: Text(
+                              donation.createdAt.isNotEmpty ? donation.createdAt.split('T')[0] : 'Recent',
+                              style: theme.textTheme.bodySmall?.copyWith(fontSize: 11),
+                            ),
+                            trailing: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                                  decoration: BoxDecoration(
+                                    color: statusColor.withValues(alpha: 0.15),
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                  child: Text(
+                                    statusLabel,
+                                    style: TextStyle(
+                                      color: statusColor,
+                                      fontSize: 11,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ),
+                                if (canSchedule) ...[
+                                  const SizedBox(width: 8),
+                                  ElevatedButton(
+                                    onPressed: onNavigateToTracker,
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: AppColors.primary,
+                                      foregroundColor: Colors.white,
+                                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                                      minimumSize: Size.zero,
+                                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                                    ),
+                                    child: const Text('Schedule', style: TextStyle(fontSize: 11)),
+                                  ),
+                                ],
+                              ],
+                            ),
+                          );
+                        },
+                      ),
+                    );
+                  },
+                ),
               ],
             );
           },
-        ),
-      ],
+        );
+      },
     );
   }
-}
 
-
-
-class _HeroBanner extends StatelessWidget {
-  const _HeroBanner({
-    required this.title,
-    required this.subtitle,
-    required this.accent,
-  });
-
-  final String title;
-  final String subtitle;
-  final Color accent;
-
-  @override
-  Widget build(BuildContext context) {
+  Widget _buildStatCard({
+    required BuildContext context,
+    required String value,
+    required String label,
+    required Color valueColor,
+  }) {
     final theme = Theme.of(context);
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(22),
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [accent, accent.withValues(alpha: 0.78)],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-        borderRadius: BorderRadius.circular(24),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(title, style: theme.textTheme.headlineMedium?.copyWith(color: Colors.white)),
-          const SizedBox(height: 8),
-          Text(subtitle, style: theme.textTheme.bodyLarge?.copyWith(color: Colors.white70)),
-        ],
-      ),
-    );
-  }
-}
+    final isDark = theme.brightness == Brightness.dark;
 
-class _InfoCard extends StatelessWidget {
-  const _InfoCard({
-    required this.title,
-    required this.value,
-    required this.subtitle,
-  });
-
-  final String title;
-  final String value;
-  final String subtitle;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     return Card(
       child: Padding(
-        padding: const EdgeInsets.all(20),
+        padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(title, style: theme.textTheme.titleLarge),
-            const SizedBox(height: 8),
-            Text(value, style: theme.textTheme.headlineMedium),
-            const SizedBox(height: 6),
-            Text(subtitle, style: theme.textTheme.bodyMedium),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _LoadingCard extends StatelessWidget {
-  const _LoadingCard({required this.label});
-
-  final String label;
-
-  @override
-  Widget build(BuildContext context) {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Row(
-          children: [
-            const SizedBox(
-              width: 18,
-              height: 18,
-              child: CircularProgressIndicator(strokeWidth: 2),
-            ),
-            const SizedBox(width: 12),
-            Expanded(child: Text(label)),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _ErrorCard extends StatelessWidget {
-  const _ErrorCard({required this.message});
-
-  final String message;
-
-  @override
-  Widget build(BuildContext context) {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Text(
-          message,
-          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: Theme.of(context).colorScheme.error,
-              ),
-        ),
-      ),
-    );
-  }
-}
-
-class _StatSpec {
-  const _StatSpec(this.label, this.value);
-
-  final String label;
-  final String value;
-}
-
-class _StatsGrid extends StatelessWidget {
-  const _StatsGrid({required this.cards});
-
-  final List<_StatSpec> cards;
-
-  @override
-  Widget build(BuildContext context) {
-    return GridView.count(
-      crossAxisCount: 2,
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      mainAxisSpacing: 12,
-      crossAxisSpacing: 12,
-      childAspectRatio: 1.65,
-      children: cards
-          .map(
-            (card) => Card(
-              child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(card.label, style: Theme.of(context).textTheme.bodyMedium),
-                    const SizedBox(height: 6),
-                    Text(card.value, style: Theme.of(context).textTheme.headlineMedium),
-                  ],
-                ),
+            Text(
+              value,
+              style: theme.textTheme.titleLarge?.copyWith(
+                fontWeight: FontWeight.bold,
+                fontSize: 26,
+                color: valueColor,
               ),
             ),
-          )
-          .toList(),
-    );
-  }
-}
-
-class _ActionList extends StatelessWidget {
-  const _ActionList({
-    required this.title,
-    required this.actions,
-  });
-
-  final String title;
-  final List<String> actions;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(title, style: theme.textTheme.titleLarge),
-            const SizedBox(height: 12),
-            ...actions.map(
-              (action) => Padding(
-                padding: const EdgeInsets.only(bottom: 10),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Padding(
-                      padding: EdgeInsets.only(top: 4),
-                      child: Icon(Icons.circle, size: 8),
-                    ),
-                    const SizedBox(width: 10),
-                    Expanded(child: Text(action, style: theme.textTheme.bodyMedium)),
-                  ],
-                ),
+            const SizedBox(height: 4),
+            Text(
+              label,
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: isDark ? AppColors.darkMutedText : AppColors.lightMutedText,
               ),
             ),
           ],
@@ -443,3 +488,7 @@ class _ActionList extends StatelessWidget {
     );
   }
 }
+
+
+
+

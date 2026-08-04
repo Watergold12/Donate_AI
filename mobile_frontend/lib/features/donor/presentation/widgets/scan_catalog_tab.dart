@@ -19,9 +19,12 @@ class ScanCatalogTab extends StatefulWidget {
 
 class _ScanCatalogTabState extends State<ScanCatalogTab> {
   final _notesController = TextEditingController();
-  List<DetectedItem> _catalog = [];
+  final List<DetectedItem> _catalog = [];
   bool _isScanning = false;
   bool _isSubmitting = false;
+
+  final _categories = const ['clothing', 'food', 'books', 'electronics', 'medical', 'furniture', 'toys', 'other'];
+  final _conditions = const ['new', 'like_new', 'good', 'fair'];
 
   @override
   void dispose() {
@@ -35,17 +38,32 @@ class _ScanCatalogTabState extends State<ScanCatalogTab> {
       final items = await widget.donorService.runAiScan();
       if (!mounted) return;
       setState(() {
-        _catalog = items;
+        _catalog.addAll(items);
       });
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('AI auto-detected ${items.length} donation items!'),
+          content: Text('AI auto-detected ${items.length} donation item(s)!'),
           backgroundColor: AppColors.success,
         ),
       );
     } finally {
       if (mounted) setState(() => _isScanning = false);
     }
+  }
+
+  void _addManualItem() {
+    setState(() {
+      _catalog.add(
+        DetectedItem(
+          name: 'New Donation Item',
+          category: 'other',
+          confidence: 1.0,
+          condition: 'good',
+          description: '',
+          count: 1,
+        ),
+      );
+    });
   }
 
   Future<void> _handleSubmit() async {
@@ -60,7 +78,7 @@ class _ScanCatalogTabState extends State<ScanCatalogTab> {
     try {
       final success = await widget.donorService.submitDonation(
         _catalog,
-        _notesController.text,
+        _notesController.text.trim(),
       );
       if (!mounted) return;
       if (success) {
@@ -75,6 +93,13 @@ class _ScanCatalogTabState extends State<ScanCatalogTab> {
           _notesController.clear();
         });
         widget.onDonationSubmitted();
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Submission failed. Please check your backend connection.'),
+            backgroundColor: AppColors.error,
+          ),
+        );
       }
     } finally {
       if (mounted) setState(() => _isSubmitting = false);
@@ -98,7 +123,7 @@ class _ScanCatalogTabState extends State<ScanCatalogTab> {
                 Container(
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
-                    color: AppColors.primary.withOpacity(0.12),
+                    color: AppColors.primary.withValues(alpha: 0.12),
                     shape: BoxShape.circle,
                   ),
                   child: const Icon(
@@ -109,37 +134,50 @@ class _ScanCatalogTabState extends State<ScanCatalogTab> {
                 ),
                 const SizedBox(height: 12),
                 Text(
-                  'AI Item Scanner',
+                  'Scan & Catalog Items',
                   style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 6),
                 Text(
-                  'Take a photo of your donation items. Our AI will automatically detect category, specs, and condition.',
+                  'Scan items with AI or manually add catalog details for donor matching.',
                   textAlign: TextAlign.center,
                   style: theme.textTheme.bodyMedium?.copyWith(
                     color: isDark ? AppColors.darkMutedText : AppColors.lightMutedText,
                   ),
                 ),
                 const SizedBox(height: 16),
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton.icon(
-                    onPressed: _isScanning ? null : _handleScan,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.primary,
-                      foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(vertical: 14),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                Row(
+                  children: [
+                    Expanded(
+                      child: ElevatedButton.icon(
+                        onPressed: _isScanning ? null : _handleScan,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppColors.primary,
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(vertical: 14),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                        ),
+                        icon: _isScanning
+                            ? const SizedBox(
+                                width: 20,
+                                height: 20,
+                                child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                              )
+                            : const Icon(Icons.camera_alt),
+                        label: Text(_isScanning ? 'Scanning...' : 'AI Scan Photo'),
+                      ),
                     ),
-                    icon: _isScanning
-                        ? const SizedBox(
-                            width: 20,
-                            height: 20,
-                            child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
-                          )
-                        : const Icon(Icons.camera_alt),
-                    label: Text(_isScanning ? 'Analyzing with AI...' : 'Scan / Capture Photo'),
-                  ),
+                    const SizedBox(width: 10),
+                    OutlinedButton.icon(
+                      onPressed: _addManualItem,
+                      style: OutlinedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 16),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      ),
+                      icon: const Icon(Icons.add),
+                      label: const Text('Add Manual'),
+                    ),
+                  ],
                 ),
               ],
             ),
@@ -148,7 +186,6 @@ class _ScanCatalogTabState extends State<ScanCatalogTab> {
 
         const SizedBox(height: 20),
 
-        // Scanned Catalog Items List
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
@@ -186,7 +223,7 @@ class _ScanCatalogTabState extends State<ScanCatalogTab> {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  'Tap the button above to scan items using your camera.',
+                  'Tap AI Scan Photo or Add Manual to add items to your donation.',
                   style: theme.textTheme.bodySmall?.copyWith(
                     color: isDark ? AppColors.darkMutedText : AppColors.lightMutedText,
                   ),
@@ -199,72 +236,95 @@ class _ScanCatalogTabState extends State<ScanCatalogTab> {
             children: _catalog.asMap().entries.map((entry) {
               final idx = entry.key;
               final item = entry.value;
+
               return Card(
-                margin: const EdgeInsets.only(bottom: 10),
-                child: ListTile(
-                  contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                  leading: Container(
-                    padding: const EdgeInsets.all(10),
-                    decoration: BoxDecoration(
-                      color: AppColors.primary.withOpacity(0.12),
-                      shape: BoxShape.circle,
-                    ),
-                    child: const Icon(Icons.check_circle_outline, color: AppColors.primary),
-                  ),
-                  title: Text(
-                    item.name,
-                    style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
-                  ),
-                  subtitle: Row(
+                margin: const EdgeInsets.only(bottom: 12),
+                child: Padding(
+                  padding: const EdgeInsets.all(14),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                        decoration: BoxDecoration(
-                          color: AppColors.primary.withOpacity(0.1),
-                          borderRadius: BorderRadius.circular(6),
-                        ),
-                        child: Text(
-                          item.category,
-                          style: const TextStyle(
-                            fontSize: 11,
-                            fontWeight: FontWeight.w600,
-                            color: AppColors.primary,
+                      Row(
+                        children: [
+                          Expanded(
+                            child: TextFormField(
+                              initialValue: item.name,
+                              decoration: const InputDecoration(
+                                labelText: 'Item Name',
+                                isDense: true,
+                              ),
+                              onChanged: (val) => item.name = val,
+                            ),
                           ),
-                        ),
+                          IconButton(
+                            icon: const Icon(Icons.delete_outline, color: AppColors.error),
+                            onPressed: () {
+                              setState(() => _catalog.removeAt(idx));
+                            },
+                          ),
+                        ],
                       ),
-                      const SizedBox(width: 8),
-                      Text(
-                        '${(item.confidence * 100).toInt()}% AI match confidence',
-                        style: theme.textTheme.bodySmall?.copyWith(fontSize: 11),
+                      const SizedBox(height: 10),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: DropdownButtonFormField<String>(
+                              initialValue: _categories.contains(item.category.toLowerCase())
+                                  ? item.category.toLowerCase()
+                                  : 'other',
+                              decoration: const InputDecoration(labelText: 'Category', isDense: true),
+                              items: _categories.map((cat) {
+                                return DropdownMenuItem(
+                                  value: cat,
+                                  child: Text(cat.toUpperCase()),
+                                );
+                              }).toList(),
+                              onChanged: (val) {
+                                if (val != null) setState(() => item.category = val);
+                              },
+                            ),
+                          ),
+                          const SizedBox(width: 10),
+                          Expanded(
+                            child: DropdownButtonFormField<String>(
+                              initialValue: _conditions.contains(item.condition.toLowerCase())
+                                  ? item.condition.toLowerCase()
+                                  : 'good',
+                              decoration: const InputDecoration(labelText: 'Condition', isDense: true),
+                              items: _conditions.map((cond) {
+                                return DropdownMenuItem(
+                                  value: cond,
+                                  child: Text(cond.replaceAll('_', ' ').toUpperCase()),
+                                );
+                              }).toList(),
+                              onChanged: (val) {
+                                if (val != null) setState(() => item.condition = val);
+                              },
+                            ),
+                          ),
+                        ],
                       ),
-                    ],
-                  ),
-                  trailing: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      IconButton(
-                        icon: const Icon(Icons.remove_circle_outline, size: 20),
-                        onPressed: () {
-                          if (item.count > 1) {
-                            setState(() => item.count--);
-                          }
-                        },
-                      ),
-                      Text(
-                        '${item.count}',
-                        style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
-                      ),
-                      IconButton(
-                        icon: const Icon(Icons.add_circle_outline, size: 20),
-                        onPressed: () {
-                          setState(() => item.count++);
-                        },
-                      ),
-                      IconButton(
-                        icon: const Icon(Icons.delete_outline, color: AppColors.error, size: 20),
-                        onPressed: () {
-                          setState(() => _catalog.removeAt(idx));
-                        },
+                      const SizedBox(height: 10),
+                      Row(
+                        children: [
+                          Text('Quantity:', style: theme.textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.bold)),
+                          IconButton(
+                            icon: const Icon(Icons.remove_circle_outline, size: 20),
+                            onPressed: () {
+                              if (item.count > 1) setState(() => item.count--);
+                            },
+                          ),
+                          Text('${item.count}', style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
+                          IconButton(
+                            icon: const Icon(Icons.add_circle_outline, size: 20),
+                            onPressed: () => setState(() => item.count++),
+                          ),
+                          const Spacer(),
+                          Text(
+                            '${(item.confidence * 100).toInt()}% AI Conf.',
+                            style: const TextStyle(fontSize: 11, color: AppColors.primary, fontWeight: FontWeight.bold),
+                          ),
+                        ],
                       ),
                     ],
                   ),
@@ -287,7 +347,7 @@ class _ScanCatalogTabState extends State<ScanCatalogTab> {
                     controller: _notesController,
                     maxLines: 2,
                     decoration: const InputDecoration(
-                      hintText: 'Add special pickup instructions or details...',
+                      hintText: 'Add pickup preferences or notes for NGOs...',
                     ),
                   ),
                   const SizedBox(height: 16),

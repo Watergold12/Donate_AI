@@ -16,139 +16,170 @@ class DonorService {
       return SummaryStats.fromJson(data);
     } catch (_) {
       return const SummaryStats(
-        totalDonations: 12,
-        completedDonations: 9,
-        pendingDonations: 3,
-        totalItemsDonated: 48,
+        totalDonations: 0,
+        completedDonations: 0,
+        pendingDonations: 0,
+        totalItemsDonated: 0,
       );
     }
   }
 
+  Future<List<DonationRecord>> getRecentDonations({int page = 1, int size = 10, String? statusFilter}) async {
+    try {
+      final queryParams = <String, String>{
+        'page': page.toString(),
+        'size': size.toString(),
+      };
+      if (statusFilter != null && statusFilter.isNotEmpty) {
+        queryParams['status_filter'] = statusFilter;
+      }
+
+      final response = await _client.get<Map<String, dynamic>>(
+        '/api/v1/donors/donations',
+        queryParameters: queryParams,
+        fromJson: (json) => Map<String, dynamic>.from(json as Map),
+      );
+
+      final dataList = response.data?['data'] as List? ?? [];
+      return dataList.map((d) => DonationRecord.fromJson(d as Map<String, dynamic>)).toList();
+    } catch (_) {
+      return [];
+    }
+  }
+
   Future<List<DetectedItem>> runAiScan() async {
-    await Future.delayed(const Duration(milliseconds: 1200));
+    await Future.delayed(const Duration(milliseconds: 1000));
     return [
-      DetectedItem(name: 'Winter Jackets', category: 'Clothing', confidence: 0.96, count: 2),
-      DetectedItem(name: 'Textbooks (Grade 10)', category: 'Education', confidence: 0.92, count: 5),
-      DetectedItem(name: 'First Aid Kit', category: 'Medical', confidence: 0.89, count: 1),
+      DetectedItem(
+        name: 'Winter Jacket',
+        category: 'clothing',
+        confidence: 0.96,
+        condition: 'good',
+        description: 'Warm insulated jacket',
+        count: 2,
+      ),
+      DetectedItem(
+        name: 'Textbook Pack',
+        category: 'books',
+        confidence: 0.92,
+        condition: 'like_new',
+        description: 'Grade 10 Science & Math',
+        count: 5,
+      ),
+      DetectedItem(
+        name: 'First Aid Medical Kit',
+        category: 'medical',
+        confidence: 0.89,
+        condition: 'new',
+        description: 'Complete emergency kit',
+        count: 1,
+      ),
     ];
   }
 
   Future<bool> submitDonation(List<DetectedItem> items, String notes) async {
     try {
-      final response = await _client.post<Map<String, dynamic>>(
+      // Step 1: Create donation shell
+      final createRes = await _client.post<Map<String, dynamic>>(
         '/api/v1/donations',
-        body: {
-          'notes': notes,
-          'items': items.map((i) => i.toJson()).toList(),
-        },
+        body: {'notes': notes},
         fromJson: (json) => Map<String, dynamic>.from(json as Map),
       );
-      return response.success;
+
+      final donationId = createRes.data?['data']?['id']?.toString() ?? createRes.data?['id']?.toString();
+      if (donationId == null || donationId.isEmpty) {
+        return false;
+      }
+
+      // Step 2: Add each item to the donation
+      for (final item in items) {
+        await _client.post<Map<String, dynamic>>(
+          '/api/v1/donations/$donationId/items',
+          body: item.toJson(),
+          fromJson: (json) => Map<String, dynamic>.from(json as Map),
+        );
+      }
+
+      // Step 3: Submit donation for AI matching
+      final submitRes = await _client.post<Map<String, dynamic>>(
+        '/api/v1/donations/$donationId/submit',
+        fromJson: (json) => Map<String, dynamic>.from(json as Map),
+      );
+
+      return submitRes.success;
     } catch (_) {
-      await Future.delayed(const Duration(milliseconds: 800));
-      return true;
+      return false;
     }
   }
 
   Future<List<DonorMatchItem>> getMatches() async {
     try {
-      final response = await _client.get<List<dynamic>>(
+      final response = await _client.get<Map<String, dynamic>>(
         '/api/v1/donors/donations',
-        fromJson: (json) => json as List<dynamic>,
+        fromJson: (json) => Map<String, dynamic>.from(json as Map),
       );
-      final rawList = response.data ?? [];
-      if (rawList.isEmpty) return _mockMatches();
-      return rawList.map((m) => DonorMatchItem.fromJson(m as Map<String, dynamic>)).toList();
-    } catch (_) {
-      return _mockMatches();
-    }
-  }
 
-  List<DonorMatchItem> _mockMatches() {
-    return const [
-      DonorMatchItem(
-        id: 'm-1',
-        ngoName: 'Hope Foundation India',
-        demandTitle: 'Warm Winter Clothes Drive',
-        category: 'Clothing',
-        matchScore: 0.96,
-        status: 'pending',
-        location: 'Indiranagar, Bangalore',
-        isUrgent: true,
-      ),
-      DonorMatchItem(
-        id: 'm-2',
-        ngoName: 'Vidya Shiksha Trust',
-        demandTitle: 'School Books & Stationery',
-        category: 'Education',
-        matchScore: 0.91,
-        status: 'pending',
-        location: 'Koramangala, Bangalore',
-        isUrgent: false,
-      ),
-      DonorMatchItem(
-        id: 'm-3',
-        ngoName: 'Aarogya Health Care NGO',
-        demandTitle: 'Medical & First Aid Supplies',
-        category: 'Medical',
-        matchScore: 0.88,
-        status: 'accepted',
-        location: 'Jayanagar, Bangalore',
-        isUrgent: true,
-      ),
-    ];
+      final donationsList = response.data?['data'] as List? ?? [];
+      final matchesList = <DonorMatchItem>[];
+
+      for (final donation in donationsList) {
+        final status = donation['status']?.toString() ?? '';
+        final dId = donation['id']?.toString() ?? '';
+        if (status == 'pending_match' || status == 'matched' || status == 'acknowledged') {
+          try {
+            final matchRes = await _client.get<Map<String, dynamic>>(
+              '/api/v1/donations/$dId/match',
+              fromJson: (json) => Map<String, dynamic>.from(json as Map),
+            );
+            if (matchRes.data?['data'] != null) {
+              matchesList.add(DonorMatchItem.fromJson(matchRes.data!['data'] as Map<String, dynamic>));
+            }
+          } catch (_) {}
+        }
+      }
+
+      return matchesList;
+    } catch (_) {
+      return [];
+    }
   }
 
   Future<List<PickupRecord>> getPickups() async {
     try {
-      final response = await _client.get<List<dynamic>>(
+      final response = await _client.get<Map<String, dynamic>>(
         '/api/v1/pickups/donor',
-        fromJson: (json) => json as List<dynamic>,
+        fromJson: (json) => Map<String, dynamic>.from(json as Map),
       );
-      final rawList = response.data ?? [];
-      if (rawList.isEmpty) return _mockPickups();
+      final rawList = response.data?['data'] as List? ?? [];
       return rawList.map((p) => PickupRecord.fromJson(p as Map<String, dynamic>)).toList();
     } catch (_) {
-      return _mockPickups();
+      return [];
     }
   }
 
-  List<PickupRecord> _mockPickups() {
-    return const [
-      PickupRecord(
-        id: 'p-101',
-        status: 'in_transit',
-        scheduledDate: 'Today, 2:30 PM',
-        timeSlot: '2:00 PM - 4:00 PM',
-        address: '123 HSR Layout, Sector 4, Bangalore',
-        driverName: 'Ramesh Kumar',
-        driverPhone: '+91 98123 45678',
-        vehicleNo: 'KA-05-EV-1024',
-        itemNames: ['Winter Jackets (x2)', 'First Aid Kit (x1)'],
-      ),
-      PickupRecord(
-        id: 'p-102',
-        status: 'scheduled',
-        scheduledDate: 'Tomorrow, 10:00 AM',
-        timeSlot: '10:00 AM - 12:00 PM',
-        address: '123 HSR Layout, Sector 4, Bangalore',
-        driverName: 'Suresh Patel',
-        driverPhone: '+91 98765 11223',
-        vehicleNo: 'KA-01-MH-8899',
-        itemNames: ['Grade 10 Textbooks (x5)'],
-      ),
-      PickupRecord(
-        id: 'p-100',
-        status: 'completed',
-        scheduledDate: 'Aug 02, 2026',
-        timeSlot: '3:00 PM - 5:00 PM',
-        address: '123 HSR Layout, Sector 4, Bangalore',
-        driverName: 'Anil Gupta',
-        driverPhone: '+91 99001 22334',
-        vehicleNo: 'KA-03-AB-5544',
-        itemNames: ['Box of Canned Food (x10)'],
-      ),
-    ];
+  Future<bool> schedulePickup({
+    required String donationId,
+    required String scheduledDate,
+    required String timeSlot,
+    required String address,
+    String? notes,
+  }) async {
+    try {
+      final response = await _client.post<Map<String, dynamic>>(
+        '/api/v1/pickups',
+        body: {
+          'donation_id': donationId,
+          'scheduled_date': scheduledDate,
+          'time_slot': timeSlot,
+          'address': address,
+          'notes': notes,
+        },
+        fromJson: (json) => Map<String, dynamic>.from(json as Map),
+      );
+      return response.success;
+    } catch (_) {
+      return false;
+    }
   }
 
   Future<DonorProfile> getProfile() async {
@@ -157,14 +188,15 @@ class DonorService {
         '/api/v1/donors/profile',
         fromJson: (json) => Map<String, dynamic>.from(json as Map),
       );
-      return DonorProfile.fromJson(response.data ?? {});
+      final data = response.data?['data'] ?? response.data ?? {};
+      return DonorProfile.fromJson(Map<String, dynamic>.from(data as Map));
     } catch (_) {
       return const DonorProfile(
-        name: 'Aarav Sharma',
-        email: 'aarav.sharma@example.com',
-        phone: '+91 98765 43210',
-        city: 'Bangalore',
-        address: '123 HSR Layout, Sector 4',
+        name: 'Donor User',
+        email: 'donor@donate.ai',
+        phone: '',
+        city: '',
+        address: '',
       );
     }
   }
@@ -178,8 +210,7 @@ class DonorService {
       );
       return response.success;
     } catch (_) {
-      await Future.delayed(const Duration(milliseconds: 600));
-      return true;
+      return false;
     }
   }
 

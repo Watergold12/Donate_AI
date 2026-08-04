@@ -95,7 +95,7 @@ class _DonorMatchesTabState extends State<DonorMatchesTab> {
                     Text(
                       'Matches are generated in real-time based on NGO demand urgency, item suitability, and geographic proximity.',
                       style: TextStyle(
-                        color: Colors.white.withOpacity(0.9),
+                        color: Colors.white.withValues(alpha: 0.9),
                         fontSize: 12,
                       ),
                     ),
@@ -126,11 +126,25 @@ class _DonorMatchesTabState extends State<DonorMatchesTab> {
                 Container(
                   padding: const EdgeInsets.all(32),
                   alignment: Alignment.center,
-                  child: const Column(
+                  decoration: BoxDecoration(
+                    color: isDark ? AppColors.darkSurface : Colors.white,
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: Column(
                     children: [
-                      Icon(Icons.handshake_outlined, size: 48, color: AppColors.lightMutedText),
-                      SizedBox(height: 8),
-                      Text('No active matches found'),
+                      const Icon(Icons.handshake_outlined, size: 48, color: AppColors.lightMutedText),
+                      const SizedBox(height: 8),
+                      Text(
+                        'No active matches found',
+                        style: theme.textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.w600),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        'Submit a new donation to trigger AI match recommendations.',
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: isDark ? AppColors.darkMutedText : AppColors.lightMutedText,
+                        ),
+                      ),
                     ],
                   ),
                 )
@@ -151,9 +165,9 @@ class _DonorMatchesTabState extends State<DonorMatchesTab> {
                               Container(
                                 padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                                 decoration: BoxDecoration(
-                                  color: AppColors.success.withOpacity(0.12),
+                                  color: AppColors.success.withValues(alpha: 0.12),
                                   borderRadius: BorderRadius.circular(20),
-                                  border: Border.all(color: AppColors.success.withOpacity(0.3)),
+                                  border: Border.all(color: AppColors.success.withValues(alpha: 0.3)),
                                 ),
                                 child: Row(
                                   children: [
@@ -174,7 +188,7 @@ class _DonorMatchesTabState extends State<DonorMatchesTab> {
                                 Container(
                                   padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                                   decoration: BoxDecoration(
-                                    color: AppColors.warning.withOpacity(0.15),
+                                    color: AppColors.warning.withValues(alpha: 0.15),
                                     borderRadius: BorderRadius.circular(6),
                                   ),
                                   child: const Text(

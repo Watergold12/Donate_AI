@@ -22,33 +22,105 @@ class SummaryStats {
 }
 
 class DetectedItem {
-  final String name;
-  final String category;
+  String name;
+  String category;
   final double confidence;
+  String condition;
+  String description;
   int count;
 
   DetectedItem({
     required this.name,
     required this.category,
     required this.confidence,
+    this.condition = 'good',
+    this.description = '',
     this.count = 1,
   });
 
   factory DetectedItem.fromJson(Map<String, dynamic> json) {
     return DetectedItem(
-      name: json['name']?.toString() ?? 'Donation Item',
-      category: json['category']?.toString() ?? 'General',
-      confidence: (json['confidence'] as num?)?.toDouble() ?? 0.95,
-      count: json['count'] as int? ?? 1,
+      name: json['name']?.toString() ?? json['item_name']?.toString() ?? 'Donation Item',
+      category: json['category']?.toString() ?? 'other',
+      confidence: (json['confidence'] as num?)?.toDouble() ?? (json['confidence_score'] as num?)?.toDouble() ?? 0.95,
+      condition: json['condition']?.toString() ?? 'good',
+      description: json['description']?.toString() ?? '',
+      count: json['count'] as int? ?? json['quantity'] as int? ?? 1,
     );
   }
 
   Map<String, dynamic> toJson() => {
-        'title': name,
-        'category': category,
+        'item_name': name,
+        'category': category.toLowerCase(),
         'quantity': count,
-        'condition': 'good',
+        'condition': condition.toLowerCase(),
+        'description': description,
+        'ai_detected': true,
+        'confidence_score': confidence,
       };
+}
+
+class DonationItemModel {
+  final String id;
+  final String itemName;
+  final String category;
+  final int quantity;
+  final String condition;
+  final String? description;
+
+  const DonationItemModel({
+    required this.id,
+    required this.itemName,
+    required this.category,
+    required this.quantity,
+    required this.condition,
+    this.description,
+  });
+
+  factory DonationItemModel.fromJson(Map<String, dynamic> json) {
+    return DonationItemModel(
+      id: json['id']?.toString() ?? '',
+      itemName: json['item_name']?.toString() ?? 'Item',
+      category: json['category']?.toString() ?? 'other',
+      quantity: json['quantity'] as int? ?? 1,
+      condition: json['condition']?.toString() ?? 'good',
+      description: json['description']?.toString(),
+    );
+  }
+}
+
+class DonationRecord {
+  final String id;
+  final String status;
+  final String? notes;
+  final int totalItems;
+  final String createdAt;
+  final List<DonationItemModel> items;
+
+  const DonationRecord({
+    required this.id,
+    required this.status,
+    this.notes,
+    required this.totalItems,
+    required this.createdAt,
+    required this.items,
+  });
+
+  factory DonationRecord.fromJson(Map<String, dynamic> json) {
+    final itemsRaw = json['items'] as List?;
+    final itemsList = itemsRaw != null
+        ? itemsRaw.map((i) => DonationItemModel.fromJson(i as Map<String, dynamic>)).toList()
+        : <DonationItemModel>[];
+
+    return DonationRecord(
+      id: json['id']?.toString() ?? '',
+      status: json['status']?.toString() ?? 'draft',
+      notes: json['notes']?.toString(),
+      totalItems: json['total_items'] as int? ?? itemsList.length,
+      createdAt: json['created_at']?.toString() ?? '',
+      items: itemsList,
+    );
+  }
 }
 
 class DonorMatchItem {
@@ -73,15 +145,15 @@ class DonorMatchItem {
   });
 
   factory DonorMatchItem.fromJson(Map<String, dynamic> json) {
-    final score = (json['score'] as num?)?.toDouble() ?? 0.88;
+    final score = (json['score'] as num?)?.toDouble() ?? (json['match_score'] as num?)?.toDouble() ?? 0.88;
     return DonorMatchItem(
       id: json['id']?.toString() ?? '',
-      ngoName: json['ngo_name']?.toString() ?? json['ngo']?['name']?.toString() ?? 'Community Hope NGO',
-      demandTitle: json['demand_title']?.toString() ?? 'Warm Clothes & Essentials',
-      category: json['category']?.toString() ?? 'Clothing',
+      ngoName: json['ngo_name']?.toString() ?? json['ngo']?['name']?.toString() ?? 'Partner NGO',
+      demandTitle: json['demand_title']?.toString() ?? json['title']?.toString() ?? 'Resource Demand',
+      category: json['category']?.toString() ?? 'General',
       matchScore: score,
       status: json['status']?.toString() ?? 'pending',
-      location: json['location']?.toString() ?? 'Downtown Community Center',
+      location: json['location']?.toString() ?? json['city']?.toString() ?? 'Location',
       isUrgent: json['is_urgent'] as bool? ?? false,
     );
   }
@@ -89,6 +161,7 @@ class DonorMatchItem {
 
 class PickupRecord {
   final String id;
+  final String donationId;
   final String status;
   final String scheduledDate;
   final String timeSlot;
@@ -100,6 +173,7 @@ class PickupRecord {
 
   const PickupRecord({
     required this.id,
+    required this.donationId,
     required this.status,
     required this.scheduledDate,
     required this.timeSlot,
@@ -115,11 +189,12 @@ class PickupRecord {
     final itemsList = itemsRaw?.map((i) => i.toString()).toList() ?? ['Donation Package'];
     return PickupRecord(
       id: json['id']?.toString() ?? '',
+      donationId: json['donation_id']?.toString() ?? '',
       status: json['status']?.toString() ?? 'scheduled',
-      scheduledDate: json['scheduled_date']?.toString() ?? 'Today, 2:30 PM',
-      timeSlot: json['time_slot']?.toString() ?? '2:00 PM - 4:00 PM',
-      address: json['address']?.toString() ?? '123 Main Street, Apt 4B',
-      driverName: json['driver_name']?.toString() ?? 'Rahul Sharma',
+      scheduledDate: json['scheduled_date']?.toString() ?? 'Today',
+      timeSlot: json['time_slot']?.toString() ?? '09:00 - 12:00',
+      address: json['address']?.toString() ?? 'Registered Pickup Address',
+      driverName: json['driver_name']?.toString() ?? 'Assigned Logistics Driver',
       driverPhone: json['driver_phone']?.toString() ?? '+91 98765 43210',
       vehicleNo: json['vehicle_no']?.toString() ?? 'KA-01-EA-4921',
       itemNames: itemsList,
@@ -150,31 +225,11 @@ class DonorProfile {
     return DonorProfile(
       name: json['full_name']?.toString() ?? json['name']?.toString() ?? 'Donor User',
       email: json['email']?.toString() ?? 'donor@donate.ai',
-      phone: json['phone']?.toString() ?? '+91 98765 12345',
-      city: json['city']?.toString() ?? 'Bangalore',
-      address: json['address']?.toString() ?? 'Sector 4, HSR Layout',
+      phone: json['phone']?.toString() ?? '',
+      city: json['city']?.toString() ?? '',
+      address: json['address']?.toString() ?? '',
       emailNotifications: json['email_notifications'] as bool? ?? true,
       pushNotifications: json['push_notifications'] as bool? ?? true,
-    );
-  }
-
-  DonorProfile copyWith({
-    String? name,
-    String? email,
-    String? phone,
-    String? city,
-    String? address,
-    bool? emailNotifications,
-    bool? pushNotifications,
-  }) {
-    return DonorProfile(
-      name: name ?? this.name,
-      email: email ?? this.email,
-      phone: phone ?? this.phone,
-      city: city ?? this.city,
-      address: address ?? this.address,
-      emailNotifications: emailNotifications ?? this.emailNotifications,
-      pushNotifications: pushNotifications ?? this.pushNotifications,
     );
   }
 
