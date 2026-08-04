@@ -44,7 +44,7 @@ class Settings(BaseSettings):
 
     # AI Detection
     detection_confidence: float = 0.40
-    model_path: str = "./models/yolov8n.pt"
+    yolo_yolo_model_path: str = "./models/yolov8n.pt"
     use_mock_detector: bool = False
 
     # Matching Engine

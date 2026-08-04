@@ -31,16 +31,27 @@ export function PickupSchedulePage() {
   const [phone, setPhone]           = useState('')
   const [scheduledAt, setScheduledAt] = useState('')
   const [packagingChecklist, setPackagingChecklist] = useState<PackagingChecklist | null>(null)
+  const [packagingError, setPackagingError] = useState('')
 
   useEffect(() => {
     if (!donationId) return
     donationsApi.getMatches(donationId)
-      .then(r => setMatches(r.data.data))
+      .then(r => {
+        setMatches(r.data.data)
+        const acceptedMatch = r.data.data.find(m => m.status === 'accepted')
+        setSelectedMatch(acceptedMatch?.id ?? r.data.data[0]?.id ?? null)
+      })
       .catch(() => setError('Could not load matches. The matching engine may still be processing.'))
       .finally(() => setLoading(false))
     donationsApi.startPackagingChecklist(donationId)
-      .then(r => setPackagingChecklist(r.data.data))
-      .catch(() => null)
+      .then(r => {
+        setPackagingChecklist(r.data.data)
+        setPackagingError('')
+      })
+      .catch((err: unknown) => {
+        setPackagingChecklist(null)
+        setPackagingError(getApiError(err))
+      })
   }, [donationId])
 
   const acknowledgePackaging = async () => {
@@ -152,18 +163,23 @@ export function PickupSchedulePage() {
                   ].join(' ')}
                 >
                   <div className="flex flex-col gap-1">
+                    <div className="flex items-center gap-2">
                     <p className="text-sm font-medium text-da-text">NGO Match</p>
-                    <p className="text-xs text-da-secondary">Match strength: {scoreToPercent(m.score)}</p>
-                    {m.match_explanation && m.match_explanation.length > 0 && (
-                      <ul className="mt-1 space-y-1">
-                        {m.match_explanation.slice(0, 2).map(reason => (
-                          <li key={reason} className="text-[11px] text-da-muted">
-                            {reason}
-                          </li>
-                        ))}
-                      </ul>
-                    )}
-                    <p className="text-xs text-da-muted">Expires {formatDate(m.expires_at)}</p>
+                    <span className="rounded-full bg-da-bg px-2 py-0.5 text-[10px] uppercase tracking-wide text-da-secondary">
+                      {m.status}
+                    </span>
+                  </div>
+                  <p className="text-xs text-da-secondary">Match strength: {scoreToPercent(m.score)}</p>
+                  {m.match_explanation && m.match_explanation.length > 0 && (
+                    <ul className="mt-1 space-y-1">
+                      {m.match_explanation.slice(0, 2).map(reason => (
+                        <li key={reason} className="text-[11px] text-da-muted">
+                          {reason}
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                  <p className="text-xs text-da-muted">Expires {formatDate(m.expires_at)}</p>
                   </div>
                   <div className="flex flex-col items-end gap-1">
                     <div className="h-1.5 w-24 overflow-hidden rounded-full bg-da-border">
@@ -228,7 +244,9 @@ export function PickupSchedulePage() {
             </div>
           ) : (
             <div className="mt-4 rounded-lg border border-dashed border-da-border px-4 py-6 text-sm text-da-muted">
-              Packaging checklist will appear once your match is ready.
+              {packagingError
+                ? `Unable to load packaging checklist: ${packagingError}`
+                : 'Packaging checklist will appear once your match is ready.'}
             </div>
           )}
         </Card>

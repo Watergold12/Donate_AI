@@ -50,8 +50,8 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     else:
         try:
             from app.ai.yolo_detector import YOLODetector
-            app.state.detector = YOLODetector(model_path=settings.model_path)
-            logger.info("AI detector: YOLODetector loaded from %s", settings.model_path)
+            app.state.detector = YOLODetector(yolo_model_path=settings.yolo_model_path)
+            logger.info("AI detector: YOLODetector loaded from %s", settings.yolo_model_path)
         except Exception as exc:
             logger.warning(
                 "YOLODetector failed to load (%s). Falling back to MockDetector.",

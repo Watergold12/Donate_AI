@@ -88,8 +88,8 @@ class YOLODetector(BaseDetector):
     Wraps the ultralytics YOLO model for inference-only use.
     """
 
-    def __init__(self, model_path: str = "yolov8n.pt") -> None:
-        self._model_path = model_path
+    def __init__(self, yolo_model_path: str = "yolov8n.pt") -> None:
+        self._yolo_model_path = yolo_model_path
         self._model = None
         self._load()
 
@@ -97,14 +97,14 @@ class YOLODetector(BaseDetector):
         """Load the YOLO model from disk. Called once at startup."""
         try:
             from ultralytics import YOLO  # type: ignore[import-untyped]
-            self._model = YOLO(self._model_path)
-            logger.info("YOLOv8 model loaded from '%s'", self._model_path)
+            self._model = YOLO(self._yolo_model_path)
+            logger.info("YOLOv8 model loaded from '%s'", self._yolo_model_path)
         except ImportError as exc:
             logger.error("ultralytics package not installed. Run: pip install ultralytics")
             raise RuntimeError("ultralytics package not installed") from exc
         except Exception as exc:
-            logger.error("Failed to load YOLOv8 model '%s': %s", self._model_path, exc)
-            raise RuntimeError(f"Failed to load YOLOv8 model '{self._model_path}'") from exc
+            logger.error("Failed to load YOLOv8 model '%s': %s", self._yolo_model_path, exc)
+            raise RuntimeError(f"Failed to load YOLOv8 model '{self._yolo_model_path}'") from exc
 
     def detect(self, image_bytes: bytes) -> List[DetectionResult]:
         """Run inference on image bytes. Returns aggregated detections."""

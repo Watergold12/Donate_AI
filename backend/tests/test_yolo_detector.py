@@ -34,9 +34,9 @@ class FakeResult:
 class FakeYOLO:
     instances = 0
 
-    def __init__(self, model_path: str) -> None:
+    def __init__(self, yolo_model_path: str) -> None:
         type(self).instances += 1
-        self.model_path = model_path
+        self.yolo_model_path = yolo_model_path
 
     def __call__(self, image, verbose=False):
         names = {
@@ -105,9 +105,9 @@ async def test_lifespan_uses_yolo_once_and_falls_back_when_needed(monkeypatch):
     load_calls = {"yolo": 0, "mock": 0, "embedding": 0}
 
     class FakeLoadedDetector:
-        def __init__(self, model_path: str) -> None:
+        def __init__(self, yolo_model_path: str) -> None:
             load_calls["yolo"] += 1
-            self.model_path = model_path
+            self.yolo_model_path = yolo_model_path
 
         @property
         def name(self) -> str:
@@ -148,7 +148,7 @@ async def test_lifespan_falls_back_to_mock_when_yolo_fails(monkeypatch):
     from app import main as app_main
 
     class FailingDetector:
-        def __init__(self, model_path: str) -> None:
+        def __init__(self, yolo_model_path: str) -> None:
             raise RuntimeError("boom")
 
     class FakeMockDetector:
