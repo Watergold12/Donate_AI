@@ -37,6 +37,8 @@ dependencies:
   image_picker: ^1.2.3
   http: ^1.6.0
   http_parser: ^4.1.2
+  file_picker: ^8.1.6
+  url_launcher: ^6.3.2
 
 dev_dependencies:
   flutter_test:
@@ -90,3 +92,5 @@ flutter:
   #
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/to/font-from-package
+dependency_overrides:
+  flutter_plugin_android_lifecycle: 2.0.24

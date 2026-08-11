@@ -5,7 +5,8 @@ import 'package:mobile_frontend/core/network/api_exception.dart';
 import 'package:mobile_frontend/core/network/token_store.dart';
 import 'package:mobile_frontend/core/theme/app_colors.dart';
 import 'package:mobile_frontend/features/auth/data/auth_service.dart';
-
+import '../../data/services/ngo_service.dart';
+import '../widgets/ngo_verification_tab.dart';
 class NGODashboardScreen extends StatefulWidget {
   const NGODashboardScreen({super.key});
 
@@ -16,6 +17,7 @@ class NGODashboardScreen extends StatefulWidget {
 class _NGODashboardScreenState extends State<NGODashboardScreen> {
   late final ApiClient _apiClient;
   late final AuthService _authService;
+  late final NGOService _ngoService;
   late Future<Map<String, dynamic>> _summaryFuture;
   late Future<StoredSession?> _sessionFuture;
   int _selectedIndex = 0;
@@ -26,6 +28,7 @@ class _NGODashboardScreenState extends State<NGODashboardScreen> {
     super.initState();
     _apiClient = ApiClient();
     _authService = AuthService(client: _apiClient);
+    _ngoService = NGOService(client: _apiClient);
     _summaryFuture = _loadSummary();
     _sessionFuture = _apiClient.readSession();
   }
@@ -99,16 +102,8 @@ class _NGODashboardScreenState extends State<NGODashboardScreen> {
               sessionFuture: _sessionFuture,
               summaryFuture: _summaryFuture,
             ),
-            _ActionTab(
-              title: 'Verification',
-              subtitle: 'NGO document verification and compliance status.',
-              accent: AppColors.primaryDark,
-              cards: const [
-                _ActionCardData('Upload verification docs', 'Submit registration certificates and tax IDs.'),
-                _ActionCardData('Check approval status', 'Review admin verification badge and state.'),
-                _ActionCardData('Organization profile', 'Update registered NGO details and contacts.'),
-                _ActionCardData('Compliance checklist', 'Complete required trust and safety steps.'),
-              ],
+            NGOVerificationTab(
+              ngoService: _ngoService,
             ),
             _ActionTab(
               title: 'Demands',
