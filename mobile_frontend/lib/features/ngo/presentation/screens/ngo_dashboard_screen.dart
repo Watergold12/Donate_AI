@@ -6,7 +6,9 @@ import 'package:mobile_frontend/core/network/token_store.dart';
 import 'package:mobile_frontend/core/theme/app_colors.dart';
 import 'package:mobile_frontend/features/auth/data/auth_service.dart';
 import '../../data/services/ngo_service.dart';
+import '../../data/services/ngo_analytics_service.dart';
 import '../widgets/ngo_verification_tab.dart';
+import '../widgets/ngo_analytics_tab.dart';
 class NGODashboardScreen extends StatefulWidget {
   const NGODashboardScreen({super.key});
 
@@ -18,6 +20,7 @@ class _NGODashboardScreenState extends State<NGODashboardScreen> {
   late final ApiClient _apiClient;
   late final AuthService _authService;
   late final NGOService _ngoService;
+  late final NGOAnalyticsService _analyticsService;
   late Future<Map<String, dynamic>> _summaryFuture;
   late Future<StoredSession?> _sessionFuture;
   int _selectedIndex = 0;
@@ -29,6 +32,7 @@ class _NGODashboardScreenState extends State<NGODashboardScreen> {
     _apiClient = ApiClient();
     _authService = AuthService(client: _apiClient);
     _ngoService = NGOService(client: _apiClient);
+    _analyticsService = NGOAnalyticsService(client: _apiClient);
     _summaryFuture = _loadSummary();
     _sessionFuture = _apiClient.readSession();
   }
@@ -138,16 +142,8 @@ class _NGODashboardScreenState extends State<NGODashboardScreen> {
                 _ActionCardData('Delivery history', 'Track completed item transfers.'),
               ],
             ),
-            _ActionTab(
-              title: 'Analytics',
-              subtitle: 'Track resource distribution metrics and impact.',
-              accent: AppColors.primaryDark,
-              cards: const [
-                _ActionCardData('Matching efficiency', 'Analyze fulfillment speed and match rates.'),
-                _ActionCardData('Fulfillment metrics', 'Track items received vs total demands.'),
-                _ActionCardData('Category breakdown', 'Review distribution by item category.'),
-                _ActionCardData('Impact report', 'Export monthly resource impact summary.'),
-              ],
+            NGOAnalyticsTab(
+              analyticsService: _analyticsService,
             ),
             _AccountTab(
               sessionFuture: _sessionFuture,

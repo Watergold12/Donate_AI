@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/config/api_config.dart';
 import '../../../../core/network/api_exception.dart';
 import '../../data/models/ngo_models.dart';
 import '../../data/services/ngo_service.dart';
@@ -257,7 +258,7 @@ class _NGOVerificationTabState extends State<NGOVerificationTab> {
                         ),
                         TextButton.icon(
                           onPressed: () async {
-                            final url = Uri.parse('http://10.0.2.2:8000${_profile!.verificationDocPath}');
+                            final url = Uri.parse('${ApiConfig.baseUrl}${_profile!.verificationDocPath}');
                             if (await canLaunchUrl(url)) {
                               await launchUrl(url);
                             }
