@@ -71,5 +71,9 @@
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
+	<key>NSCameraUsageDescription</key>
+	<string>DonateAI needs camera access to scan your donation items.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>DonateAI needs photo library access to upload images of your donation items.</string>
 </dict>
 </plist>

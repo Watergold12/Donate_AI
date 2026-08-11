@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../data/models/donor_models.dart';
 import '../../data/services/donor_service.dart';
@@ -33,10 +34,47 @@ class _ScanCatalogTabState extends State<ScanCatalogTab> {
   }
 
   Future<void> _handleScan() async {
+    final picker = ImagePicker();
+    final source = await showModalBottomSheet<ImageSource>(
+      context: context,
+      builder: (ctx) => SafeArea(
+        child: Wrap(
+          children: [
+            ListTile(
+              leading: const Icon(Icons.camera_alt),
+              title: const Text('Take Photo'),
+              onTap: () => Navigator.pop(ctx, ImageSource.camera),
+            ),
+            ListTile(
+              leading: const Icon(Icons.photo_library),
+              title: const Text('Upload from Gallery'),
+              onTap: () => Navigator.pop(ctx, ImageSource.gallery),
+            ),
+          ],
+        ),
+      ),
+    );
+
+    if (source == null) return;
+
+    final pickedFile = await picker.pickImage(source: source);
+    if (pickedFile == null) return;
+
     setState(() => _isScanning = true);
     try {
-      final items = await widget.donorService.runAiScan();
+      final items = await widget.donorService.scanImage(pickedFile.path);
       if (!mounted) return;
+      
+      if (items.isEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('No items detected or analysis failed.'),
+            backgroundColor: AppColors.error,
+          ),
+        );
+        return;
+      }
+      
       setState(() {
         _catalog.addAll(items);
       });
@@ -51,25 +89,12 @@ class _ScanCatalogTabState extends State<ScanCatalogTab> {
     }
   }
 
-  void _addManualItem() {
-    setState(() {
-      _catalog.add(
-        DetectedItem(
-          name: 'New Donation Item',
-          category: 'other',
-          confidence: 1.0,
-          condition: 'good',
-          description: '',
-          count: 1,
-        ),
-      );
-    });
-  }
+
 
   Future<void> _handleSubmit() async {
     if (_catalog.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please scan or add items before submitting.')),
+        const SnackBar(content: Text('Please scan items before submitting.')),
       );
       return;
     }
@@ -139,7 +164,7 @@ class _ScanCatalogTabState extends State<ScanCatalogTab> {
                 ),
                 const SizedBox(height: 6),
                 Text(
-                  'Scan items with AI or manually add catalog details for donor matching.',
+                  'Scan items with AI to detect catalog details for donor matching.',
                   textAlign: TextAlign.center,
                   style: theme.textTheme.bodyMedium?.copyWith(
                     color: isDark ? AppColors.darkMutedText : AppColors.lightMutedText,
@@ -166,16 +191,6 @@ class _ScanCatalogTabState extends State<ScanCatalogTab> {
                             : const Icon(Icons.camera_alt),
                         label: Text(_isScanning ? 'Scanning...' : 'AI Scan Photo'),
                       ),
-                    ),
-                    const SizedBox(width: 10),
-                    OutlinedButton.icon(
-                      onPressed: _addManualItem,
-                      style: OutlinedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 16),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                      ),
-                      icon: const Icon(Icons.add),
-                      label: const Text('Add Manual'),
                     ),
                   ],
                 ),

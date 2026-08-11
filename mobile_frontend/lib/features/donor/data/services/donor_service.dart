@@ -1,4 +1,9 @@
+import 'dart:convert';
+import 'package:http/http.dart' as http;
+import 'package:http_parser/http_parser.dart';
+import 'package:mobile_frontend/core/config/api_config.dart';
 import 'package:mobile_frontend/core/network/api_client.dart';
+import 'package:mobile_frontend/core/network/token_store.dart';
 import '../models/donor_models.dart';
 
 class DonorService {
@@ -75,6 +80,42 @@ class DonorService {
         count: 1,
       ),
     ];
+  }
+
+  Future<List<DetectedItem>> scanImage(String imagePath) async {
+    try {
+      final uri = ApiConfig.uri('/api/v1/detection/analyze');
+      final request = http.MultipartRequest('POST', uri);
+
+      final token = await TokenStore().read();
+      if (token != null) {
+        request.headers['Authorization'] = 'Bearer $token';
+      }
+      
+      final ext = imagePath.split('.').last.toLowerCase();
+      final mimeType = ext == 'png' ? 'png' : 'jpeg';
+
+      final file = await http.MultipartFile.fromPath(
+        'image', 
+        imagePath,
+        contentType: MediaType('image', mimeType),
+      );
+      request.files.add(file);
+
+      final streamedResponse = await request.send().timeout(const Duration(seconds: 30));
+      final response = await http.Response.fromStream(streamedResponse);
+
+      if (response.statusCode == 200) {
+        final decoded = jsonDecode(response.body);
+        if (decoded['success'] == true) {
+           final items = decoded['data']?['items'] as List? ?? [];
+           return items.map((i) => DetectedItem.fromJson(i as Map<String, dynamic>)).toList();
+        }
+      }
+      return [];
+    } catch (_) {
+      return [];
+    }
   }
 
   Future<bool> submitDonation(List<DetectedItem> items, String notes) async {
