@@ -7,8 +7,10 @@ import 'package:mobile_frontend/core/theme/app_colors.dart';
 import 'package:mobile_frontend/features/auth/data/auth_service.dart';
 import '../../data/services/ngo_service.dart';
 import '../../data/services/ngo_analytics_service.dart';
+import '../../data/services/ngo_demand_service.dart';
 import '../widgets/ngo_verification_tab.dart';
 import '../widgets/ngo_analytics_tab.dart';
+import '../widgets/ngo_demands_tab.dart';
 class NGODashboardScreen extends StatefulWidget {
   const NGODashboardScreen({super.key});
 
@@ -21,6 +23,7 @@ class _NGODashboardScreenState extends State<NGODashboardScreen> {
   late final AuthService _authService;
   late final NGOService _ngoService;
   late final NGOAnalyticsService _analyticsService;
+  late final NGODemandService _demandService;
   late Future<Map<String, dynamic>> _summaryFuture;
   late Future<StoredSession?> _sessionFuture;
   int _selectedIndex = 0;
@@ -33,6 +36,7 @@ class _NGODashboardScreenState extends State<NGODashboardScreen> {
     _authService = AuthService(client: _apiClient);
     _ngoService = NGOService(client: _apiClient);
     _analyticsService = NGOAnalyticsService(client: _apiClient);
+    _demandService = NGODemandService(client: _apiClient);
     _summaryFuture = _loadSummary();
     _sessionFuture = _apiClient.readSession();
   }
@@ -109,16 +113,9 @@ class _NGODashboardScreenState extends State<NGODashboardScreen> {
             NGOVerificationTab(
               ngoService: _ngoService,
             ),
-            _ActionTab(
-              title: 'Demands',
-              subtitle: 'Post and manage resource demand requests.',
-              accent: AppColors.primaryDark,
-              cards: const [
-                _ActionCardData('Create new demand', 'Post urgent inventory and item requests.'),
-                _ActionCardData('Active demand list', 'Review currently open resource requests.'),
-                _ActionCardData('Urgent needs', 'Highlight high-priority emergency requirements.'),
-                _ActionCardData('Fulfilled history', 'Review successfully matched demand requests.'),
-              ],
+            NGODemandsTab(
+              ngoService: _ngoService,
+              demandService: _demandService,
             ),
             _ActionTab(
               title: 'Matches',
