@@ -6,7 +6,7 @@ MODELS_DIR = Path("models")
 MODELS_DIR.mkdir(parents=True, exist_ok=True)
 
 MODELS = {
-    "YOLOv8": "yolov8n.pt",
+    "YOLOv8": "yolov8l.pt",
     "YOLO26": "yolo26n.pt",
 }
 

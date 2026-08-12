@@ -88,7 +88,7 @@ class YOLODetector(BaseDetector):
     Wraps the ultralytics YOLO model for inference-only use.
     """
 
-    def __init__(self, yolo_model_path: str = "yolov8n.pt") -> None:
+    def __init__(self, yolo_model_path: str = "yolov8l.pt") -> None:
         self._yolo_model_path = yolo_model_path
         self._model = None
         self._load()
