@@ -235,6 +235,25 @@ class _NGOPickupsTabState extends State<NGOPickupsTab> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        Padding(
+          padding: const EdgeInsets.all(20).copyWith(bottom: 0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Pickups Management',
+                style: Theme.of(context).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 6),
+              Text(
+                'Monitor logistics and confirm receipt of incoming donations.',
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  color: Theme.of(context).brightness == Brightness.dark ? AppColors.darkMutedText : AppColors.lightMutedText,
+                ),
+              ),
+            ],
+          ),
+        ),
         _buildFilterChips(),
         Expanded(
           child: _isLoading

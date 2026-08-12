@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:mobile_frontend/core/network/token_store.dart';
+import 'package:mobile_frontend/app/app.dart';
 import 'package:mobile_frontend/core/theme/app_colors.dart';
 import 'package:mobile_frontend/features/ngo/data/models/ngo_models.dart';
 import 'package:mobile_frontend/features/ngo/data/services/ngo_service.dart';
@@ -145,12 +146,18 @@ class _NGOSettingsTabState extends State<NGOSettingsTab> {
     return ListView(
       padding: const EdgeInsets.all(20),
       children: [
-        _HeroBanner(
-          title: 'Settings',
-          subtitle: 'Manage your organization profile and account session.',
-          accent: AppColors.primary,
+        Text(
+          'Settings',
+          style: theme.textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
         ),
-        const SizedBox(height: 16),
+        const SizedBox(height: 6),
+        Text(
+          'Manage your organization profile and application preferences.',
+          style: theme.textTheme.bodyMedium?.copyWith(
+            color: theme.brightness == Brightness.dark ? AppColors.darkMutedText : AppColors.lightMutedText,
+          ),
+        ),
+        const SizedBox(height: 24),
         
         // Profile Editing Section
         Card(
@@ -258,26 +265,27 @@ class _NGOSettingsTabState extends State<NGOSettingsTab> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('Session actions', style: theme.textTheme.titleLarge),
+                Text('App Preferences', style: theme.textTheme.titleLarge),
                 const SizedBox(height: 12),
-                FutureBuilder<StoredSession?>(
-                  future: widget.sessionFuture,
-                  builder: (context, snapshot) {
-                    final role = snapshot.data?.role ?? 'ngo';
-                    return Text('Currently signed in as: ${role.toUpperCase()}', style: theme.textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.bold));
+                SwitchListTile(
+                  title: const Text('Dark Mode'),
+                  contentPadding: EdgeInsets.zero,
+                  value: DonateAiApp.of(context)?.themeMode == ThemeMode.dark ||
+                         (DonateAiApp.of(context)?.themeMode == ThemeMode.system && theme.brightness == Brightness.dark),
+                  onChanged: (bool value) {
+                    DonateAiApp.of(context)?.toggleTheme(value);
                   },
                 ),
-                const SizedBox(height: 12),
-                Text(
-                  'Sign out when you are done so the next user has to authenticate again.',
-                  style: theme.textTheme.bodyMedium,
-                ),
+                const Divider(height: 32),
+                Text('Session', style: theme.textTheme.titleLarge),
                 const SizedBox(height: 16),
-                Align(
-                  alignment: Alignment.centerRight,
-                  child: OutlinedButton(
+                SizedBox(
+                  width: double.infinity,
+                  height: 50,
+                  child: OutlinedButton.icon(
                     onPressed: widget.onLogout,
-                    child: Text(widget.logoutLabel),
+                    icon: const Icon(Icons.logout),
+                    label: Text(widget.logoutLabel),
                   ),
                 ),
               ],
@@ -290,39 +298,4 @@ class _NGOSettingsTabState extends State<NGOSettingsTab> {
   }
 }
 
-class _HeroBanner extends StatelessWidget {
-  const _HeroBanner({
-    required this.title,
-    required this.subtitle,
-    required this.accent,
-  });
 
-  final String title;
-  final String subtitle;
-  final Color accent;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(22),
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [accent, accent.withValues(alpha: 0.78)],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-        borderRadius: BorderRadius.circular(24),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(title, style: theme.textTheme.headlineMedium?.copyWith(color: Colors.white)),
-          const SizedBox(height: 8),
-          Text(subtitle, style: theme.textTheme.bodyLarge?.copyWith(color: Colors.white70)),
-        ],
-      ),
-    );
-  }
-}
