@@ -39,11 +39,11 @@ class NGOMatchService {
       body: {}, // Empty body required by backend if no data expected, though backend doesn't explicitly require a body, it's a PUT request.
       fromJson: (json) => Map<String, dynamic>.from(json as Map),
     );
-    final data = response.data?['data'];
+    final data = response.data;
     if (data == null) {
       throw Exception('Failed to accept match: No data returned');
     }
-    return NGOMatch.fromJson(data as Map<String, dynamic>);
+    return NGOMatch.fromJson(data);
   }
 
   Future<NGOMatch> rejectMatch(String matchId, String reason) async {
@@ -52,10 +52,10 @@ class NGOMatchService {
       body: {'rejection_reason': reason},
       fromJson: (json) => Map<String, dynamic>.from(json as Map),
     );
-    final data = response.data?['data'];
+    final data = response.data;
     if (data == null) {
       throw Exception('Failed to reject match: No data returned');
     }
-    return NGOMatch.fromJson(data as Map<String, dynamic>);
+    return NGOMatch.fromJson(data);
   }
 }

@@ -9,10 +9,12 @@ import '../../data/services/ngo_service.dart';
 import '../../data/services/ngo_analytics_service.dart';
 import '../../data/services/ngo_demand_service.dart';
 import '../../data/services/ngo_match_service.dart';
+import '../../data/services/ngo_pickup_service.dart';
 import '../widgets/ngo_verification_tab.dart';
 import '../widgets/ngo_analytics_tab.dart';
 import '../widgets/ngo_demands_tab.dart';
 import '../widgets/ngo_matches_tab.dart';
+import '../widgets/ngo_pickups_tab.dart';
 class NGODashboardScreen extends StatefulWidget {
   const NGODashboardScreen({super.key});
 
@@ -27,6 +29,7 @@ class _NGODashboardScreenState extends State<NGODashboardScreen> {
   late final NGOAnalyticsService _analyticsService;
   late final NGODemandService _demandService;
   late final NGOMatchService _matchService;
+  late final NGOPickupService _pickupService;
   late Future<Map<String, dynamic>> _summaryFuture;
   late Future<StoredSession?> _sessionFuture;
   int _selectedIndex = 0;
@@ -41,6 +44,7 @@ class _NGODashboardScreenState extends State<NGODashboardScreen> {
     _analyticsService = NGOAnalyticsService(client: _apiClient);
     _demandService = NGODemandService(client: _apiClient);
     _matchService = NGOMatchService(client: _apiClient);
+    _pickupService = NGOPickupService(client: _apiClient);
     _summaryFuture = _loadSummary();
     _sessionFuture = _apiClient.readSession();
   }
@@ -124,16 +128,8 @@ class _NGODashboardScreenState extends State<NGODashboardScreen> {
             NGOMatchesTab(
               matchService: _matchService,
             ),
-            _ActionTab(
-              title: 'Pickups',
-              subtitle: 'Coordinate pickup logistics and collection.',
-              accent: AppColors.primaryDark,
-              cards: const [
-                _ActionCardData('Scheduled pickups', 'Monitor upcoming driver pickup appointments.'),
-                _ActionCardData('Logistics details', 'Coordinate vehicle routing and contact points.'),
-                _ActionCardData('Confirm receipt', 'Mark items as received and inspected.'),
-                _ActionCardData('Delivery history', 'Track completed item transfers.'),
-              ],
+            NGOPickupsTab(
+              pickupService: _pickupService,
             ),
             NGOAnalyticsTab(
               analyticsService: _analyticsService,
@@ -260,43 +256,7 @@ class _OverviewTab extends StatelessWidget {
   }
 }
 
-class _ActionTab extends StatelessWidget {
-  const _ActionTab({
-    required this.title,
-    required this.subtitle,
-    required this.accent,
-    required this.cards,
-  });
 
-  final String title;
-  final String subtitle;
-  final Color accent;
-  final List<_ActionCardData> cards;
-
-  @override
-  Widget build(BuildContext context) {
-    return ListView(
-      padding: const EdgeInsets.all(20),
-      children: [
-        _HeroBanner(
-          title: title,
-          subtitle: subtitle,
-          accent: accent,
-        ),
-        const SizedBox(height: 16),
-        _ActionList(
-          title: 'Quick actions',
-          actions: cards.map((card) => card.title).toList(),
-        ),
-        const SizedBox(height: 16),
-        _ActionList(
-          title: 'What this page covers',
-          actions: cards.map((card) => card.subtitle).toList(),
-        ),
-      ],
-    );
-  }
-}
 
 class _AccountTab extends StatelessWidget {
   const _AccountTab({
@@ -363,12 +323,7 @@ class _AccountTab extends StatelessWidget {
   }
 }
 
-class _ActionCardData {
-  const _ActionCardData(this.title, this.subtitle);
 
-  final String title;
-  final String subtitle;
-}
 
 class _HeroBanner extends StatelessWidget {
   const _HeroBanner({
