@@ -19,9 +19,9 @@ class NGOService {
         '/api/v1/ngos/profile',
         fromJson: (json) => Map<String, dynamic>.from(json as Map),
       );
-      final data = response.data?['data'];
+      final data = response.data;
       if (data != null) {
-        return NGOProfile.fromJson(data as Map<String, dynamic>);
+        return NGOProfile.fromJson(data);
       }
       return null;
     } catch (_) {

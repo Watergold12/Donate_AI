@@ -8,9 +8,11 @@ import 'package:mobile_frontend/features/auth/data/auth_service.dart';
 import '../../data/services/ngo_service.dart';
 import '../../data/services/ngo_analytics_service.dart';
 import '../../data/services/ngo_demand_service.dart';
+import '../../data/services/ngo_match_service.dart';
 import '../widgets/ngo_verification_tab.dart';
 import '../widgets/ngo_analytics_tab.dart';
 import '../widgets/ngo_demands_tab.dart';
+import '../widgets/ngo_matches_tab.dart';
 class NGODashboardScreen extends StatefulWidget {
   const NGODashboardScreen({super.key});
 
@@ -24,6 +26,7 @@ class _NGODashboardScreenState extends State<NGODashboardScreen> {
   late final NGOService _ngoService;
   late final NGOAnalyticsService _analyticsService;
   late final NGODemandService _demandService;
+  late final NGOMatchService _matchService;
   late Future<Map<String, dynamic>> _summaryFuture;
   late Future<StoredSession?> _sessionFuture;
   int _selectedIndex = 0;
@@ -37,6 +40,7 @@ class _NGODashboardScreenState extends State<NGODashboardScreen> {
     _ngoService = NGOService(client: _apiClient);
     _analyticsService = NGOAnalyticsService(client: _apiClient);
     _demandService = NGODemandService(client: _apiClient);
+    _matchService = NGOMatchService(client: _apiClient);
     _summaryFuture = _loadSummary();
     _sessionFuture = _apiClient.readSession();
   }
@@ -117,16 +121,8 @@ class _NGODashboardScreenState extends State<NGODashboardScreen> {
               ngoService: _ngoService,
               demandService: _demandService,
             ),
-            _ActionTab(
-              title: 'Matches',
-              subtitle: 'Incoming donor matches and resource allocation.',
-              accent: AppColors.primaryDark,
-              cards: const [
-                _ActionCardData('Incoming donor offers', 'See donor items matched to your demands.'),
-                _ActionCardData('AI match score', 'Check similarity rating and distance metrics.'),
-                _ActionCardData('Approve match', 'Accept matched donations to trigger logistics.'),
-                _ActionCardData('Match history', 'View record of accepted and completed matches.'),
-              ],
+            NGOMatchesTab(
+              matchService: _matchService,
             ),
             _ActionTab(
               title: 'Pickups',

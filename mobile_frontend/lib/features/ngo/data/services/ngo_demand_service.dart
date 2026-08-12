@@ -47,7 +47,7 @@ class NGODemandService {
       fromJson: (json) => Map<String, dynamic>.from(json as Map),
     );
     
-    final data = response.data?['data'];
+    final data = response.data;
     if (data == null) {
       throw ApiException('Failed to parse demand from response');
     }

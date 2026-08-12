@@ -16,8 +16,8 @@ class ApiConfig {
     // Development phase codeblock:
     if (Platform.isAndroid) {
       
-      // return 'http://localhost:8000'; // <- Uncomment for physical Android device
-      return 'http://10.0.2.2:8000';     // <- Default for Android Emulator
+      return 'http://localhost:8000'; // <- Uncomment for physical Android device
+      // return 'http://10.0.2.2:8000';     // <- Default for Android Emulator
     }
     
     // iOS Simulators and Desktop apps
