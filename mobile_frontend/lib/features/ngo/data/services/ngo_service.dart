@@ -28,6 +28,19 @@ class NGOService {
       return null;
     }
   }
+  Future<NGOProfile> updateProfile(Map<String, dynamic> payload) async {
+    final response = await _client.put<Map<String, dynamic>>(
+      '/api/v1/ngos/profile',
+      body: payload,
+      fromJson: (json) => Map<String, dynamic>.from(json as Map),
+    );
+    final data = response.data;
+    if (data == null) {
+      throw ApiException('Failed to update profile: No data returned');
+    }
+    return NGOProfile.fromJson(data);
+  }
+
 
   Future<NGOProfile> uploadVerificationDocs(String filePath) async {
     final uri = ApiConfig.uri('/api/v1/ngos/verification-documents');

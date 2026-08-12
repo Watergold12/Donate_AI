@@ -4,7 +4,13 @@ class NGOProfile {
   final String? registrationNumber;
   final String? missionStatement;
   final String? address;
+  final String? city;
+  final String? state;
+  final String? pincode;
   final String? contactPhone;
+  final String? website;
+  final String? description;
+  final List<String>? serviceAreas;
   final bool isVerified;
   final String verificationStatus;
   final String? verificationDocPath;
@@ -18,7 +24,13 @@ class NGOProfile {
     this.registrationNumber,
     this.missionStatement,
     this.address,
+    this.city,
+    this.state,
+    this.pincode,
     this.contactPhone,
+    this.website,
+    this.description,
+    this.serviceAreas,
     required this.isVerified,
     required this.verificationStatus,
     this.verificationDocPath,
@@ -34,7 +46,13 @@ class NGOProfile {
       registrationNumber: json['registration_number'] as String?,
       missionStatement: json['mission_statement'] as String?,
       address: json['address'] as String?,
+      city: json['city'] as String?,
+      state: json['state'] as String?,
+      pincode: json['pincode'] as String?,
       contactPhone: json['contact_phone'] as String?,
+      website: json['website'] as String?,
+      description: json['description'] as String?,
+      serviceAreas: (json['service_areas'] as List<dynamic>?)?.map((e) => e.toString()).toList(),
       isVerified: json['is_verified'] as bool? ?? false,
       verificationStatus: json['verification_status'] as String? ?? 'unsubmitted',
       verificationDocPath: json['verification_doc_path'] as String?,
@@ -55,7 +73,13 @@ class NGOProfile {
       'registration_number': registrationNumber,
       'mission_statement': missionStatement,
       'address': address,
+      'city': city,
+      'state': state,
+      'pincode': pincode,
       'contact_phone': contactPhone,
+      'website': website,
+      'description': description,
+      'service_areas': serviceAreas,
       'is_verified': isVerified,
       'verification_status': verificationStatus,
       'verification_doc_path': verificationDocPath,

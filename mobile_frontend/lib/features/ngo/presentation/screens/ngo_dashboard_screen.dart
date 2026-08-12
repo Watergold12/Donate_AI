@@ -15,6 +15,7 @@ import '../widgets/ngo_analytics_tab.dart';
 import '../widgets/ngo_demands_tab.dart';
 import '../widgets/ngo_matches_tab.dart';
 import '../widgets/ngo_pickups_tab.dart';
+import '../widgets/ngo_settings_tab.dart';
 class NGODashboardScreen extends StatefulWidget {
   const NGODashboardScreen({super.key});
 
@@ -134,11 +135,11 @@ class _NGODashboardScreenState extends State<NGODashboardScreen> {
             NGOAnalyticsTab(
               analyticsService: _analyticsService,
             ),
-            _AccountTab(
+            NGOSettingsTab(
               sessionFuture: _sessionFuture,
               onLogout: _busy ? null : _logout,
               logoutLabel: _busy ? 'Signing out...' : 'Sign out',
-              roleLabel: 'ngo',
+              ngoService: _ngoService,
             ),
           ],
         ),
@@ -258,70 +259,7 @@ class _OverviewTab extends StatelessWidget {
 
 
 
-class _AccountTab extends StatelessWidget {
-  const _AccountTab({
-    required this.sessionFuture,
-    required this.onLogout,
-    required this.logoutLabel,
-    required this.roleLabel,
-  });
 
-  final Future<StoredSession?> sessionFuture;
-  final VoidCallback? onLogout;
-  final String logoutLabel;
-  final String roleLabel;
-
-  @override
-  Widget build(BuildContext context) {
-    return ListView(
-      padding: const EdgeInsets.all(20),
-      children: [
-        const _HeroBanner(
-          title: 'Account',
-          subtitle: 'Manage your signed-in session and account access.',
-          accent: AppColors.success,
-        ),
-        const SizedBox(height: 16),
-        FutureBuilder<StoredSession?>(
-          future: sessionFuture,
-          builder: (context, snapshot) {
-            final session = snapshot.data;
-            return _InfoCard(
-              title: 'Current role',
-              value: session?.role ?? roleLabel,
-              subtitle: 'Your mobile session stays on this device until you log out.',
-            );
-          },
-        ),
-        const SizedBox(height: 16),
-        Card(
-          child: Padding(
-            padding: const EdgeInsets.all(20),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text('Session actions', style: Theme.of(context).textTheme.titleLarge),
-                const SizedBox(height: 12),
-                Text(
-                  'Sign out when you are done so the next user has to authenticate again.',
-                  style: Theme.of(context).textTheme.bodyMedium,
-                ),
-                const SizedBox(height: 16),
-                Align(
-                  alignment: Alignment.centerRight,
-                  child: OutlinedButton(
-                    onPressed: onLogout,
-                    child: Text(logoutLabel),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-}
 
 
 
