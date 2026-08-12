@@ -30,6 +30,8 @@ backend/
 │   │   ├── interface.py          # Abstract BaseDetector protocol
 │   │   ├── yolo_detector.py      # Ultralytics YOLOv8 inference implementation
 │   │   ├── mock_detector.py      # Deterministic fallback detector (no GPU required)
+│   │   ├── donatable_items.py    # CSV-backed allowlist filter (blocks humans, cars, etc.)
+│   │   ├── donation_items.csv    # NGO-approved donatable categories & item names
 │   │   └── services/             # Detection helper services
 │   ├── api/
 │   │   └── v1/                   # Versioned API route controllers
@@ -224,10 +226,32 @@ Request → /api/v1/detection/analyze
     │                    │
 YOLODetector       MockDetector
 (requires best.pt)  (always available)
+              │
+              ▼
+    run_inference()             ← app/ai/services/inference.py
+              │
+              ▼
+    is_donatable() filter       ← app/ai/donatable_items.py
+    reads donation_items.csv
+              │
+    ┌─────────┴──────────┐
+    │                    │
+  KEEP                DISCARD
+(shirts, books,     (person, car,
+ laptops, etc.)      dog, etc.)
+              │
+              ▼
+    DetectionResponse → Client (web & mobile)
 ```
 
 - **`YOLODetector`** — Runs Ultralytics YOLOv8 inference. Returns detected items with bounding boxes, confidence scores, and category labels.
 - **`MockDetector`** — Returns a deterministic set of realistic items (books, clothing, electronics). Used when `USE_MOCK_DETECTOR=true` or when YOLO weights fail to load.
+- **`donatable_items.py`** — Loads `donation_items.csv` once at import time and exposes `is_donatable(name, category)`. Uses a 4-step strategy:
+  1. **Hard-block list** — Immediately rejects known non-donatable YOLO classes (`person`, `car`, `dog`, `cat`, etc.) regardless of any other check.
+  2. **Category match** — If the mapped `ItemCategory` is in the CSV categories (`clothing`, `electronics`, etc.), accept.
+  3. **Name match** — If any token in the detected label matches a CSV item name (`shirt`, `laptop`, etc.), accept.
+  4. **Default reject** — Unknown objects are excluded.
+- **`donation_items.csv`** — The NGO-approved allowlist. 13 categories, 144 specific items. Lives at `backend/app/ai/donation_items.csv`. Edit this file to add or remove acceptable donation items — no code change required.
 - **Fallback:** If `YOLODetector` raises any exception during startup, the lifespan manager automatically activates `MockDetector`. The donor flow is **never interrupted** by AI model failures.
 
 ### Semantic Embeddings (`app/services/embedding_service.py`)
