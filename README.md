@@ -17,6 +17,7 @@ An end-to-end, AI-powered donation management platform that bridges the gap betw
 - [Features Implemented](#-features-implemented)
 - [Tech Stack](#-tech-stack)
 - [System Architecture](#-system-architecture)
+- [Platform Architecture Docs](#-platform-architecture-docs)
 - [Project Directory Structure](#-project-directory-structure)
 - [Self-Hosting & Local Setup Guide](#-self-hosting--local-setup-guide)
   - [Prerequisites](#prerequisites)
@@ -112,41 +113,63 @@ An end-to-end, AI-powered donation management platform that bridges the gap betw
 
 ---
 
+## 📚 Platform Architecture Docs
+
+For a deep dive into the specific technologies, libraries, and core workflows of each stack layer, please refer to our detailed architectural documents:
+
+- **[Backend Architecture](docs/architecture-backend.md)**: Details the FastAPI, SQLAlchemy, and AI model integration.
+- **[Frontend Architecture](docs/architecture-frontend.md)**: Details the React 19 web SPA, Tailwind styling, and React Hook Form validation.
+- **[Mobile App Architecture](docs/architecture-mobile.md)**: Details the cross-platform Flutter application, camera hardware integration, and routing.
+
+---
+
 ## 📁 Project Directory Structure
 
 ```
-Infosys_AI_Donation_platform/
+AI_donation_infy/
 ├── backend/                        # FastAPI Backend Application
 │   ├── alembic/                    # Database migration scripts & history
 │   ├── app/
-│   │   ├── ai/                     # YOLOv8 & Mock AI detectors
-│   │   ├── api/v1/                 # API Endpoints (auth, donors, ngos, matching, pickups, admin)
-│   │   ├── core/                   # Security, JWT, middleware, custom exceptions
-│   │   ├── matching/               # Weighted matching engine & vector similarity logic
-│   │   ├── models/                 # SQLAlchemy ORM Database models
-│   │   ├── schemas/                # Pydantic validation schemas
-│   │   ├── services/               # Embedding service, notification services
-│   │   ├── config.py               # Pydantic Settings configuration
-│   │   ├── database.py             # SQLAlchemy session setup
-│   │   └── main.py                 # FastAPI application factory & lifespan
-│   ├── media/                      # Uploaded scan images & static assets
+│   │   ├── ai/                     # YOLOv8 detector, MockDetector, & BaseDetector interface
+│   │   ├── api/v1/                 # API Endpoints (auth, donors, ngos, detection, matching, pickups, admin)
+│   │   ├── core/                   # Security, JWT, middleware, dependencies, custom exceptions
+│   │   ├── matching/               # Weighted matching engine, scorer & vector similarity logic
+│   │   ├── models/                 # SQLAlchemy ORM Database models & Enum types
+│   │   ├── schemas/                # Pydantic v2 validation schemas (request/response DTOs)
+│   │   ├── services/               # Business logic: donation, NGO, matching, embedding, notification, analytics
+│   │   ├── utils/                  # Shared utility helpers
+│   │   ├── config.py               # Pydantic Settings — all env config in one place
+│   │   ├── database.py             # Async SQLAlchemy session factory
+│   │   └── main.py                 # FastAPI application factory & lifespan hooks
+│   ├── media/                      # Uploaded scan images served as static assets
 │   ├── models/                     # YOLO weight files (.pt)
-│   ├── tests/                      # Pytest test suite
+│   ├── tests/                      # Pytest test suite (auth, donations, NGOs, matching, pickups, AI)
 │   ├── Dockerfile                  # Multi-stage production Docker image
 │   ├── requirements.txt            # Python dependencies
 │   └── .env.example                # Backend environment template
-├── frontend/                       # React 19 + TypeScript Frontend Application
+├── frontend/                       # React 19 + TypeScript Web Frontend (Vite)
 │   ├── src/
-│   │   ├── api/                    # Axios API client instances
-│   │   ├── components/             # Reusable UI components (Nav, Modals, Cards, Cart)
-│   │   ├── pages/                  # Donor, NGO, Admin, Auth, and Landing pages
-│   │   ├── store/                  # State management stores
-│   │   ├── types/                  # TypeScript interfaces & types
-│   │   ├── App.tsx                 # Routes configuration
-│   │   └── main.tsx                # Entry point
-│   ├── package.json                # Frontend Node dependencies & scripts
-│   ├── vite.config.ts              # Vite bundle configuration
+│   │   ├── api/                    # Axios API client + typed endpoint wrappers
+│   │   ├── components/             # Atomic Design components (atoms, molecules, organisms, templates)
+│   │   ├── hooks/                  # Custom React hooks (useApiQuery, useDonations, useAuth, etc.)
+│   │   ├── pages/                  # Route-level pages (Donor, NGO, Admin, Auth, Shared)
+│   │   ├── store/                  # Global state management
+│   │   ├── types/                  # TypeScript interfaces & type definitions
+│   │   ├── utils/                  # Shared utility functions (cn, formatters, etc.)
+│   │   ├── App.tsx                 # Root component — React Router config & global providers
+│   │   └── main.tsx                # Application entry point
+│   ├── package.json                # Frontend Node.js dependencies & npm scripts
+│   ├── vite.config.ts              # Vite bundler & dev-proxy configuration
 │   └── .env.example                # Frontend environment template
+├── mobile_frontend/                # Flutter Cross-Platform Mobile App (Android & iOS)
+│   ├── lib/
+│   │   ├── app/                    # Root app config & ThemeData
+│   │   ├── core/                   # ApiClient, ApiConfig, shared theme
+│   │   ├── features/               # Feature modules: auth, donor, ngo, home, dashboard
+│   │   └── main.dart               # Application entry point
+│   ├── android/                    # Android platform build files
+│   ├── ios/                        # iOS platform build files
+│   └── pubspec.yaml                # Flutter dependencies & asset declarations
 └── README.md                       # Main Project Documentation
 ```
 
@@ -320,7 +343,7 @@ You can containerize the backend using the included production `Dockerfile`.
 | `DEBUG` | Enable debug logs & Swagger UI | `false` |
 | `DATABASE_URL` | PostgreSQL connection string | `postgresql://user:pass@localhost:5432/donation_db` |
 | `SECRET_KEY` | Secret key for signing JWT tokens | 64+ random characters |
-| `ACCESS_TOKEN_EXPIRE_MINUTES` | Expiration time for JWT access tokens | `15` |
+| `ACCESS_TOKEN_EXPIRE_MINUTES` | Expiration time for JWT access tokens | `30` |
 | `ALLOWED_ORIGINS` | Comma-separated CORS allowed origins | `http://localhost:5173,http://localhost:3000` |
 | `USE_MOCK_DETECTOR` | Set `false` for active YOLO model inference | `true` |
 | `DETECTION_CONFIDENCE` | Minimum confidence score threshold for YOLO | `0.40` |

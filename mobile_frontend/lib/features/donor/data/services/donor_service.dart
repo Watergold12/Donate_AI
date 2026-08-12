@@ -39,13 +39,13 @@ class DonorService {
         queryParams['status_filter'] = statusFilter;
       }
 
-      final response = await _client.get<Map<String, dynamic>>(
+      final response = await _client.get<List<dynamic>>(
         '/api/v1/donors/donations',
         queryParameters: queryParams,
-        fromJson: (json) => Map<String, dynamic>.from(json as Map),
+        fromJson: (json) => List<dynamic>.from(json as List),
       );
 
-      final dataList = response.data?['data'] as List? ?? [];
+      final dataList = response.data ?? [];
       return dataList.map((d) => DonationRecord.fromJson(d as Map<String, dynamic>)).toList();
     } catch (_) {
       return [];
@@ -155,12 +155,12 @@ class DonorService {
 
   Future<List<DonorMatchItem>> getMatches() async {
     try {
-      final response = await _client.get<Map<String, dynamic>>(
+      final response = await _client.get<List<dynamic>>(
         '/api/v1/donors/donations',
-        fromJson: (json) => Map<String, dynamic>.from(json as Map),
+        fromJson: (json) => List<dynamic>.from(json as List),
       );
 
-      final donationsList = response.data?['data'] as List? ?? [];
+      final donationsList = response.data ?? [];
       final matchesList = <DonorMatchItem>[];
 
       for (final donation in donationsList) {
@@ -187,11 +187,11 @@ class DonorService {
 
   Future<List<PickupRecord>> getPickups() async {
     try {
-      final response = await _client.get<Map<String, dynamic>>(
+      final response = await _client.get<List<dynamic>>(
         '/api/v1/pickups/donor',
-        fromJson: (json) => Map<String, dynamic>.from(json as Map),
+        fromJson: (json) => List<dynamic>.from(json as List),
       );
-      final rawList = response.data?['data'] as List? ?? [];
+      final rawList = response.data ?? [];
       return rawList.map((p) => PickupRecord.fromJson(p as Map<String, dynamic>)).toList();
     } catch (_) {
       return [];
