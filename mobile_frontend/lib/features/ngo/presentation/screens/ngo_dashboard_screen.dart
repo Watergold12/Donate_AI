@@ -213,10 +213,16 @@ class _OverviewTab extends StatelessWidget {
     return ListView(
       padding: const EdgeInsets.all(20),
       children: [
-        _HeroBanner(
-          title: title,
-          subtitle: subtitle,
-          accent: accent,
+        Text(
+          title,
+          style: Theme.of(context).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
+        ),
+        const SizedBox(height: 6),
+        Text(
+          subtitle,
+          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+            color: Theme.of(context).brightness == Brightness.dark ? AppColors.darkMutedText : AppColors.lightMutedText,
+          ),
         ),
         const SizedBox(height: 16),
         FutureBuilder<StoredSession?>(
@@ -263,42 +269,7 @@ class _OverviewTab extends StatelessWidget {
 
 
 
-class _HeroBanner extends StatelessWidget {
-  const _HeroBanner({
-    required this.title,
-    required this.subtitle,
-    required this.accent,
-  });
 
-  final String title;
-  final String subtitle;
-  final Color accent;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(22),
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [accent, accent.withValues(alpha: 0.78)],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-        borderRadius: BorderRadius.circular(24),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(title, style: theme.textTheme.headlineMedium?.copyWith(color: Colors.white)),
-          const SizedBox(height: 8),
-          Text(subtitle, style: theme.textTheme.bodyLarge?.copyWith(color: Colors.white70)),
-        ],
-      ),
-    );
-  }
-}
 
 class _InfoCard extends StatelessWidget {
   const _InfoCard({
