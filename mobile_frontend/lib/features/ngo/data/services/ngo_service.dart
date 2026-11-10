@@ -53,8 +53,9 @@ class NGOService {
     
     final ext = filePath.split('.').last.toLowerCase();
     String mimeType = 'application/octet-stream';
-    if (ext == 'pdf') mimeType = 'application/pdf';
-    else if (ext == 'png') mimeType = 'image/png';
+    if (ext == 'pdf') {
+      mimeType = 'application/pdf';
+    } else if (ext == 'png') mimeType = 'image/png';
     else if (ext == 'jpg' || ext == 'jpeg') mimeType = 'image/jpeg';
     else if (ext == 'doc') mimeType = 'application/msword';
     else if (ext == 'docx') mimeType = 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
